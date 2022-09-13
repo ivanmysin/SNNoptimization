@@ -2,7 +2,8 @@ import numpy as np
 from scipy.special import erf
 import matplotlib.pyplot as plt
 
-
+SQRT_FROM_2 = np.sqrt(2)
+SQRT_FROM_2_PI = 0.7978845608028654
 def update_z(z, dt, dts, Sourse):
     dz = np.zeros_like(z)
 
@@ -46,75 +47,92 @@ def limiter(a, b):
     w[selected_indx3] = np.minimum(x1, x2)
     return w
 
-def H_function(V, dV_dt, Vt, dt, tau_m, sigma):
-    #print(dV_dt[-1], V[-1], Vt) # 0.6 9.0 10
+def H_function(V, dV_dt, Vt, tau_m, sigma):
+    T = (Vt - V) / sigma / SQRT_FROM_2
+    A = np.exp(0.0061 - 1.12 * T - 0.257 * T**2 - 0.072 * T**3 - 0.0117 * T**4)
+    dT_dt = -1.0 / sigma / SQRT_FROM_2 * dV_dt
+    dT_dt[dT_dt > 0] = 0
 
-    k = tau_m / dt
-    g_tot = 1 / tau_m # (Cm = 1) !!!!
+    F_T = SQRT_FROM_2_PI * np.exp(-T**2) / (1.000000001 + erf(T))
 
-    T = np.sqrt(0.5*(1+k)) * g_tot * (Vt - V) / sigma
+    B = -SQRT_FROM_2 * dT_dt * F_T * tau_m
 
-    A_inf = np.exp(0.0061 - 1.12 * T - 0.257 * T**2 - 0.072 * T**3 - 0.0117 * T**4)
-    A = A_inf * (1 - (1 + k)**(-0.71 + 0.0825 * (T + 3) ) )
+    H = (A + B) / tau_m
 
-    dT_dt = -g_tot/sigma * np.sqrt(0.5+0.5*k) * dV_dt
 
-    dT_dt[dT_dt < 0] = 0
-
-    F_T = np.sqrt(2/np.pi) * np.exp(-T**2) / (1 + erf(T))
-
-    B = -np.sqrt(2) * tau_m * dT_dt * F_T
-
-    H = A + B
+    # k = tau_m / dt
+    # g_tot = 1 / tau_m # (Cm = 1) !!!!
+    #
+    # T = np.sqrt(0.5*(1+k)) * g_tot * (Vt - V) / sigma
+    #
+    # A_inf = np.exp(0.0061 - 1.12 * T - 0.257 * T**2 - 0.072 * T**3 - 0.0117 * T**4)
+    # A = A_inf * (1 - (1 + k)**(-0.71 + 0.0825 * (T + 3) ) )
+    #
+    # dT_dt = -g_tot/sigma * np.sqrt(0.5+0.5*k) * dV_dt
+    #
+    # dT_dt[dT_dt < 0] = 0
+    #
+    # F_T = np.sqrt(2/np.pi) * np.exp(-T**2) / (1 + erf(T))
+    #
+    # B = -np.sqrt(2) * tau_m * dT_dt * F_T
+    #
+    # H = A + B
 
     return H
 #########################################################################################################
-def simulate_monte_carlo(Iext, Vt, dt, tau_m, sigma, Vr, nsteps):
-    print(Iext, Vt, dt, tau_m, sigma, Vr, nsteps)
-    V = np.zeros(5000, dtype=np.float64) + Vr
+def simulate_monte_carlo(Cm, gl, El, Iext, Vt, Vr, dt, sigma, nsteps):
+
+    V = np.zeros(50000, dtype=np.float64) + Vr
     spike_rate = []
 
-    sigma_V = sigma / np.sqrt(dt) / tau_m
+    sigma_V = sigma / Cm / np.sqrt(dt)
 
     for _ in range(nsteps):
 
         # self.V += dt * (-self.V + self.muext + self.Isyn + self.sigmaext**2 * np.random.randn(self.N) ) / self.tau
-        dV_dt = (-V + Iext) / tau_m + np.random.normal(0, sigma_V, V.size)
+        dV_dt = (gl * (El - V) + Iext ) / Cm + np.random.normal(0, sigma_V, V.size)
+        # (-V + Iext) / tau_m
 
         V += dt * dV_dt
-        fired = V > Vt
+        fired = V >= Vt
         V[fired] = Vr
-        firing = np.mean(fired)
+        firing = np.sum(fired) / dt / V.size
         spike_rate.append(firing)
 
     return spike_rate
 
-def cbrd(Iext, Vt, dt, tau_m, sigma, Vr, nsteps, dts):
+def cbrd(Cm, gl, El, Iext, Vt, Vr, dt, sigma, nsteps, dts):
     Pts = np.zeros(400, dtype=np.float64)
-    Pts[-1] = 1
+    Pts[-1] = 1 / dts
     V = np.zeros_like(Pts) + Vr
 
     spike_rate = []
     V_hist = []
 
-    for _ in range(nsteps):
-        dV_dt = (-V + Iext) / tau_m
+    # sigma = sigma * np.sqrt(0.5 * tau_m)
+    sigma = sigma / gl * np.sqrt(0.5 * gl / Cm)
 
-        H = H_function(V, dV_dt, Vt, dt, tau_m, sigma)
+    for _ in range(nsteps):
+        #dV_dt = (-V + Iext) / tau_m
+        dVdt = (gl * (El - V) + Iext ) / Cm
+
+        # gtot = gl
+        tau_m =  Cm / gl
+        H = H_function(V, dVdt, Vt, dt, tau_m, sigma)
         # print(H)
 
         sourse4Pts = Pts * H
 
         sourse4Pts[0] = -np.sum(sourse4Pts)
         dPts = update_z(Pts, dt, dts, sourse4Pts)
-        dV = update_z(V, dt, dts, -dV_dt)
+        dV = update_z(V, dt, dts, -dVdt)
 
         # print(dPts)
-        spike_rate.append(-sourse4Pts[0])  # sourse4Pts[0]
+        spike_rate.append(-sourse4Pts[0] * dts)  # sourse4Pts[0]
         V_hist.append(V[-1])
 
         dV[0] = 0
-        dV[-1] = dt * dV_dt[-1]
+        dV[-1] = dt * dVdt[-1]
 
         Pts += dPts
         V += dV
@@ -123,30 +141,40 @@ def cbrd(Iext, Vt, dt, tau_m, sigma, Vr, nsteps, dts):
 ##################################################################
 
 def main():
+    duration = 500
 
     dt = 0.1
     dts = 0.5
-    tau_m = 10
-    Vr = 0
-    Vt = 10
-    Iext = 15
-    sigma = 1.5
-    nsteps = 10000
+
+    Vr = -80
+    Vt = -50
+    gl = 0.01
+    Cm = 0.2
+    Iext = 0.3
+    sigma = 0.3
+    El = -70.0
+
+    #tau_m = Cm / gl
+
+    nsteps = int(duration / dt)
 
     # spike_rate1 = cbrd(Iext - 0.1, Vt, dt, tau_m, sigma, Vr, nsteps, dts)
     # spike_rate2 = cbrd(Iext + 0.1, Vt, dt, tau_m, sigma, Vr, nsteps, dts)
     # grad = (spike_rate2[-1] - spike_rate1[-1]) / 0.2
     # print(grad)
 
-    spike_rate = cbrd(Iext, Vt, dt, tau_m, sigma, Vr, nsteps, dts)
-    spike_rate_mc = simulate_monte_carlo(Iext, Vt, dt, tau_m, sigma, Vr, nsteps)
+    spike_rate = cbrd(Cm, gl, El, Iext, Vt, Vr, dt, sigma, nsteps, dts)
+    spike_rate_mc = simulate_monte_carlo(Cm, gl, El, Iext, Vt, Vr, dt, sigma, nsteps)
 
-    plt.plot(spike_rate)
-    plt.plot(spike_rate_mc)
+    spike_rate_mc = np.asarray(spike_rate_mc)
+    t = np.arange(0, duration, dt)
+    plt.plot(t, spike_rate_mc, linewidth=1, label="Monte-Carlo")
+    plt.plot(t, spike_rate, linewidth=2, label="CBRD")
+    plt.legend(loc="upper left")
     # # plt.plot(V_hist)
     # print(spike_rate[-1], spike_rate_mc[-1])
     #
-    # plt.show()
+    plt.show()
 
 
 main()

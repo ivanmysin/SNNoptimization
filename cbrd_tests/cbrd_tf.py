@@ -16,25 +16,43 @@ abs = tf.math.abs
 logical_and = tf.math.logical_and
 logical_not = tf.math.logical_not
 
-def H_function(V, dV_dt, Vt, dt, tau_m, sigma):
-    k = tau_m / dt
-    g_tot = 1 / tau_m # (Cm = 1) !!!!
+SQRT_FROM_2 = np.sqrt(2)
+SQRT_FROM_2_PI = 0.7978845608028654
 
-    T = sqrt(0.5*(1+k)) * g_tot * (Vt - V) / sigma
+def H_function(V, dV_dt, Vt, tau_m, sigma):
 
-    A_inf = exp(0.0061 - 1.12 * T - 0.257 * T**2 - 0.072 * T**3 - 0.0117 * T**4)
-    A = A_inf * (1 - (1 + k)**(-0.71 + 0.0825 * (T + 3) ) )
+    T = (Vt - V) / sigma / SQRT_FROM_2
+    A = np.exp(0.0061 - 1.12 * T - 0.257 * T**2 - 0.072 * T**3 - 0.0117 * T**4)
+    dT_dt = -1.0 / sigma / SQRT_FROM_2 * dV_dt
+    #dT_dt[dT_dt > 0] = 0
+    dT_dt = minimum(0.0, dT_dt)
 
-    dT_dt = -g_tot/sigma * sqrt(0.5+0.5*k) * dV_dt
+    F_T = SQRT_FROM_2_PI * np.exp(-T**2) / (1.000000001 + erf(T))
 
-    # dT_dt[dT_dt < 0] = 0
-    dT_dt = maximum(0.0, dT_dt)
+    B = -SQRT_FROM_2 * dT_dt * F_T * tau_m
 
-    F_T = np.sqrt(2.0/np.pi) * exp(-T**2) / (1 + erf(T))
+    H = (A + B) / tau_m
 
-    B = -np.sqrt(2.0) * tau_m * dT_dt * F_T
 
-    H = A + B
+
+    # k = tau_m / dt
+    # g_tot = 1 / tau_m # (Cm = 1) !!!!
+    #
+    # T = sqrt(0.5*(1+k)) * g_tot * (Vt - V) / sigma
+    #
+    # A_inf = exp(0.0061 - 1.12 * T - 0.257 * T**2 - 0.072 * T**3 - 0.0117 * T**4)
+    # A = A_inf * (1 - (1 + k)**(-0.71 + 0.0825 * (T + 3) ) )
+    #
+    # dT_dt = -g_tot/sigma * sqrt(0.5+0.5*k) * dV_dt
+    #
+    # # dT_dt[dT_dt < 0] = 0
+    # dT_dt = maximum(0.0, dT_dt)
+    #
+    # F_T = np.sqrt(2.0/np.pi) * exp(-T**2) / (1 + erf(T))
+    #
+    # B = -np.sqrt(2.0) * tau_m * dT_dt * F_T
+    #
+    # H = A + B
 
     return H
 #############################################################################################
@@ -112,9 +130,8 @@ def update_z(z, dt, dts, Sourse):
 # w = limiter(a, b)
 # print(w)
 
-Pts = np.zeros(400, dtype=np.float64)
-Pts[-1] = 1
-V = np.zeros_like(Pts)
+
+
 #V[-1] = 9
 
 dt = 0.1
@@ -124,6 +141,10 @@ Vr=0.0
 Vt=10.0
 Iext=15.0
 sigma=1.5
+
+Pts = np.zeros(400, dtype=np.float64)
+Pts[-1] = 1 / dts
+V = np.zeros_like(Pts)
 
 dV_dt = (-V + Iext) / tau_m
 
@@ -145,13 +166,13 @@ with tf.GradientTape(persistent=False) as tape:
     for _ in range(1000):
         dV_dt = (-V + Iext) / tau_m
 
-        H = H_function(V, dV_dt, Vt, dt, tau_m, sigma)
+        H = H_function(V, dV_dt, Vt, tau_m, sigma)
         sourse4Pts = Pts * H
 
         # sourse4Pts[0] = -tf.math.reduce_sum(sourse4Pts)
-        firing = -tf.math.reduce_sum(sourse4Pts)
+        firing = tf.math.reduce_sum(sourse4Pts)
 
-        sourse4Pts = tf.tensor_scatter_nd_update(sourse4Pts, [[0], ], tf.reshape(firing, [1, ]) )
+        sourse4Pts = tf.tensor_scatter_nd_update(sourse4Pts, [[0], ], -tf.reshape(firing, [1, ]) )
 
         dPts = update_z(Pts, dt, dts, sourse4Pts)
         dV = update_z(V, dt, dts, -dV_dt)
@@ -172,7 +193,7 @@ with tf.GradientTape(persistent=False) as tape:
         # V += dV
         V = tf.math.add(V, dV)
         # print(dV[-1], V[-1])
-        spike_rate.append(-float(firing.numpy()))
+        spike_rate.append( float(firing.numpy()))
         # print("#########################")
 
     grad = tape.gradient(firing, Iext)

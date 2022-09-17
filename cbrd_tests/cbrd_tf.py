@@ -20,7 +20,6 @@ SQRT_FROM_2 = np.sqrt(2)
 SQRT_FROM_2_PI = 0.7978845608028654
 
 def H_function(V, dV_dt, Vt, tau_m, sigma):
-
     T = (Vt - V) / sigma / SQRT_FROM_2
     A = np.exp(0.0061 - 1.12 * T - 0.257 * T**2 - 0.072 * T**3 - 0.0117 * T**4)
     dT_dt = -1.0 / sigma / SQRT_FROM_2 * dV_dt
@@ -32,27 +31,6 @@ def H_function(V, dV_dt, Vt, tau_m, sigma):
     B = -SQRT_FROM_2 * dT_dt * F_T * tau_m
 
     H = (A + B) / tau_m
-
-
-
-    # k = tau_m / dt
-    # g_tot = 1 / tau_m # (Cm = 1) !!!!
-    #
-    # T = sqrt(0.5*(1+k)) * g_tot * (Vt - V) / sigma
-    #
-    # A_inf = exp(0.0061 - 1.12 * T - 0.257 * T**2 - 0.072 * T**3 - 0.0117 * T**4)
-    # A = A_inf * (1 - (1 + k)**(-0.71 + 0.0825 * (T + 3) ) )
-    #
-    # dT_dt = -g_tot/sigma * sqrt(0.5+0.5*k) * dV_dt
-    #
-    # # dT_dt[dT_dt < 0] = 0
-    # dT_dt = maximum(0.0, dT_dt)
-    #
-    # F_T = np.sqrt(2.0/np.pi) * exp(-T**2) / (1 + erf(T))
-    #
-    # B = -np.sqrt(2.0) * tau_m * dT_dt * F_T
-    #
-    # H = A + B
 
     return H
 #############################################################################################
@@ -163,7 +141,7 @@ spike_rate = []
 with tf.GradientTape(persistent=False) as tape:
     tape.watch(Iext)
 
-    for _ in range(1000):
+    for _ in range(5000):
         dV_dt = (-V + Iext) / tau_m
 
         H = H_function(V, dV_dt, Vt, tau_m, sigma)

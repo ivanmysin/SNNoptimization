@@ -162,6 +162,7 @@ class LIF_Neuron(BaseNeuron):
         t = 0
         while (t < duration):
             # dVdt = -self.V / self.tau_m + self.Iext / self.tau_m + self.Isyn
+
             dVdt = (self.gl * (self.El - self.V[self.ref_dvdt_idx: ]) + self.Iext + self.Isyn) / self.C
 
             tau_m = self.C / (self.gl + self.gsyn)
@@ -318,9 +319,50 @@ class Synapse(SimlestSinapse):
         self.post.add_Isyn(-Isyn, gsyn)
 
         return
+
+class PlasticSynapse(SimlestSinapse):
+    def __init__(self, params):
+        super(PlasticSynapse, self).__init__(params)
+
+        self.tau_d = tf.Variable(params["tau_d"], dtype=tf.float32)
+        self.tau_r = tf.Variable(params["tau_r"], dtype=tf.float32)
+        self.tau_f = tf.Variable(params["tau_f"], dtype=tf.float32)
+        self.Uinc = tf.Variable(params["Uinc"], dtype=tf.float32)
+
+        self.gbarS = tf.Variable(params["gbarS"], dtype=tf.float32)
+        self.Erev = tf.Variable(params["Erev"], dtype=tf.float32)
+
+        #tau_d, tau_r, tau_f, u, u0, x0, y0
+
+        self.S = tf.Variable(0, dtype=tf.float32)
+        self.x = tf.Variable(1.0, dtype=tf.float32)
+        self.y = tf.Variable(0.0, dtype=tf.float32)
+        self.u = tf.Variable(0.0, dtype=tf.float32)
+
+        if self.tau_d != self.tau_r:
+            self.tau1r = self.tau_d / (self.tau_d - self.tau_r)
+        else:
+            self.tau1r = 1e-13
+
+    def update(self, dt):
+        SRpre = self.pre.get_flow()
+
+        y_ = self.y * exp(-dt / self.tau_d)
+        x_ = 1 + (self.x - 1 + self.tau1r * self.y) * exp(-dt / self.tau_r) - self.tau1r * y_
+        u_ = self.u * exp(-dt / self.tau_f)
+        self.u = u_ + self.Uinc * (1 - u_) * SRpre
+        self.y = y_ + self.u * x_ * SRpre
+        self.x = x_ - self.u * x_ * SRpre
+        gsyn = self.gbarS * self.w * self.y
+        Isyn = gsyn * (self.post.getV() - self.Erev)
+        self.post.add_Isyn(-Isyn, gsyn)
+
+        return
+
+
 ################################################################################3
 class Network:
-    def __init__(self, neurons, synapses, is_save_distrib = False):
+    def __init__(self, neurons, synapses):
         self.neurons = neurons
         self.synapses = synapses
 
@@ -334,6 +376,7 @@ class Network:
             for synapse in self.synapses:
                 synapse.update(dt)
 
+            #print(self.synapses[0].y.numpy())
             t += dt
         return
 
@@ -341,66 +384,81 @@ class Network:
 params_neurons = {
     "Vreset" : -80.0,
     "Vt" : -50.0,
-    "gl" : 0.01,
+    "gl" : 0.1,
     "El" : -70.0,
-    "C"  : 0.2,
+    "C"  : 1.0,
     "sigma" : 0.3,
     "ref_dvdt" : 0,
     "refactory" :  3.0, # refactory for threshold
     "w_in_distr" : 1.0,  # weight of neuron in model
-    "Iext" : 0.3,
+    "Iext" : 1.8,
 
     "use_CBRD" : True,
     "N" : 400,
     "dts" : 0.5
 }
 
+# synapse_params = {
+#     "w" : 1.0,
+#     "pre" : None,
+#     "post": None,
+#     "tau_s" : 5.4,
+#     "tau_a" : 1.0,
+#     "gbarS" : 1.0,
+#     "Erev": -75.0,
+# }
+
 synapse_params = {
     "w" : 1.0,
     "pre" : None,
     "post": None,
-    "tau_s" : 5.4,
-    "tau_a" : 1.0,
+    "tau_f" : 12.0,  # ms
+    "tau_r" : 750.0, # 1912.0, #  ms   # Synaptic depression rate
+    "tau_d" : 2.8, #
+    "Uinc"  : 0.6, # 0.153,
     "gbarS" : 1.0,
     "Erev": -75.0,
 }
 
-
 neuron_pops_1 = LIF_Neuron(params_neurons)
+params_neurons["Iext"] = 1.7
 neuron_pops_2 = LIF_Neuron(params_neurons)
 
 synapse_params_1 = copy.deepcopy(synapse_params)
 synapse_params_1["pre"] = neuron_pops_1
 synapse_params_1["post"] = neuron_pops_2
-
-synapse1 = Synapse(synapse_params_1)
+synapse_params_1["w"] = 2.5
+synapse1 = PlasticSynapse(synapse_params_1)
 
 synapse_params_2 = copy.deepcopy(synapse_params)
 synapse_params_2["pre"] = neuron_pops_2
 synapse_params_2["post"] = neuron_pops_1
+synapse_params_2["w"] = 2.5
+synapse2 = PlasticSynapse(synapse_params_2)
 
-#synapse2 = Synapse(synapse_params_2)
-
-net = Network([neuron_pops_1, neuron_pops_2], [synapse1, ])
+net = Network([neuron_pops_1, neuron_pops_2], [synapse1, synapse2])
 
 
-net.update(0.1, 500)
-# with tf.GradientTape() as tape:
-#     tape.watch(neuron_pops.Iext)
-#     neuron_pops.update(0.1, 500)
-#     grad = tape.gradient(neuron_pops.firing[-1], neuron_pops.Iext)
-#
-#     print(grad)
+#net.update(0.1, 1000)
+with tf.GradientTape() as tape:
+    tape.watch(synapse1.Uinc)
+    net.update(0.1, 500)
+    grad = tape.gradient(neuron_pops_1.firing[-1], synapse1.Uinc)
+    print(grad)
+
 firing1 = neuron_pops_1.get_flow_hist().numpy()
 firing2 = neuron_pops_2.get_flow_hist().numpy()
 
-print(firing1)
-print(firing2)
+print(firing1[-1])
+print(firing2[-1])
+# print(firing2)
 
-times = np.linspace(0, 0.1, firing1.size)
+times = np.linspace(0, firing1.size*0.1, firing1.size)
+print(times[-1])
 import matplotlib.pyplot as plt
-plt.scatter(times, firing1, color="red")
-plt.scatter(times, firing2, color="green")
+plt.scatter(times, firing1, color="red", label="Pop1")
+plt.scatter(times, firing2, color="green", label="Pop2")
+plt.legend()
 plt.show()
 
 

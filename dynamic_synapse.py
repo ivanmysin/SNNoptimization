@@ -22,6 +22,23 @@ def synaptic_event(delta_t, g0, tau_d, tau_r, tau_f, u, u0, x0, y0):
     # u0 = u_ + u * (1 - u_)
     return g, x0, y0, u0
 
+
+def synaptic_integration(delta_t, g0, tau_d, tau_r, tau_f, u, u0, x0, y0, SRpre):
+    # TM Model that depends on tau_d
+    tau1r = tau_d / ((tau_d - tau_r) if tau_d != tau_r else 1e-13)
+    y_ = y0 * exp(-delta_t / tau_d)
+
+    x_ = 1 + (x0 - 1 + tau1r * y0) * exp(-delta_t / tau_r) - tau1r * y_
+
+    u_ = u0 * exp(-delta_t / tau_f)
+    u0 = u_ + u * (1 - u_) * SRpre
+    y0 = y_ + u0 * x_ * SRpre
+    x0 = x_ - u0 * x_ * SRpre
+    g = g0 * y0
+
+    return g, x0, y0, u0
+
+
 tau_f = 12 # 1.5 # 23.89 # 50 # ms
 tau_r = 1912.0 # 128.0 # 895.2 # 750  # ms   # Synaptic depression rate
 tau_d = 23.8 # 20.0 # 3.806 # 2
@@ -35,12 +52,11 @@ A_S = 0
 g_hist = []
 
 dt = 0.1
-duration = 150
+duration = 200
 R = 15 # Гц
 
-t = np.arange(0, duration, dt)
-SR_pre = np.zeros_like(t) #(np.random.rand(t.size) < (R * 0.001 * dt) ).astype(float)
-SR_pre[::150] = 1
+t = np.arange(0, duration + dt, dt)
+
 
 # for idx in range(t.size):
 #
@@ -70,20 +86,39 @@ SR_pre[::150] = 1
 g0 = 1  #, tau_d, tau_r, tau_f, u = input_vec
 u = U_0
 x0, y0, u0 = 1.0, 0.0, 0.0
-delta_t = np.arange(0, 20, dt)
+delta_t = np.arange(0, 20 + dt, dt)
 g_hist = np.empty(0, dtype=np.float64)
 
 g, x0, y0, u0 = synaptic_event(0.0, g0, tau_d, tau_r, tau_f, u, u0, x0, y0)
+start_x = x0
+start_y = y0
+start_u = u0
 g_hist = np.append(g_hist, g)
+
+#print(g0, tau_d, tau_r, tau_f, u, u0, x0, y0)
+print(delta_t[-1])
 for idx in range(10):
-    if idx == 0:
-        g, x0, y0, u0 = synaptic_event(delta_t, g0, tau_d, tau_r, tau_f, u, u0, x0, y0)
-    else:
-        g, x0, y0, u0 = synaptic_event(delta_t, g0, tau_d, tau_r, tau_f, u, u0[-1], x0[-1], y0[-1])
+    g, x0, y0, u0 = synaptic_event(delta_t[-1], g0, tau_d, tau_r, tau_f, u, u0, x0, y0)
     g_hist = np.append(g_hist, g)
 
-t = np.linspace(0, 20*(idx+1), g_hist.size)
-plt.plot(t, g_hist)
+g_hist2 = []
+t_sourse = np.linspace(0, (idx+1)*delta_t[-1], g_hist.size)
+
+SR_pre = np.zeros_like(t) #(np.random.rand(t.size) < (R * 0.001 * dt) ).astype(float)
+SR_pre[::delta_t.size] = 1
+x0, y0, u0 = 1.0, 0.0, 0.0 # start_x, start_y, start_u
+#g_hist2.append(y0)
+g0 = 1
+
+
+#print(g0, tau_d, tau_r, tau_f, u, u0, x0, y0)
+for idx in range(t.size):
+    g, x0, y0, u0 = synaptic_integration(dt, g0, tau_d, tau_r, tau_f, u, u0, x0, y0, SR_pre[idx])
+    g_hist2.append(g)
+
+plt.scatter(t_sourse, g_hist, color="red", label="Sourses model")
+plt.plot(t, g_hist2, color="green", label="Iterate model")
+plt.legend()
 plt.show()
 
 # fig, axes = plt.subplots(nrows=2, sharex=True)

@@ -1,8 +1,4 @@
-# import matplotlib
-# matplotlib.use("Qt5Agg")
-import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
 import copy
 
 # from scipy.special import erf
@@ -17,7 +13,7 @@ abs = tf.math.abs
 logical_and = tf.math.logical_and
 logical_not = tf.math.logical_not
 
-SQRT_FROM_2 = np.sqrt(2)
+SQRT_FROM_2 = sqrt(2.0)
 SQRT_FROM_2_PI = 0.7978845608028654
 
 
@@ -69,11 +65,13 @@ class BaseNeuron:
 
 
     def H_function(self, V, dVdt, tau_m, Vt, sigma):
-        T = (Vt - V) / sigma / SQRT_FROM_2
-        A = np.exp(0.0061 - 1.12 * T - 0.257 * T**2 - 0.072 * T**3 - 0.0117 * T**4)
+        #T = (Vt - V) / sigma / SQRT_FROM_2
+        delta_V = maximum((Vt - V), -1.0)  # (Vt - V) #
+        T = delta_V / sigma / SQRT_FROM_2
+        A = exp(0.0061 - 1.12 * T - 0.257 * T**2 - 0.072 * T**3 - 0.0117 * T**4)
         dT_dt = -1.0 / sigma / SQRT_FROM_2 * dVdt
         dT_dt = minimum(0.0, dT_dt)
-        F_T = SQRT_FROM_2_PI * np.exp(-T**2) / (1.000000001 + erf(T))
+        F_T = SQRT_FROM_2_PI * exp(-T**2) / (1.001 + erf(T))
         B = -SQRT_FROM_2 * dT_dt * F_T * tau_m
         H = (A + B) / tau_m
         return H
@@ -156,19 +154,19 @@ class LIF_Neuron(BaseNeuron):
         #self.times = [0]
 
         #if self.is_use_CBRD:
-        self.sigma = self.sigma / self.gl * np.sqrt(0.5 * self.gl / self.C)
+        self.sigma = self.sigma / self.gl * sqrt(0.5 * self.gl / self.C)
 
     def update(self, dt, duration):
         t = 0
         while (t < duration):
             # dVdt = -self.V / self.tau_m + self.Iext / self.tau_m + self.Isyn
 
-            dVdt = (self.gl * (self.El - self.V[self.ref_dvdt_idx: ]) + self.Iext + self.Isyn) / self.C
+            dVdt = (self.gl * (self.El - self.V[self.ref_dvdt_idx: ]) + self.Iext + self.Isyn[self.ref_dvdt_idx: ]) / self.C
 
             tau_m = self.C / (self.gl + self.gsyn)
 
             #dVdt[:self.ref_dvdt_idx ] = 0
-            tf.concat([tf.zeros(self.ref_dvdt_idx, dtype=tf.float32), dVdt], axis=0)
+            dVdt = tf.concat([tf.zeros(self.ref_dvdt_idx, dtype=tf.float32), dVdt], axis=0)
             self.V = self.V + dt * dVdt
 
             #self.Vhist.append(self.V[-1])
@@ -206,7 +204,7 @@ class Channel:
 
         if not y is None:
             self.y = self.get_y_inf(V)
-            self.y_reset =  tf.constant([y_reset, ], shape=(1, ), dtype=tf.float32)
+            self.y_reset = tf.constant([y_reset, ], shape=(1, ), dtype=tf.float32)
         else:
             self.y = None
 
@@ -388,7 +386,7 @@ params_neurons = {
     "El" : -70.0,
     "C"  : 1.0,
     "sigma" : 0.3,
-    "ref_dvdt" : 0,
+    "ref_dvdt" : 3.0,
     "refactory" :  3.0, # refactory for threshold
     "w_in_distr" : 1.0,  # weight of neuron in model
     "Iext" : 1.8,
@@ -427,34 +425,35 @@ neuron_pops_2 = LIF_Neuron(params_neurons)
 synapse_params_1 = copy.deepcopy(synapse_params)
 synapse_params_1["pre"] = neuron_pops_1
 synapse_params_1["post"] = neuron_pops_2
-synapse_params_1["w"] = 2.5
+synapse_params_1["w"] = 0.5
 synapse1 = PlasticSynapse(synapse_params_1)
 
 synapse_params_2 = copy.deepcopy(synapse_params)
 synapse_params_2["pre"] = neuron_pops_2
 synapse_params_2["post"] = neuron_pops_1
-synapse_params_2["w"] = 2.5
+synapse_params_2["w"] = 0.5
 synapse2 = PlasticSynapse(synapse_params_2)
 
 net = Network([neuron_pops_1, neuron_pops_2], [synapse1, synapse2])
 
 
-#net.update(0.1, 1000)
-with tf.GradientTape() as tape:
-    tape.watch(synapse1.Uinc)
-    net.update(0.1, 500)
-    grad = tape.gradient(neuron_pops_1.firing[-1], synapse1.Uinc)
-    print(grad)
+net.update(0.1, 100)
+# with tf.GradientTape(watch_accessed_variables=False) as tape:
+#     tape.watch(synapse1.Uinc)
+#     net.update(0.1, 1000)
+#     grad = tape.gradient(neuron_pops_1.firing[-1], synapse1.Uinc)
+#     print(grad)
 
 firing1 = neuron_pops_1.get_flow_hist().numpy()
 firing2 = neuron_pops_2.get_flow_hist().numpy()
 
-print(firing1[-1])
-print(firing2[-1])
+# print(firing1[-1])
+# print(firing2[-1])
 # print(firing2)
-
+import numpy as np
+import matplotlib.pyplot as plt
 times = np.linspace(0, firing1.size*0.1, firing1.size)
-print(times[-1])
+
 import matplotlib.pyplot as plt
 plt.scatter(times, firing1, color="red", label="Pop1")
 plt.scatter(times, firing2, color="green", label="Pop2")

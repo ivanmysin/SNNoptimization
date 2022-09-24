@@ -1,97 +1,57 @@
+# import matplotlib
+# matplotlib.use("Qt5Agg")
 import numpy as np
+import tensorflow as tf
 import matplotlib.pyplot as plt
-exp = np.exp
-def synaptic_integration(delta_t, g0, tau_d, tau_r, tau_f, u, u0, x0, y0, SRpre):
-    # TM Model that depends on tau_d
-    tau1r = tau_d / ((tau_d - tau_r) if tau_d != tau_r else 1e-13)
-    y_ = y0 * exp(-delta_t / tau_d)
-    x_ = 1 + (x0 - 1 + tau1r * y0) * exp(-delta_t / tau_r) - tau1r * y_
-    u_ = u0 * exp(-delta_t / tau_f)
-    u0 = u_ + u * (1 - u_) * SRpre
-    y0 = y_ + u0 * x_ * SRpre
-    x0 = x_ - u0 * x_ * SRpre
-    g = g0 * y0
+import copy
 
-    return g, x0, y0, u0
-def run_integration(t, delta_t, g0, tau_d, tau_r, tau_f, u, u0, x0, y0, SRpre):
-    for idx in range(t.size):
-        g, x0, y0, u0 = synaptic_integration(delta_t, g0, tau_d, tau_r, tau_f, u, u0, x0, y0, SRpre[idx])
+# from scipy.special import erf
+# from tensorflow.math import erf, sqrt, exp, maximum, minimum, abs
 
-    return g, x0, y0, u0
-#######################################################################
-class Test:
-    def __init__(self, params):
+erf = tf.math.erf
+sqrt = tf.math.sqrt
+exp = tf.math.exp
+maximum = tf.math.maximum
+minimum = tf.math.minimum
+abs = tf.math.abs
+logical_and = tf.math.logical_and
+logical_not = tf.math.logical_not
 
+SQRT_FROM_2 = sqrt(2.0)
+SQRT_FROM_2_PI = 0.7978845608028654
 
-        self.tau_d = params["tau_d"]
-        self.tau_r = params["tau_r"]
-        self.tau_f = params["tau_f"]
-        self.Uinc =  params["Uinc"]
-
-        self.gbarS = params["gbarS"]
-        self.Erev = params["Erev"]
-
-        #tau_d, tau_r, tau_f, u, u0, x0, y0
-
-        self.S = 0
-        self.x = 1.0
-        self.y = 0.0
-        self.u = 0.0
-        self.w = 1.0
-
-        if self.tau_d != self.tau_r:
-            self.tau1r = self.tau_d / (self.tau_d - self.tau_r)
-        else:
-            self.tau1r = 1e-13
-
-    def update(self, dt, SRpre):
-        #SRpre = self.pre.get_flow()
-
-        y_ = self.y * exp(-dt / self.tau_d)
-        x_ = 1 + (self.x - 1 + self.tau1r * self.y) * exp(-dt / self.tau_r) - self.tau1r * y_
-        u_ = self.u * exp(-dt / self.tau_f)
-        self.u = u_ + self.Uinc * (1 - u_) * SRpre
-        self.y = y_ + self.u * x_ * SRpre
-        self.x = x_ - self.u * x_ * SRpre
-        gsyn = self.gbarS * self.w * self.y
-        # Isyn = gsyn * (self.post.getV() - self.Erev)
-        # self.post.add_Isyn(-Isyn, gsyn)
-
-        return
+def H_function(V, dVdt, tau_m, Vt, sigma):
+    delta_V = maximum((Vt - V), -1.0) #(Vt - V) #
+    #print(delta_V.numpy())
+    T = delta_V / sigma / SQRT_FROM_2
+    A = exp(0.0061 - 1.12 * T - 0.257 * T**2 - 0.072 * T**3 - 0.0117 * T**4)
+    dT_dt = -1.0 / sigma / SQRT_FROM_2 * dVdt
+    dT_dt = minimum(0.0, dT_dt)
 
 
+    F_T = SQRT_FROM_2_PI * exp(-T ** 2) / (1.001 + erf(T))
+    B = -SQRT_FROM_2 * dT_dt * F_T * tau_m
 
-#######################################################################
-tau_f = 12 # 1.5 # 23.89 # 50 # ms
-tau_r = 1912.0 # 128.0 # 895.2 # 750  # ms   # Synaptic depression rate
-tau_d = 23.8 # 20.0 # 3.806 # 2
-g0 = 1.0
-u = 0.153
-x0, y0, u0 = 1.0, 0.0, 0.0
-dt = 0.1
-t = np.arange(0, 1.5, dt)
-SR_pre = np.zeros_like(t) #(np.random.rand(t.size) < (R * 0.001 * dt) ).astype(float)
-SR_pre[::150] = 1
+    #print(A[-20:].numpy())
+
+    H = (A + B) / tau_m
+    return H
 
 
-g_1, x0_1, y0_1, u0_1 = run_integration(t, dt, g0, tau_d, tau_r, tau_f, u, u0, x0, y0, SR_pre)
-print(g_1, x0_1, y0_1, u0_1 )
+V = tf.linspace(-52, -40, 100)
+V = tf.cast(V, tf.float32)
+dVdt = 0.1*(-60 - V) + 1.8
+tau_m = 10
+Vt = -50.0
+sigma = 0.3
 
+#T = (Vt - V) / sigma / SQRT_FROM_2
+delta_V = (Vt - V)
+H = H_function(V, dVdt, tau_m, Vt, sigma)
+H = H.numpy()
+# print(np.sum(H < 0))
+# print(H[-20:])
+#print(delta_V)
 
-synapse_params = {
-    "w" : 5.0,
-    "pre" : None,
-    "post": None,
-    "tau_f" : 12.0,  # ms
-    "tau_r" : 1912.0, #  ms   # Synaptic depression rate
-    "tau_d" : 23.8, #
-    "Uinc"  : 0.153,
-    "gbarS" : 1.0,
-    "Erev": -75.0,
-}
-test = Test(synapse_params)
-
-for idx in range(t.size):
-    test.update(dt, SR_pre[idx])
-
-print(test.y, test.x, test.y, test.u )
+plt.scatter(V.numpy(), H)
+plt.show()

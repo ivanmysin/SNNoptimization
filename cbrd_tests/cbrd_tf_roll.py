@@ -1,5 +1,6 @@
 import tensorflow as tf
 import copy
+import time
 
 # from scipy.special import erf
 # from tensorflow.math import erf, sqrt, exp, maximum, minimum, abs
@@ -17,9 +18,10 @@ SQRT_FROM_2 = sqrt(2.0)
 SQRT_FROM_2_PI = 0.7978845608028654
 
 
-class BaseNeuron:
+class BaseNeuron(tf.Module):
 
     def __init__(self, params):
+        super(BaseNeuron, self).__init__(name="NeuronPopulation")
 
         self.Vreset = tf.constant(params["Vreset"], shape=[1, ], dtype=tf.float32)
         self.Vt = tf.constant(params["Vt"], dtype=tf.float32)
@@ -109,11 +111,11 @@ class BaseNeuron:
 
 
         # self.ro[self.ro < 0] = 0
-        fired = tf.math.reduce_sum(dro) #tf.math.reduce_sum(H * self.ro[self.ref_idx:])
+        self.fired = tf.math.reduce_sum(dro) #tf.math.reduce_sum(H * self.ro[self.ref_idx:])
 
-        self.firing = tf.concat( [self.firing, tf.reshape(fired, [1, ])], axis=0)
+        self.firing = tf.concat( [self.firing, tf.reshape(self.fired, [1, ])], axis=0)
         #print(self.firing)
-        self.ro_H_integral = self.ro_H_integral + fired
+        self.ro_H_integral = self.ro_H_integral + self.fired
 
         self.ro = self.ro - dro
         self.ts = self.ts + dt
@@ -130,7 +132,7 @@ class BaseNeuron:
 
 
     def get_flow(self):
-        return self.firing[-1]
+        return self.fired # self.firing[-1]
 
     def get_flow_hist(self):
         return self.firing
@@ -155,10 +157,13 @@ class LIF_Neuron(BaseNeuron):
 
         #if self.is_use_CBRD:
         self.sigma = self.sigma / self.gl * sqrt(0.5 * self.gl / self.C)
+        self.t = tf.Variable(0, dtype=tf.float32)
 
+    @tf.function
     def update(self, dt, duration):
-        t = 0
-        while (t < duration):
+
+        self.t = self.t * 0
+        while (self.t < duration):
             # dVdt = -self.V / self.tau_m + self.Iext / self.tau_m + self.Isyn
 
             dVdt = (self.gl * (self.El - self.V[self.ref_dvdt_idx: ]) + self.Iext + self.Isyn[self.ref_dvdt_idx: ]) / self.C
@@ -186,10 +191,12 @@ class LIF_Neuron(BaseNeuron):
                 V_without_last = self.V[:-1]
                 V_without_last = tf.roll(V_without_last, 1, axis=0)
                 self.V = tf.concat([self.Vreset, V_without_last[1:], V_last], axis=0)
-            t = t + dt
+
+            self.t = self.t + dt
 ###################################################################################
-class Channel:
+class Channel(tf.Module):
     def __init__(self, gmax, E, V, x=None, y=None, x_reset=None, y_reset=None, x_deg=0, y_deg=0):
+        super(Channel, self).__init__(name="Channel")
         self.gmax = tf.constant(gmax, dtype=tf.float32)
         self.E =  tf.constant(E, dtype=tf.float32)
         self.g = tf.Variable(0, dtype=tf.float32)
@@ -274,13 +281,15 @@ class Channel:
             self.y = tf.concat([tmpy, rolled_y, last_y], axis=0)
 
 ###################################################################################
-class SimlestSinapse:
+class SimlestSinapse(tf.Module):
     def __init__(self, params):
+        super(SimlestSinapse, self).__init__(name="Synapse")
         self.w = tf.Variable(params["w"], dtype=tf.float32)
         # self.delay = params["delay"] # !!!!!!!!!
         self.pre = params["pre"]
         self.post = params["post"]
         # self.pre_hist = []
+
 
     def update(self, dt):
         pre_flow = self.pre.get_flow()
@@ -303,6 +312,7 @@ class Synapse(SimlestSinapse):
         self.S = tf.Variable(0, dtype=tf.float32)
         self.dsdt = tf.Variable(0, dtype=tf.float32)
         self.tau_s_2 = self.tau_s ** 2
+
 
     def update(self, dt):
         pre_flow = self.pre.get_flow()
@@ -342,43 +352,63 @@ class PlasticSynapse(SimlestSinapse):
         else:
             self.tau1r = 1e-13
 
-    def update(self, dt):
-        SRpre = self.pre.get_flow()
+    @tf.function
+    def update(self, dt, SRpre):
+
+
+        #SRpre = self.pre.get_flow()
 
         y_ = self.y * exp(-dt / self.tau_d)
         x_ = 1 + (self.x - 1 + self.tau1r * self.y) * exp(-dt / self.tau_r) - self.tau1r * y_
         u_ = self.u * exp(-dt / self.tau_f)
-        self.u = u_ + self.Uinc * (1 - u_) * SRpre
-        self.y = y_ + self.u * x_ * SRpre
-        self.x = x_ - self.u * x_ * SRpre
-        gsyn = self.gbarS * self.w * self.y
-        Isyn = gsyn * (self.post.getV() - self.Erev)
-        self.post.add_Isyn(-Isyn, gsyn)
+        # self.u = u_ + self.Uinc * (1 - u_) * SRpre
+        self.u.assign(u_ + self.Uinc * (1 - u_) * SRpre,  read_value=False)
+        #self.y = y_ + self.u * x_ * SRpre
+        self.y.assign(y_ + self.u * x_ * SRpre, read_value=False)
+        #self.x = x_ - self.u * x_ * SRpre
+        self.x.assign(x_ - self.u * x_ * SRpre, read_value=False)
 
-        return
+        gsyn = self.gbarS * self.w * self.y
+        # Isyn = gsyn * (self.post.getV() - self.Erev)
+        # self.post.add_Isyn(-Isyn, gsyn)
+
+        return gsyn
 
 
 ################################################################################3
-class Network:
+class Network(tf.Module):
     def __init__(self, neurons, synapses):
+        super(Network, self).__init__(name="Network")
         self.neurons = neurons
         self.synapses = synapses
 
+
+
     def update(self, dt, duration):
-        t = 0
+        t = tf.Variable(0, dtype=tf.float32)
 
         while(t < duration):
             for idx, neuron in enumerate(self.neurons):
                 neuron.update(dt, dt)
 
             for synapse in self.synapses:
-                synapse.update(dt)
+                synapse.update(dt, 0.001)
 
             #print(self.synapses[0].y.numpy())
-            t += dt
+            t = t + dt
         return
 
 ###################################################################################
+
+
+    # with tf.GradientTape(watch_accessed_variables=False) as tape:
+    #     tape.watch(net.synapses[0].Uinc)
+    #     net.update(dt, duration)
+    #     grad = tape.gradient(net.neurons[0].firing[-1], net.synapses[0].Uinc)
+    #
+    # return grad
+
+
 params_neurons = {
     "Vreset" : -80.0,
     "Vt" : -50.0,
@@ -436,29 +466,42 @@ synapse2 = PlasticSynapse(synapse_params_2)
 
 net = Network([neuron_pops_1, neuron_pops_2], [synapse1, synapse2])
 
+dt = tf.Variable(0.1, dtype=tf.float32)
+duration = tf.Variable(0.1, dtype=tf.float32)
 
-net.update(0.1, 100)
+net.update(dt, duration)
+
+duration = tf.Variable(100, dtype=tf.float32)
+net.update(dt, duration)
+#timer = time.time()
+
+# net.update(dt, duration)
+#
+# duration = tf.Variable(100.0, dtype=tf.float32)
+# net.update(dt, duration)
 # with tf.GradientTape(watch_accessed_variables=False) as tape:
 #     tape.watch(synapse1.Uinc)
-#     net.update(0.1, 1000)
+#     net.update(dt, duration)
 #     grad = tape.gradient(neuron_pops_1.firing[-1], synapse1.Uinc)
 #     print(grad)
-
-firing1 = neuron_pops_1.get_flow_hist().numpy()
-firing2 = neuron_pops_2.get_flow_hist().numpy()
-
-# print(firing1[-1])
-# print(firing2[-1])
-# print(firing2)
+# print(time.time() - timer)
 import numpy as np
-import matplotlib.pyplot as plt
-times = np.linspace(0, firing1.size*0.1, firing1.size)
+firing1 = neuron_pops_1.get_flow_hist()
+firing2 = neuron_pops_2.get_flow_hist()
 
-import matplotlib.pyplot as plt
-plt.scatter(times, firing1, color="red", label="Pop1")
-plt.scatter(times, firing2, color="green", label="Pop2")
-plt.legend()
-plt.show()
+print(firing1[-1])
+print(firing2[-1])
+# print(firing2)
+
+
+# import matplotlib.pyplot as plt
+# times = np.linspace(0, firing1.size*0.1, firing1.size)
+#
+# import matplotlib.pyplot as plt
+# plt.scatter(times, firing1, color="red", label="Pop1")
+# plt.scatter(times, firing2, color="green", label="Pop2")
+# plt.legend()
+# plt.show()
 
 
 

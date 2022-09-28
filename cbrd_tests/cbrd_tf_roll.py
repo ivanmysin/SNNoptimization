@@ -46,7 +46,7 @@ class BaseNeuron(tf.Module):
         self.gsyn = tf.zeros_like(self.V)
         # self.t_states = np.linspace(0, self.N * self.dts, self.N)
         self.ro = tf.zeros_like(self.V)
-        self.ro = tf.Variable(tf.tensor_scatter_nd_update(self.ro, [[0, ]], [1 / self.dts, ]))
+        self.ro = tf.Variable(tf.tensor_scatter_nd_update(self.ro, [[tf.size(self.ro)-1, ]], [1 / self.dts, ]))
 
         # self.ro[-1] = 1 / self.dts
         self.ro_H_integral = tf.Variable(0, dtype=tf.float32)
@@ -159,7 +159,7 @@ class LIF_Neuron(BaseNeuron):
         self.sigma = self.sigma / self.gl * sqrt(0.5 * self.gl / self.C)
         self.t = tf.Variable(0, dtype=tf.float32)
 
-    @tf.function
+    #@tf.function
     def update(self, dt, duration):
 
         self.t = self.t * 0
@@ -410,16 +410,16 @@ class Network(tf.Module):
 
 
 params_neurons = {
-    "Vreset" : -80.0,
+    "Vreset" : -90.0,
     "Vt" : -50.0,
     "gl" : 0.1,
-    "El" : -70.0,
+    "El" : -60.0,
     "C"  : 1.0,
     "sigma" : 0.3,
     "ref_dvdt" : 3.0,
     "refactory" :  3.0, # refactory for threshold
     "w_in_distr" : 1.0,  # weight of neuron in model
-    "Iext" : 1.8,
+    "Iext" : 1.1,
 
     "use_CBRD" : True,
     "N" : 400,
@@ -449,59 +449,60 @@ synapse_params = {
 }
 
 neuron_pops_1 = LIF_Neuron(params_neurons)
-params_neurons["Iext"] = 1.7
-neuron_pops_2 = LIF_Neuron(params_neurons)
+#params_neurons["Iext"] = 1.7
+# neuron_pops_2 = LIF_Neuron(params_neurons)
+#
+# synapse_params_1 = copy.deepcopy(synapse_params)
+# synapse_params_1["pre"] = neuron_pops_1
+# synapse_params_1["post"] = neuron_pops_2
+# synapse_params_1["w"] = 0.5
+# synapse1 = PlasticSynapse(synapse_params_1)
+#
+# synapse_params_2 = copy.deepcopy(synapse_params)
+# synapse_params_2["pre"] = neuron_pops_2
+# synapse_params_2["post"] = neuron_pops_1
+# synapse_params_2["w"] = 0.5
+# synapse2 = PlasticSynapse(synapse_params_2)
 
-synapse_params_1 = copy.deepcopy(synapse_params)
-synapse_params_1["pre"] = neuron_pops_1
-synapse_params_1["post"] = neuron_pops_2
-synapse_params_1["w"] = 0.5
-synapse1 = PlasticSynapse(synapse_params_1)
+#net = Network([neuron_pops_1, neuron_pops_2], [synapse1, synapse2])
+net = Network([neuron_pops_1, ], [])
 
-synapse_params_2 = copy.deepcopy(synapse_params)
-synapse_params_2["pre"] = neuron_pops_2
-synapse_params_2["post"] = neuron_pops_1
-synapse_params_2["w"] = 0.5
-synapse2 = PlasticSynapse(synapse_params_2)
+dt = 0.1 # tf.Variable(0.1, dtype=tf.float32)
+#duration = tf.Variable(0.1, dtype=tf.float32)
 
-net = Network([neuron_pops_1, neuron_pops_2], [synapse1, synapse2])
+#net.update(dt, duration)
 
-dt = tf.Variable(0.1, dtype=tf.float32)
-duration = tf.Variable(0.1, dtype=tf.float32)
-
-net.update(dt, duration)
-
-duration = tf.Variable(100, dtype=tf.float32)
-net.update(dt, duration)
+duration = 500 # tf.Variable(1000, dtype=tf.float32)
+#net.update(dt, duration)
 #timer = time.time()
 
 # net.update(dt, duration)
 #
 # duration = tf.Variable(100.0, dtype=tf.float32)
 # net.update(dt, duration)
-# with tf.GradientTape(watch_accessed_variables=False) as tape:
-#     tape.watch(synapse1.Uinc)
-#     net.update(dt, duration)
-#     grad = tape.gradient(neuron_pops_1.firing[-1], synapse1.Uinc)
-#     print(grad)
+with tf.GradientTape(watch_accessed_variables=False) as tape:
+    tape.watch(neuron_pops_1.Iext)
+    net.update(dt, duration)
+    grad = tape.gradient(neuron_pops_1.firing[-1], neuron_pops_1.Iext)
+    print(grad)
 # print(time.time() - timer)
 import numpy as np
 firing1 = neuron_pops_1.get_flow_hist()
-firing2 = neuron_pops_2.get_flow_hist()
+#firing2 = neuron_pops_2.get_flow_hist()
 
-print(firing1[-1])
-print(firing2[-1])
+# print(firing1[-1])
+# print(firing2[-1])
 # print(firing2)
 
 
-# import matplotlib.pyplot as plt
-# times = np.linspace(0, firing1.size*0.1, firing1.size)
-#
-# import matplotlib.pyplot as plt
-# plt.scatter(times, firing1, color="red", label="Pop1")
-# plt.scatter(times, firing2, color="green", label="Pop2")
-# plt.legend()
-# plt.show()
+firing1 = np.asarray( firing1 )
+times = np.linspace(0, firing1.size*0.1, firing1.size)
+
+import matplotlib.pyplot as plt
+plt.plot(times, firing1, color="red", label="Pop1")
+#plt.scatter(times, firing2, color="green", label="Pop2")
+plt.legend()
+plt.show()
 
 
 

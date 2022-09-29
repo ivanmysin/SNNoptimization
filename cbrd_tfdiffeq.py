@@ -42,10 +42,11 @@ class BaseNeuron(tf.keras.Model):
         self.V = tf.zeros(self.N, dtype=tf.float64)
         self.dts = tf.constant(params["dts"], dtype=tf.float64)
 
-        # self.Isyn = tf.zeros_like(self.V)
-        # self.gsyn = tf.zeros_like(self.V)
+        self.Isyn = tf.zeros_like(self.V)
+        self.gsyn = tf.zeros_like(self.V)
 
         self.ro_H_integral = tf.Variable(0, dtype=tf.float64)
+        self.firing = tf.Variable(0, dtype=tf.float64)
 
         self.ref_idx = tf.Variable(int(self.refactory / self.dts), dtype=tf.int32)
         self.ref_dvdt_idx = tf.Variable(int(self.ref_dvdt / self.dts), dtype=tf.int32)
@@ -109,8 +110,8 @@ class BaseNeuron(tf.keras.Model):
 
 
     def add_Isyn(self, Isyn, gsyn):
-        self.Isyn += Isyn
-        self.gsyn += gsyn
+        self.Isyn = self.Isyn + Isyn
+        self.gsyn = self.gsyn + gsyn
 
     def update(self, dt):
         return
@@ -128,25 +129,25 @@ class LIF_Neuron(BaseNeuron):
 
 
 
-    @tf.function
+    #@tf.function
     def __call__(self, t, y, gsyn=0):
         ro = y[:self.N]
         V = y[self.N:]
 
-        Isyn = gsyn * (-75 - V)
-        dVdt = (self.gl * (self.El - V) + self.Iext + Isyn) / self.C #!!!!!![self.ref_dvdt_idx: ]
-        tau_m = self.C / (self.gl + gsyn)
+        #Isyn = gsyn * (-75 - V)
+        dVdt = (self.gl * (self.El - V) + self.Iext + self.Isyn) / self.C #!!!!!![self.ref_dvdt_idx: ]
+        tau_m = self.C / (self.gl + self.gsyn)
 
-        #self.Isyn = tf.zeros_like(self.V)
-        #self.gsyn = tf.zeros_like(self.V)
+        self.Isyn = 0.0
+        self.gsyn = 0.0
         #dVdt = tf.concat([tf.zeros(self.ref_dvdt_idx, dtype=tf.float64), dVdt], axis=0)
 
         H = self.H_function(V, dVdt, tau_m, self.Vt, self.sigma)
         sourse4Pts = ro * H
-        firing = tf.math.reduce_sum(sourse4Pts)
-        #print( firing )
+        self.firing = tf.math.reduce_sum(sourse4Pts)
 
-        sourse4Pts = tf.tensor_scatter_nd_update(sourse4Pts, [[0], ], -tf.reshape(firing, [1, ]))
+
+        sourse4Pts = tf.tensor_scatter_nd_update(sourse4Pts, [[0], ], -tf.reshape(self.firing, [1, ]))
 
         dro_dt = self.update_z(ro, self.dts, sourse4Pts)
         dV_dt = self.update_z(V, self.dts, -dVdt)
@@ -170,25 +171,43 @@ class PlasticSynapse(SimlestSinapse):
     def __init__(self, params):
         super(PlasticSynapse, self).__init__(params)
 
-        self.tau_d = tf.Variable(params["tau_d"], dtype=tf.float64)
-        self.tau_r = tf.Variable(params["tau_r"], dtype=tf.float64)
-        self.tau_f = tf.Variable(params["tau_f"], dtype=tf.float64)
-        self.Uinc = tf.Variable(params["Uinc"], dtype=tf.float64)
+        tau_ds = []
+        tau_rs = []
+        tau_fs = []
+        Uincs = []
+        gbarSs = []
+        Erevs = []
 
-        self.gbarS = tf.Variable(params["gbarS"], dtype=tf.float64)
-        self.Erev = tf.Variable(params["Erev"], dtype=tf.float64)
+        for p in params:
+            tau_ds.append(p["tau_d"])
+            tau_rs.append(p["tau_r"])
+            tau_fs.append(p["tau_f"])
+            Uincs.append(p["Uinc"])
+            gbarSs.append(p["gbarSs"])
+            Erevs.append(p["Erev"])
 
-        if self.tau_d != self.tau_r:
-            self.tau1r = self.tau_d / (self.tau_d - self.tau_r)
-        else:
-            self.tau1r = 1e-13
+        self.tau_d = tf.Variable(tau_ds, dtype=tf.float64)
+        self.tau_r = tf.Variable(tau_rs, dtype=tf.float64)
+        self.tau_f = tf.Variable(tau_fs, dtype=tf.float64)
+        self.Uinc = tf.Variable(Uincs, dtype=tf.float64)
+
+        self.gbarS = tf.Variable(gbarSs, dtype=tf.float64)
+        self.Erev = tf.Variable(Erevs, dtype=tf.float64)
+
+        self.tau1r = tf.where(self.tau_d != self.tau_r,  self.tau_d / (self.tau_d - self.tau_r), 1e-13)
+
+        self.end_idx = len(params)
+        # if self.tau_d != self.tau_r:
+        #     self.tau1r = self.tau_d / (self.tau_d - self.tau_r)
+        # else:
+        #     self.tau1r = 1e-13
 
 
     def __call__(self, t, y, SRpre=0):
 
-        X = y[0]
-        Y = y[1]
-        U = y[2]
+        X = y[0::3]
+        Y = y[1::3]
+        U = y[2::3]
 
         #y_ = self.y * exp(-dt / self.tau_d)
         dYdt = -Y / self.tau_d + U * X * SRpre
@@ -204,9 +223,6 @@ class PlasticSynapse(SimlestSinapse):
         # #self.x = x_ - self.u * x_ * SRpre
         # self.x.assign(x_ - self.u * x_ * SRpre, read_value=False)
         #
-        # gsyn = self.gbarS * self.w * self.y
-        # Isyn = gsyn * (self.post.getV() - self.Erev)
-        # self.post.add_Isyn(-Isyn, gsyn)
         dy_dt = tf.stack([dXdt, dYdt, dUdt])
 
         return dy_dt
@@ -218,26 +234,28 @@ class Network(tf.keras.Model):
 
         self.synapses = []
         params_synapses = params["params_synapses"]
-        for idx, param_synapse in enumerate(params_synapses):
-            Syn = PlasticSynapse(param_synapse)
-            Syn.start_idx = idx * 3 # 3 - число динамических переменных для синапса
-            Syn.end_idx = Syn.start_idx + 3
-            self.synapses.append(Syn)
+        Syn = PlasticSynapse(params_synapses)
+        self.synapses.append(Syn)
+        # for idx, param_synapse in enumerate(params_synapses):
+        #     Syn = PlasticSynapse(param_synapse)
+        #     Syn.start_idx = idx * 3 # 3 - число динамических переменных для синапса
+        #     Syn.end_idx = Syn.start_idx + 3
+        #     self.synapses.append(Syn)
 
         start_idx4_neurons = 3 * len(self.synapses)
         params_neurons = params["params_neurons"]
         self.neurons = []
+
+        ro_0_indexes = []
         for idx, param_neuron in enumerate(params_neurons):
             Pop = LIF_Neuron(param_neuron)
-            Pop.start_idx = start_idx4_neurons + idx * 2 * Pop.N
-            Pop.end_idx = Pop.start_idx + 2*Pop.N
-
-            for syn in self.synapses:
-                if syn.post == idx:
-                    Pop.input_index = syn.start_idx + 1
+            start_idx = start_idx4_neurons + idx * 2 * Pop.N
+            Pop.start_idx = start_idx
+            Pop.end_idx = start_idx + 2*Pop.N
+            ro_0_indexes.append(start_idx)
             self.neurons.append(Pop)
 
-            #print( start_idx4_neurons + idx * 2 * Pop.N, Pop.start_idx + 2*Pop.N )
+        self.ro_0_indexes = tf.convert_to_tensor(ro_0_indexes, dtype=tf.int32)
 
 
     #@tf.function
@@ -246,7 +264,7 @@ class Network(tf.keras.Model):
 
         for synapse in self.synapses:
             y4syn = y[synapse.start_idx:synapse.end_idx]
-            SRpre = y[ self.neurons[synapse.pre].start_idx ]
+            SRpre = synapse.pre.firing
 
             dy_dt.append(synapse(t, y4syn, SRpre=SRpre))
 

@@ -266,7 +266,7 @@ class Network(tf.keras.Model):
 
 
 
-    @tf.function
+    #@tf.function
     def __call__(self, t, y):
         dy_dt = []
 
@@ -278,16 +278,21 @@ class Network(tf.keras.Model):
             dsyn_dt = tf.reshape(dsyn_dt, shape=(-1, ))
             dy_dt.append(dsyn_dt)
 
+
         for neuron_idx, neuron in enumerate(self.neurons):
             y4neuron = y[ neuron.start_idx:neuron.end_idx ]
 
             #for synapse in self.synapses:  ### !!!!!!!!!!!
             synapse = self.synapses[0]
-            gsyn_idx = tf.where(synapse.post_indxes == neuron_idx)
 
-            gsyn = synapse.W * synapse.gbarS * tf.reshape(tf.gather(y, gsyn_idx), shape=(-1, 1))  #y[gsyn_idx]
+            Y4syn = y4syn[1::3]
+            gsyn_tmp = tf.where(synapse.post_indxes == neuron_idx, Y4syn, 0.0)
+
+            gsyn = synapse.W * synapse.gbarS * gsyn_tmp
             Erev = tf.reshape(synapse.Erev, shape=(-1, 1))
+            #gsyn = tf.reshape(gsyn, shape=(-1, 1))
 
+            #print(gsyn.numpy())
             dneur_dt = neuron(t, y4neuron, gsyn=gsyn, Erev=Erev)
             dy_dt.append( dneur_dt )
 
@@ -316,8 +321,8 @@ def main():
         "N" : 400,
         "dts" : 0.5
     }
-    synapse_params = {
-        "w" : 1.0,
+    synapse_params1 = {
+        "w" : 0.6,
         "pre" : 0, # None,
         "post": 1, # None,
         "tau_f" : 12.0,  # ms
@@ -327,14 +332,26 @@ def main():
         "gbarS" : 0.001,
         "Erev": -75.0,
     }
+
+    synapse_params2 = {
+        "w" : 0.5,
+        "pre" : 1, # None,
+        "post": 0, # None,
+        "tau_f" : 12.0,  # ms
+        "tau_r" : 750.0, # 1912.0, #  ms   # Synaptic depression rate
+        "tau_d" : 2.8, #
+        "Uinc"  : 0.6, # 0.153,
+        "gbarS" : 0.001,
+        "Erev": -75.0,
+    }
     params_net = {
         "params_neurons" : [params_neurons, params_neurons],
-        "params_synapses" : [synapse_params, ]
+        "params_synapses" : [synapse_params1, synapse_params2]
     }
 
 
 
-    t = tf.range(0.0, 250.0, 0.1, dtype=tf.float64) #tf.Variable(0, dtype=tf.float64)
+    t = tf.range(0.0, 800.0, 0.1, dtype=tf.float64) #tf.Variable(0, dtype=tf.float64)
     V = tf.zeros(400, dtype=tf.float64) - 90
     ro = tf.zeros(400, dtype=tf.float64)
     ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[399, ]], [1 / 0.5, ]))
@@ -345,17 +362,17 @@ def main():
 
     net = Network(params_net)
 
-    with tf.GradientTape() as tape:
-        tape.watch(net.neurons[0].Iext)
-        solution = odeint_adjoint(net, y0, t, method="euler")
-        grad = tape.gradient(solution[-1, 0], net.neurons[0].Iext)
-
-    print(grad)
+    solution = odeint_adjoint(net, y0, t, method="euler")
+    # with tf.GradientTape() as tape:
+    #     tape.watch(net.neurons[0].Iext)
+    #     solution = odeint_adjoint(net, y0, t, method="euler")
+    #     grad = tape.gradient(solution[-1, 0], net.neurons[0].Iext)
+    #
+    # print(grad)
     #np.savetxt("test.txt", solution.numpy(), fmt='%.2f', delimiter='\t')
     #print(solution.numpy())
     # Pop = LIF_Neuron(params_neurons)
-    #
-    #
+
     # V = tf.zeros(400, dtype=tf.float64) - 90
     # ro = tf.zeros(400, dtype=tf.float64)
     # ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[399, ]], [1 / 0.5, ]))

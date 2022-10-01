@@ -40,7 +40,7 @@ class BaseNeuron(tf.keras.Model):
         self.end_idx = 2 * self.N
 
         self.V = tf.zeros(self.N, dtype=tf.float64)
-        self.gl = tf.zeros_like(V) + params["gl"]
+        self.gl = tf.zeros_like(self.V) + params["gl"]
         self.dts = tf.constant(params["dts"], dtype=tf.float64)
 
 
@@ -202,28 +202,34 @@ class PlasticSynapse(SimlestSinapse):
 
         self.tau1r = tf.where(self.tau_d != self.tau_r,  self.tau_d / (self.tau_d - self.tau_r), 1e-13)
 
+        self.dt = 0.1 # !!!!!
+
+    @tf.function
     def __call__(self, t, y, SRpre=0):
 
         X = y[0::3]
         Y = y[1::3]
         U = y[2::3]
 
-        #y_ = self.y * exp(-dt / self.tau_d)
-        dYdt = -Y / self.tau_d + U * X * SRpre
-        #x_ = 1 + (self.x - 1 + self.tau1r * self.y) * exp(-dt / self.tau_r) - self.tau1r * y_
-        # dXdt  = 1 + (X - 1 + self.tau1r * Y) / self.tau_r - self.tau1r * Y - U * X * SRpre  # y_
-        dXdt  = (1 - X - Y) / self.tau_r + U * X * SRpre
-        #1 + (X - 1 + self.tau1r * Y) / self.tau_r - self.tau1r * Y - U * X * SRpre  # y_
+        y_ = Y * exp(-self.dt / self.tau_d)
 
-        dUdt = -U / self.tau_f + self.Uinc * (1 - U) * SRpre
-        # u_ = self.u * exp(-dt / self.tau_f)
-        # self.u = u_ + self.Uinc * (1 - u_) * SRpre
-        # self.u.assign(u_ + self.Uinc * (1 - u_) * SRpre,  read_value=False)
-        # #self.y = y_ + self.u * x_ * SRpre
-        # self.y.assign(y_ + self.u * x_ * SRpre, read_value=False)
-        # #self.x = x_ - self.u * x_ * SRpre
-        # self.x.assign(x_ - self.u * x_ * SRpre, read_value=False)
-        #
+        x_ = 1 + (X - 1 + self.tau1r * Y) * exp(-self.dt / self.tau_r) - self.tau1r * Y
+
+        u_ = U * exp(-self.dt / self.tau_f)
+        u0 = u_ + self.Uinc * (1 - u_) * SRpre
+        y0 = y_ + u0 * x_ * SRpre
+        x0 = x_ - u0 * x_ * SRpre
+
+        dXdt = (x0 - X) / self.dt
+        dYdt = (y0 - Y) / self.dt
+        dUdt = (u0 - U) / self.dt
+
+
+        # rs = U * X * SRpre
+        # dYdt = -Y / self.tau_d + rs
+        # dXdt = 0.1 - (X - 1 + self.tau1r * Y) / self.tau_r - 0.1 * self.tau1r * Y - rs
+        # dUdt = -U / self.tau_f + self.Uinc * (1 - U) * SRpre
+
         dy_dt = tf.stack([dXdt, dYdt, dUdt])
 
         return dy_dt
@@ -290,97 +296,101 @@ class Network(tf.keras.Model):
 
 
 
-
-
-
 ##########################################
-params_neurons = {
-    "Vreset" : -90.0,
-    "Vt" : -50.0,
-    "gl" : 0.1,
-    "El" : -60.0,
-    "C"  : 1.0,
-    "sigma" : 0.3,
-    "ref_dvdt" : 3.0,
-    "refactory" :  3.0, # refactory for threshold
-    "w_in_distr" : 1.0,  # weight of neuron in model
-    "Iext" : 1.1,
-
-    "use_CBRD" : True,
-    "N" : 400,
-    "dts" : 0.5
-}
-synapse_params = {
-    "w" : 1.0,
-    "pre" : 0, # None,
-    "post": 1, # None,
-    "tau_f" : 12.0,  # ms
-    "tau_r" : 750.0, # 1912.0, #  ms   # Synaptic depression rate
-    "tau_d" : 2.8, #
-    "Uinc"  : 0.6, # 0.153,
-    "gbarS" : 0.001,
-    "Erev": -75.0,
-}
-params_net = {
-    "params_neurons" : [params_neurons, params_neurons],
-    "params_synapses" : [synapse_params, ]
-}
+def main():
 
 
+    params_neurons = {
+        "Vreset" : -90.0,
+        "Vt" : -50.0,
+        "gl" : 0.1,
+        "El" : -60.0,
+        "C"  : 1.0,
+        "sigma" : 0.3,
+        "ref_dvdt" : 3.0,
+        "refactory" :  3.0, # refactory for threshold
+        "w_in_distr" : 1.0,  # weight of neuron in model
+        "Iext" : 1.1,
 
-t = tf.range(0.0, 50.0, 0.1, dtype=tf.float64) #tf.Variable(0, dtype=tf.float64)
-V = tf.zeros(400, dtype=tf.float64) - 90
-ro = tf.zeros(400, dtype=tf.float64)
-ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[399, ]], [1 / 0.5, ]))
-# y0 = tf.concat([ro, V, ro, V], axis=0)
-#dydt = net(t, y0)
-y0syn = tf.Variable([1.0, 0.0, 0.0], dtype=tf.float64)
-y0 = tf.concat([y0syn, ro, V, ro, V], axis=0)
+        "use_CBRD" : True,
+        "N" : 400,
+        "dts" : 0.5
+    }
+    synapse_params = {
+        "w" : 1.0,
+        "pre" : 0, # None,
+        "post": 1, # None,
+        "tau_f" : 12.0,  # ms
+        "tau_r" : 750.0, # 1912.0, #  ms   # Synaptic depression rate
+        "tau_d" : 2.8, #
+        "Uinc"  : 0.6, # 0.153,
+        "gbarS" : 0.001,
+        "Erev": -75.0,
+    }
+    params_net = {
+        "params_neurons" : [params_neurons, params_neurons],
+        "params_synapses" : [synapse_params, ]
+    }
 
-net = Network(params_net)
 
-with tf.GradientTape() as tape:
-    tape.watch(net.neurons[0].Iext)
-    solution = odeint_adjoint(net, y0, t, method="euler")
-    grad = tape.gradient(solution[-1, 0], net.neurons[0].Iext)
 
-print(grad)
-#np.savetxt("test.txt", solution.numpy(), fmt='%.2f', delimiter='\t')
-#print(solution.numpy())
-# Pop = LIF_Neuron(params_neurons)
-#
-#
-# V = tf.zeros(400, dtype=tf.float64) - 90
-# ro = tf.zeros(400, dtype=tf.float64)
-# ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[399, ]], [1 / 0.5, ]))
-# y0 = tf.concat([ro, V], axis=0)
-# # dydt = Pop.update(t, y)
-# # t = tf.Variable(0, dtype=tf.float64)
-# t = tf.range(0.0, 500.0, 0.1, dtype=tf.float64)
-#
-# #solution = odeint(Pop.update, y0, t, method="euler")
-# # odeint_adjoint(func, y0, t, rtol=1e-6, atol=1e-12, method=None, options=None, adjoint_method=None, adjoint_rtol=None,
-# #                    adjoint_atol=None, adjoint_options=None)
-#
-# with tf.GradientTape() as tape:
-#     tape.watch(Pop.Iext)
-#     #sol = odeint_adjoint(Pop, y0, t, method="euler")
-#     sol = odeint(Pop, y0, t, method="euler")
-#
-#     grad = tape.gradient(sol[-1, 0], Pop.Iext)
-#
-# print(grad)
-# solution = sol
-fig, axes = plt.subplots(nrows=3)
-# t = t.numpy()
-# solution = solution.numpy()
-# #print(solution[:, -1])
+    t = tf.range(0.0, 250.0, 0.1, dtype=tf.float64) #tf.Variable(0, dtype=tf.float64)
+    V = tf.zeros(400, dtype=tf.float64) - 90
+    ro = tf.zeros(400, dtype=tf.float64)
+    ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[399, ]], [1 / 0.5, ]))
+    # y0 = tf.concat([ro, V, ro, V], axis=0)
+    #dydt = net(t, y0)
+    y0syn = tf.Variable([1.0, 0.0, 0.0], dtype=tf.float64)
+    y0 = tf.concat([y0syn, ro, V, ro, V], axis=0)
 
-firing1 = solution[:, 3]
-firing2 = solution[:, 803]
-gsyn =  solution[:, 1]
-# Vm = solution[:, -1]
-axes[0].plot(t, firing1)
-axes[1].plot(t, firing2)
-axes[2].plot(t, gsyn)
-plt.show()
+    net = Network(params_net)
+
+    with tf.GradientTape() as tape:
+        tape.watch(net.neurons[0].Iext)
+        solution = odeint_adjoint(net, y0, t, method="euler")
+        grad = tape.gradient(solution[-1, 0], net.neurons[0].Iext)
+
+    print(grad)
+    #np.savetxt("test.txt", solution.numpy(), fmt='%.2f', delimiter='\t')
+    #print(solution.numpy())
+    # Pop = LIF_Neuron(params_neurons)
+    #
+    #
+    # V = tf.zeros(400, dtype=tf.float64) - 90
+    # ro = tf.zeros(400, dtype=tf.float64)
+    # ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[399, ]], [1 / 0.5, ]))
+    # y0 = tf.concat([ro, V], axis=0)
+    # # dydt = Pop.update(t, y)
+    # # t = tf.Variable(0, dtype=tf.float64)
+    # t = tf.range(0.0, 500.0, 0.1, dtype=tf.float64)
+    #
+    # #solution = odeint(Pop.update, y0, t, method="euler")
+    # # odeint_adjoint(func, y0, t, rtol=1e-6, atol=1e-12, method=None, options=None, adjoint_method=None, adjoint_rtol=None,
+    # #                    adjoint_atol=None, adjoint_options=None)
+    #
+    # with tf.GradientTape() as tape:
+    #     tape.watch(Pop.Iext)
+    #     #sol = odeint_adjoint(Pop, y0, t, method="euler")
+    #     sol = odeint(Pop, y0, t, method="euler")
+    #
+    #     grad = tape.gradient(sol[-1, 0], Pop.Iext)
+    #
+    # print(grad)
+    # solution = sol
+    fig, axes = plt.subplots(nrows=3)
+    # t = t.numpy()
+    # solution = solution.numpy()
+    # #print(solution[:, -1])
+
+    firing1 = solution[:, 3]
+    firing2 = solution[:, 803]
+    gsyn =  solution[:, 1]
+    # Vm = solution[:, -1]
+    axes[0].plot(t, firing1)
+    axes[1].plot(t, firing2)
+    axes[2].plot(t, gsyn)
+    plt.show()
+
+
+if __name__ == '__main__':
+    main()

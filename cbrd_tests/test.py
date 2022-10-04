@@ -15,9 +15,13 @@ import matplotlib.pyplot as plt
 
 # print(V)
 # print(Vsl)
-a = 0.0
-V = tf.transpose(a)
+# a = 0.0
+# V = tf.transpose(a)
+#
+# print(V)
 
-print(V)
+t = 0.1*tf.range(0.0, 500.0, dtype=tf.float64)
+
+print(t.numpy())
 
 

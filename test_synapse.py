@@ -17,9 +17,17 @@ synapse_params = {
 }
 
 
-synapse = ctfeq.PlasticSynapse([synapse_params, ])
-y = tf.Variable([1.0, 0.0, 0.0], dtype=tf.float64)
+synapse = ctfeq.PlasticSynapse([synapse_params, synapse_params])
+y = tf.Variable([1.0, 0.5, 0.0, 1.0, 0.5, 0.0], dtype=tf.float64)
+t = tf.Variable(0, dtype=tf.float64)
+SRpre = tf.Variable([0.5, 0.5], dtype=tf.float64)
+dydt = synapse(t, y, SRpre=SRpre)
+print(dydt)
+dydt = tf.reshape(dydt, shape=(-1, ))
+print(dydt)
 
+
+"""
 dt = 0.1
 duration = 200.0
 nsteps = int(duration / dt)
@@ -38,14 +46,16 @@ for idx in range(nsteps):
     SRpre = tf.Variable( SRpres[idx] )
     dydt = synapse(t[idx], y, SRpre=SRpre)
 
-    y.assign_add(dt * tf.reshape(dydt, shape=(3, )))
+    y.assign_add(dt * tf.reshape(dydt, shape=(6, )))
     y_hist.append(y.numpy())
 
 y_hist = np.asarray(y_hist)
 
 #plt.plot(t, y_hist[:, 0], label="X")
 plt.plot(t, y_hist[:, 1], label="Y")
+plt.plot(t, y_hist[:, 4], label="Y")
 #plt.plot(t, y_hist[:, 2], label="U")
 # plt.plot(t, SRpres, label="SRpres")
 plt.legend(loc="upper left")
 plt.show()
+"""

@@ -5,6 +5,7 @@ from tfdiffeq import odeint, odeint_adjoint
 import matplotlib.pyplot as plt
 
 erf = tf.math.erf
+bessel_i0 = tf.math.bessel_i0
 sqrt = tf.math.sqrt
 exp = tf.math.exp
 cos = tf.math.cos
@@ -16,7 +17,7 @@ logical_not = tf.math.logical_not
 
 SQRT_FROM_2 = np.sqrt(2)
 SQRT_FROM_2_PI = 0.7978845608028654
-PI = tf.math.pi
+PI = np.pi
 
 class BaseNeuron(tf.keras.Model):
 
@@ -247,7 +248,7 @@ class VonMissesGenerators(tf.Module):
         mean_spike_rates = []
         for p in params:
             Rs.append(p["R"])
-            omegas.append( p["omegas"] )
+            omegas.append( p["freq"] )
             phases.append( p["phase"] )
             mean_spike_rates.append(p["mean_spike_rate"] )
 
@@ -258,10 +259,11 @@ class VonMissesGenerators(tf.Module):
         R = tf.constant(Rs, dtype=tf.float64)
         self.kappa = self.r2kappa(R)
 
-        self.mult4time = 2 * PI * self.omega * 0.001
-        self.normalizator = 1
+        self.mult4time = tf.constant( 2 * PI * self.omega * 0.001, dtype=tf.float64)
 
-        #I0 = bessel(kappa)
+        I0 = bessel_i0(self.kappa)
+        self.normalizator = self.mean_spike_rate / I0 * dt * 0.001
+
 
 
     def r2kappa(self, R):
@@ -317,13 +319,28 @@ class Network(tf.keras.Model):
 
         self.ro_0_indexes = tf.convert_to_tensor(ro_0_indexes, dtype=tf.int32)
 
+        self.generators = []
+        generator = VonMissesGenerators(params["params_generators"])
+
+        self.generators.append(generator)
 
 
-    @tf.function
+
+    @tf.function(
+    input_signature=[tf.TensorSpec(shape=(), dtype=tf.float64), tf.TensorSpec(shape=(None, ), dtype=tf.float64)])
     def __call__(self, t, y):
+        t = tf.cast(t, dtype=tf.float64)
         dy_dt = []
+        neurons_firings = tf.reshape( tf.gather(y, self.ro_0_indexes), shape=(-1, ))
 
-        firings = tf.reshape( tf.gather(y, self.ro_0_indexes), shape=(-1, ))
+        all_firings = [neurons_firings, ]
+        for generator in self.generators:
+            artifitial_firing = generator(t)
+            #firings = tf.concat(firings, artifitial_firing, axis=0)
+            all_firings.append(artifitial_firing)
+
+        firings = tf.concat(all_firings, axis=0)
+
         for synapse in self.synapses:
             y4syn = y[synapse.start_idx:synapse.end_idx]
             SRpre = tf.reshape(tf.gather(firings, synapse.pre_indxes) , shape=(-1, ))
@@ -355,7 +372,24 @@ class Network(tf.keras.Model):
 def main():
 
 
-    params_neurons = {
+    params_neurons1 = {
+        "Vreset" : -90.0,
+        "Vt" : -50.0,
+        "gl" : 0.1,
+        "El" : -60.0,
+        "C"  : 1.0,
+        "sigma" : 0.3,
+        "ref_dvdt" : 3.0,
+        "refactory" :  3.0, # refactory for threshold
+        "w_in_distr" : 1.0,  # weight of neuron in model
+        "Iext" : 0.1,
+
+        "use_CBRD" : True,
+        "N" : 400,
+        "dts" : 0.5
+    }
+
+    params_neurons2 = {
         "Vreset" : -90.0,
         "Vt" : -50.0,
         "gl" : 0.1,
@@ -371,6 +405,7 @@ def main():
         "N" : 400,
         "dts" : 0.5
     }
+
     synapse_params1 = {
         "w" : 1.6,
         "pre" : 0, # None,
@@ -394,9 +429,31 @@ def main():
         "gbarS" : 1.0,
         "Erev": -75.0,
     }
+
+    synapse_params3 = {
+        "w" : 10.0,
+        "pre" : 2, # None,
+        "post": 0, # None,
+        "tau_f" : 12.0,  # ms
+        "tau_r" : 912.0, #  ms   # Synaptic depression rate
+        "tau_d" : 2.8, #
+        "Uinc"  : 0.153,
+        "gbarS" : 1.0,
+        "Erev": 0.0,
+    }
+
+    generator1 = {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 18,
+        "phase": 0,
+    }
+
+
     params_net = {
-        "params_neurons" : [params_neurons, params_neurons],
-        "params_synapses" : [synapse_params1, synapse_params2]
+        "params_neurons" : [params_neurons1, params_neurons2],
+        "params_synapses" : [synapse_params1, synapse_params2, synapse_params3],
+        "params_generators" : [generator1, ],
     }
 
 
@@ -407,11 +464,11 @@ def main():
     ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[399, ]], [1 / 0.5, ]))
     # y0 = tf.concat([ro, V, ro, V], axis=0)
     #dydt = net(t, y0)
-    y0syn = tf.Variable([1.0, 1.0, 0.0, 0.0, 0.0, 0.0], dtype=tf.float64)
-    y0 = tf.concat([y0syn, ro, V, ro, V], axis=0)
+    y0syn = tf.Variable([1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=tf.float64)
+    y0 = tf.cast( tf.concat([y0syn, ro, V, ro, V], axis=0), dtype=tf.float64)
 
     net = Network(params_net)
-    print(net.trainable_variables)
+    #print(net.trainable_variables)
 
 
     solution = odeint_adjoint(net, y0, t, method="euler" )
@@ -436,7 +493,7 @@ def main():
     # #solution = odeint(Pop.update, y0, t, method="euler")
     # # odeint_adjoint(func, y0, t, rtol=1e-6, atol=1e-12, method=None, options=None, adjoint_method=None, adjoint_rtol=None,
     # #                    adjoint_atol=None, adjoint_options=None)
-    #
+
     # with tf.GradientTape() as tape:
     #     tape.watch(Pop.Iext)
     #     #sol = odeint_adjoint(Pop, y0, t, method="euler")
@@ -446,20 +503,22 @@ def main():
     #
     # print(grad)
     # solution = sol
-    fig, axes = plt.subplots(nrows=4)
+    fig, axes = plt.subplots(nrows=4, sharex=True)
     # t = t.numpy()
     # solution = solution.numpy()
     # #print(solution[:, -1])
 
-    firing1 = solution[:, 6]
-    firing2 = solution[:, 806]
-    gsyn1 =  solution[:, 2]
-    gsyn2 =  solution[:, 3]
+    firing1 = solution[:, 9]
+    firing2 = solution[:, 809]
+    gsyn1 = solution[:, 3]
+    gsyn2 = solution[:, 4]
+    gsyn3 = solution[:, 5]
     # Vm = solution[:, -1]
 
     axes[0].plot(t, firing1)
     axes[1].plot(t, firing2)
     axes[2].plot(t, gsyn1)
+    axes[2].plot(t, gsyn3)
     axes[3].plot(t, gsyn2)
     plt.show()
 

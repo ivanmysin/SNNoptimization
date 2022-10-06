@@ -292,7 +292,8 @@ class VonMissesGenerators(tf.Module):
 class Network(tf.keras.Model):
 
     def __init__(self, params, dt=0.1):
-        super(Network, self).__init__(name="Network")
+        super(Network, self).__init__(name="Network", dtype=tf.float64)
+
 
         self.synapses = []
         params_synapses = params["params_synapses"]
@@ -468,8 +469,6 @@ def main():
     y0 = tf.cast( tf.concat([y0syn, ro, V, ro, V], axis=0), dtype=tf.float64)
 
     net = Network(params_net)
-    #print(net.trainable_variables)
-
 
     solution = odeint_adjoint(net, y0, t, method="euler" )
     # with tf.GradientTape() as tape:

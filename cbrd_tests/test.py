@@ -4,24 +4,15 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 #from tfdiffeq import odeint
 
+V = tf.random.uniform(shape=[10, 8], dtype=tf.float64)
+indices = tf.convert_to_tensor([0, 3, 5], dtype=tf.int32)
 
-#
-# print(Isyn)
+Vsl = tf.gather(V, indices, axis=1)
 
-# V = tf.random.uniform(shape=[10, ], dtype=tf.float64)
-# #indices = tf.convert_to_tensor([0, 3, 5], dtype=tf.int32)
-# indices = tf.where(V > 0.5) # tf.convert_to_tensor([0, 3, 5], dtype=tf.int32)
-# Vsl = tf.gather(V, indices)
+print(V.numpy() )
 
-# print(V)
-# print(Vsl)
-# a = 0.0
-# V = tf.transpose(a)
-#
-# print(V)
+print("#############################################")
+print(Vsl.numpy() )
 
-t = 0.1*tf.range(0.0, 500.0, dtype=tf.float64)
-
-print(t.numpy())
 
 

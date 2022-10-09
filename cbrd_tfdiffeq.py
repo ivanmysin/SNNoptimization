@@ -175,15 +175,15 @@ class PlasticSynapse(SimlestSinapse):
             pre_indxes.append(p["pre"])
             post_indxes.append(p["post"])
 
-        self.tau_d = tf.Variable(tau_ds, dtype=tf.float64, name='tau_d')
-        self.tau_r = tf.Variable(tau_rs, dtype=tf.float64, name='tau_r')
-        self.tau_f = tf.Variable(tau_fs, dtype=tf.float64, name='tau_f')
-        self.Uinc = tf.Variable(Uincs, dtype=tf.float64, name='Uinc')
+        self.tau_d = tf.Variable(tau_ds, dtype=tf.float64, name='tau_d', trainable=True)
+        self.tau_r = tf.Variable(tau_rs, dtype=tf.float64, name='tau_r', trainable=True)
+        self.tau_f = tf.Variable(tau_fs, dtype=tf.float64, name='tau_f', trainable=True)
+        self.Uinc = tf.Variable(Uincs, dtype=tf.float64, name='Uinc', trainable=True)
         self.tau1r = tf.where(self.tau_d != self.tau_r,  self.tau_d / (self.tau_d - self.tau_r), 1e-13)
 
         self.gbarS = tf.Variable(gbarSs, dtype=tf.float64, trainable=False)
         self.Erev = tf.Variable(Erevs, dtype=tf.float64, trainable=False)
-        self.W = tf.Variable(Ws, dtype=tf.float64, name='Wplasticsyns')
+        self.W = tf.Variable(Ws, dtype=tf.float64, name='Wplasticsyns', trainable=True)
 
         self.pre_indxes = tf.convert_to_tensor(pre_indxes, dtype=tf.int32)
         self.post_indxes = tf.convert_to_tensor(post_indxes, dtype=tf.int32)
@@ -262,7 +262,7 @@ class VonMissesGenerators(tf.Module):
         self.mult4time = tf.constant( 2 * PI * self.omega * 0.001, dtype=tf.float64)
 
         I0 = bessel_i0(self.kappa)
-        self.normalizator = self.mean_spike_rate / I0 * dt * 0.001
+        self.normalizator = self.mean_spike_rate / I0 * 0.001
 
 
 
@@ -285,7 +285,7 @@ class VonMissesGenerators(tf.Module):
         return kappa
 
     def __call__(self, t):
-        firings = self.normalizator * exp(self.kappa * cos(self.mult4time * t + self.phase) )
+        firings = self.normalizator * exp(self.kappa * cos(self.mult4time * t - self.phase) )
         return firings
 
 

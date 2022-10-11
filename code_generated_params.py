@@ -1,7 +1,7 @@
 ca3pyr2aac = {
     "w": 0.01,
-    "pre": 7,
-    "post": 4,
+    "pre_name": "ca3pyr",
+    "post_name": "aac",
     "tau_f": 31.42111393,
     "tau_r": 388.4010873,
     "tau_d": 5.516572108,
@@ -11,8 +11,8 @@ ca3pyr2aac = {
 }
 ca1pyr2aac = {
     "w": 0.01,
-    "pre": 8,
-    "post": 4,
+    "pre_name": "ca1pyr",
+    "post_name": "aac",
     "tau_f": 68.64285237,
     "tau_r": 295.4773937,
     "tau_d": 3.28320237,
@@ -22,8 +22,8 @@ ca1pyr2aac = {
 }
 ec32aac = {
     "w": 0.01,
-    "pre": 9,
-    "post": 4,
+    "pre_name": "ec3",
+    "post_name": "aac",
     "tau_f": 42.9199623,
     "tau_r": 331.4994604,
     "tau_d": 3.65913222,
@@ -33,8 +33,8 @@ ec32aac = {
 }
 pvbas2aac = {
     "w": 0.001,
-    "pre": 0,
-    "post": 4,
+    "pre_name": "pvbas",
+    "post_name": "aac",
     "tau_f": 17.45934692,
     "tau_r": 596.691056,
     "tau_d": 4.000930559,
@@ -44,8 +44,8 @@ pvbas2aac = {
 }
 cckbas2aac = {
     "w": 0.001,
-    "pre": 2,
-    "post": 4,
+    "pre_name": "cckbas",
+    "post_name": "aac",
     "tau_f": 67.94156049,
     "tau_r": 663.3815975,
     "tau_d": 7.436965993,
@@ -55,8 +55,8 @@ cckbas2aac = {
 }
 ngf2aac = {
     "w": 0.001,
-    "pre": 6,
-    "post": 4,
+    "pre_name": "ngf",
+    "post_name": "aac",
     "tau_f": 23.42714963,
     "tau_r": 546.7347205,
     "tau_d": 6.664521618,
@@ -66,8 +66,8 @@ ngf2aac = {
 }
 olm2aac = {
     "w": 0.001,
-    "pre": 1,
-    "post": 4,
+    "pre_name": "olm",
+    "post_name": "aac",
     "tau_f": 19.38979865,
     "tau_r": 602.3297343,
     "tau_d": 5.828232848,
@@ -77,8 +77,8 @@ olm2aac = {
 }
 bis2aac = {
     "w": 0.001,
-    "pre": 3,
-    "post": 4,
+    "pre_name": "bis",
+    "post_name": "aac",
     "tau_f": 15.73374895,
     "tau_r": 738.2651761,
     "tau_d": 7.937465661,
@@ -88,8 +88,8 @@ bis2aac = {
 }
 ivy2aac = {
     "w": 0.001,
-    "pre": 5,
-    "post": 4,
+    "pre_name": "ivy",
+    "post_name": "aac",
     "tau_f": 18.27596659,
     "tau_r": 679.3194126,
     "tau_d": 6.998383806,
@@ -99,8 +99,8 @@ ivy2aac = {
 }
 ca3pyr2pvbas = {
     "w": 0.01,
-    "pre": 7,
-    "post": 0,
+    "pre_name": "ca3pyr",
+    "post_name": "pvbas",
     "tau_f": 29.69023481,
     "tau_r": 440.119068,
     "tau_d": 5.394005967,
@@ -110,8 +110,8 @@ ca3pyr2pvbas = {
 }
 ca1pyr2pvbas = {
     "w": 0.01,
-    "pre": 8,
-    "post": 0,
+    "pre_name": "ca1pyr",
+    "post_name": "pvbas",
     "tau_f": 76.85776536,
     "tau_r": 327.2596661,
     "tau_d": 3.163416515,
@@ -121,8 +121,8 @@ ca1pyr2pvbas = {
 }
 ec32pvbas = {
     "w": 0.01,
-    "pre": 9,
-    "post": 0,
+    "pre_name": "ec3",
+    "post_name": "pvbas",
     "tau_f": 38.32919213,
     "tau_r": 363.4563494,
     "tau_d": 3.914953021,
@@ -132,8 +132,8 @@ ec32pvbas = {
 }
 pvbas2pvbas = {
     "w": 0.001,
-    "pre": 0,
-    "post": 0,
+    "pre_name": "pvbas",
+    "post_name": "pvbas",
     "tau_f": 15.09543237,
     "tau_r": 635.5365307,
     "tau_d": 3.831414171,
@@ -143,8 +143,8 @@ pvbas2pvbas = {
 }
 cckbas2pvbas = {
     "w": 0.001,
-    "pre": 2,
-    "post": 0,
+    "pre_name": "cckbas",
+    "post_name": "pvbas",
     "tau_f": 53.15475426,
     "tau_r": 752.2001856,
     "tau_d": 6.961632328,
@@ -154,8 +154,8 @@ cckbas2pvbas = {
 }
 ngf2pvbas = {
     "w": 0.001,
-    "pre": 6,
-    "post": 0,
+    "pre_name": "ngf",
+    "post_name": "pvbas",
     "tau_f": 20.39924327,
     "tau_r": 598.3218367,
     "tau_d": 6.456458576,
@@ -165,8 +165,8 @@ ngf2pvbas = {
 }
 olm2pvbas = {
     "w": 0.001,
-    "pre": 1,
-    "post": 0,
+    "pre_name": "olm",
+    "post_name": "pvbas",
     "tau_f": 16.57863002,
     "tau_r": 650.1346414,
     "tau_d": 5.685709176,
@@ -176,8 +176,8 @@ olm2pvbas = {
 }
 bis2pvbas = {
     "w": 0.001,
-    "pre": 3,
-    "post": 0,
+    "pre_name": "bis",
+    "post_name": "pvbas",
     "tau_f": 12.41977701,
     "tau_r": 776.2305412,
     "tau_d": 7.451818541,
@@ -187,8 +187,8 @@ bis2pvbas = {
 }
 ivy2pvbas = {
     "w": 0.001,
-    "pre": 5,
-    "post": 0,
+    "pre_name": "ivy",
+    "post_name": "pvbas",
     "tau_f": 14.29480314,
     "tau_r": 735.7744076,
     "tau_d": 6.516360302,
@@ -198,8 +198,8 @@ ivy2pvbas = {
 }
 ca3pyr2cckbas = {
     "w": 0.01,
-    "pre": 7,
-    "post": 2,
+    "pre_name": "ca3pyr",
+    "post_name": "cckbas",
     "tau_f": 61.43867292,
     "tau_r": 330.9105197,
     "tau_d": 4.833858548,
@@ -209,8 +209,8 @@ ca3pyr2cckbas = {
 }
 ca1pyr2cckbas = {
     "w": 0.01,
-    "pre": 8,
-    "post": 2,
+    "pre_name": "ca1pyr",
+    "post_name": "cckbas",
     "tau_f": 200.0945674,
     "tau_r": 170.3265276,
     "tau_d": 2.77089926,
@@ -220,8 +220,8 @@ ca1pyr2cckbas = {
 }
 ec32cckbas = {
     "w": 0.01,
-    "pre": 9,
-    "post": 2,
+    "pre_name": "ec3",
+    "post_name": "cckbas",
     "tau_f": 97.27041139,
     "tau_r": 274.8237744,
     "tau_d": 3.484495113,
@@ -231,8 +231,8 @@ ec32cckbas = {
 }
 pvbas2cckbas = {
     "w": 0.001,
-    "pre": 0,
-    "post": 2,
+    "pre_name": "pvbas",
+    "post_name": "cckbas",
     "tau_f": 27.30034173,
     "tau_r": 576.2250426,
     "tau_d": 4.229703968,
@@ -242,8 +242,8 @@ pvbas2cckbas = {
 }
 cckbas2cckbas = {
     "w": 0.001,
-    "pre": 2,
-    "post": 2,
+    "pre_name": "cckbas",
+    "post_name": "cckbas",
     "tau_f": 89.13915001,
     "tau_r": 638.8350601,
     "tau_d": 6.672410531,
@@ -253,8 +253,8 @@ cckbas2cckbas = {
 }
 ngf2cckbas = {
     "w": 0.001,
-    "pre": 6,
-    "post": 2,
+    "pre_name": "ngf",
+    "post_name": "cckbas",
     "tau_f": 40.31598397,
     "tau_r": 500.1573243,
     "tau_d": 6.217529468,
@@ -264,8 +264,8 @@ ngf2cckbas = {
 }
 olm2cckbas = {
     "w": 0.001,
-    "pre": 1,
-    "post": 2,
+    "pre_name": "olm",
+    "post_name": "cckbas",
     "tau_f": 36.41141922,
     "tau_r": 527.6239734,
     "tau_d": 5.47406422,
@@ -275,8 +275,8 @@ olm2cckbas = {
 }
 bis2cckbas = {
     "w": 0.001,
-    "pre": 3,
-    "post": 2,
+    "pre_name": "bis",
+    "post_name": "cckbas",
     "tau_f": 40.08819019,
     "tau_r": 546.2435104,
     "tau_d": 7.996295433,
@@ -286,8 +286,8 @@ bis2cckbas = {
 }
 ivy2cckbas = {
     "w": 0.001,
-    "pre": 5,
-    "post": 2,
+    "pre_name": "ivy",
+    "post_name": "cckbas",
     "tau_f": 34.90925551,
     "tau_r": 569.0414429,
     "tau_d": 6.94357973,
@@ -297,8 +297,8 @@ ivy2cckbas = {
 }
 ec32ngf = {
     "w": 0.01,
-    "pre": 9,
-    "post": 6,
+    "pre_name": "ec3",
+    "post_name": "ngf",
     "tau_f": 50.35427898,
     "tau_r": 345.1417744,
     "tau_d": 4.255231343,
@@ -308,8 +308,8 @@ ec32ngf = {
 }
 ngf2ngf = {
     "w": 0.001,
-    "pre": 6,
-    "post": 6,
+    "pre_name": "ngf",
+    "post_name": "ngf",
     "tau_f": 25.480563,
     "tau_r": 553.4916051,
     "tau_d": 8.831768275,
@@ -319,8 +319,8 @@ ngf2ngf = {
 }
 olm2ngf = {
     "w": 0.001,
-    "pre": 1,
-    "post": 6,
+    "pre_name": "olm",
+    "post_name": "ngf",
     "tau_f": 20.57681507,
     "tau_r": 578.1117892,
     "tau_d": 6.800428696,
@@ -330,8 +330,8 @@ olm2ngf = {
 }
 ca3pyr2olm = {
     "w": 0.01,
-    "pre": 7,
-    "post": 1,
+    "pre_name": "ca3pyr",
+    "post_name": "olm",
     "tau_f": 38.22553135,
     "tau_r": 358.2571628,
     "tau_d": 5.430321889,
@@ -341,8 +341,8 @@ ca3pyr2olm = {
 }
 ca1pyr2olm = {
     "w": 0.01,
-    "pre": 8,
-    "post": 1,
+    "pre_name": "ca1pyr",
+    "post_name": "olm",
     "tau_f": 106.9783405,
     "tau_r": 202.0650489,
     "tau_d": 2.947716244,
@@ -352,8 +352,8 @@ ca1pyr2olm = {
 }
 bis2olm = {
     "w": 0.001,
-    "pre": 3,
-    "post": 1,
+    "pre_name": "bis",
+    "post_name": "olm",
     "tau_f": 17.81144768,
     "tau_r": 717.0400063,
     "tau_d": 8.372598889,
@@ -363,8 +363,8 @@ bis2olm = {
 }
 ivy2olm = {
     "w": 0.001,
-    "pre": 5,
-    "post": 1,
+    "pre_name": "ivy",
+    "post_name": "olm",
     "tau_f": 20.46870934,
     "tau_r": 669.3842837,
     "tau_d": 7.259238763,
@@ -374,8 +374,8 @@ ivy2olm = {
 }
 ca3pyr2bis = {
     "w": 0.01,
-    "pre": 7,
-    "post": 3,
+    "pre_name": "ca3pyr",
+    "post_name": "bis",
     "tau_f": 27.56437073,
     "tau_r": 369.3806703,
     "tau_d": 6.184627383,
@@ -385,8 +385,8 @@ ca3pyr2bis = {
 }
 ca1pyr2bis = {
     "w": 0.01,
-    "pre": 8,
-    "post": 3,
+    "pre_name": "ca1pyr",
+    "post_name": "bis",
     "tau_f": 45.77509046,
     "tau_r": 242.468234,
     "tau_d": 3.394198844,
@@ -396,8 +396,8 @@ ca1pyr2bis = {
 }
 pvbas2bis = {
     "w": 0.001,
-    "pre": 0,
-    "post": 3,
+    "pre_name": "pvbas",
+    "post_name": "bis",
     "tau_f": 21.4215323,
     "tau_r": 584.4912283,
     "tau_d": 5.061443542,
@@ -407,8 +407,8 @@ pvbas2bis = {
 }
 cckbas2bis = {
     "w": 0.001,
-    "pre": 2,
-    "post": 3,
+    "pre_name": "cckbas",
+    "post_name": "bis",
     "tau_f": 49.03171673,
     "tau_r": 628.2474546,
     "tau_d": 8.205527136,
@@ -418,8 +418,8 @@ cckbas2bis = {
 }
 bis2bis = {
     "w": 0.001,
-    "pre": 3,
-    "post": 3,
+    "pre_name": "bis",
+    "post_name": "bis",
     "tau_f": 14.32265778,
     "tau_r": 709.9692541,
     "tau_d": 10.17310097,
@@ -429,8 +429,8 @@ bis2bis = {
 }
 ivy2bis = {
     "w": 0.001,
-    "pre": 5,
-    "post": 3,
+    "pre_name": "ivy",
+    "post_name": "bis",
     "tau_f": 16.85933504,
     "tau_r": 640.9715027,
     "tau_d": 9.042053959,
@@ -440,8 +440,8 @@ ivy2bis = {
 }
 ca3pyr2ivy = {
     "w": 0.01,
-    "pre": 7,
-    "post": 5,
+    "pre_name": "ca3pyr",
+    "post_name": "ivy",
     "tau_f": 22.00501845,
     "tau_r": 419.0888672,
     "tau_d": 6.514490352,
@@ -451,8 +451,8 @@ ca3pyr2ivy = {
 }
 ca1pyr2ivy = {
     "w": 0.01,
-    "pre": 8,
-    "post": 5,
+    "pre_name": "ca1pyr",
+    "post_name": "ivy",
     "tau_f": 29.98390368,
     "tau_r": 294.5593265,
     "tau_d": 3.90415446,
@@ -462,8 +462,8 @@ ca1pyr2ivy = {
 }
 pvbas2ivy = {
     "w": 0.001,
-    "pre": 0,
-    "post": 5,
+    "pre_name": "pvbas",
+    "post_name": "ivy",
     "tau_f": 17.30237842,
     "tau_r": 598.4298782,
     "tau_d": 5.025261209,
@@ -473,8 +473,8 @@ pvbas2ivy = {
 }
 cckbas2ivy = {
     "w": 0.001,
-    "pre": 2,
-    "post": 5,
+    "pre_name": "cckbas",
+    "post_name": "ivy",
     "tau_f": 39.16684388,
     "tau_r": 653.4158889,
     "tau_d": 8.3616028,
@@ -484,8 +484,8 @@ cckbas2ivy = {
 }
 bis2ivy = {
     "w": 0.001,
-    "pre": 3,
-    "post": 5,
+    "pre_name": "bis",
+    "post_name": "ivy",
     "tau_f": 11.55699251,
     "tau_r": 760.0916001,
     "tau_d": 10.62000192,
@@ -495,8 +495,8 @@ bis2ivy = {
 }
 ivy2ivy = {
     "w": 0.001,
-    "pre": 5,
-    "post": 5,
+    "pre_name": "ivy",
+    "post_name": "ivy",
     "tau_f": 13.38354637,
     "tau_r": 688.7459606,
     "tau_d": 9.404598492,
@@ -507,6 +507,7 @@ ivy2ivy = {
 ########################################
 ##### block of neurons params #########
 pvbas_params = {
+    "name" : "pvbas",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -519,13 +520,16 @@ pvbas_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": 1.5707963267948966,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": 1.5707963267948966,
+    },
 }
 
 olm_params = {
+    "name" : "olm",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -538,13 +542,16 @@ olm_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": 3.14,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": 3.14,
+    },
 }
 
 cckbas_params = {
+    "name" : "cckbas",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -557,12 +564,16 @@ cckbas_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": -1.5707963267948966,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": -1.5707963267948966,
+    },
 }
+
 bis_params = {
+    "name" : "bis",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -575,13 +586,16 @@ bis_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": 3.141592653589793,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": 3.141592653589793,
+    },
 }
 
 aac_params = {
+    "name" : "aac",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -594,13 +608,16 @@ aac_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": 0.0,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": 0.0,
+    },
 }
 
 ivy_params = {
+    "name" : "ivy",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -613,13 +630,16 @@ ivy_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": -1.5707963267948966,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": -1.5707963267948966,
+    },
 }
 
 ngf_params = {
+    "name" : "ngf",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -632,15 +652,18 @@ ngf_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": 0.0,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": 0.0,
+    },
 }
 
 ##########################################
 ##### block of generators params #########
 ca3pyr_params = {
+    "name" : "ca3pyr",
     "R": 0.3,
     "freq": 5,
     "mean_spike_rate": 5,
@@ -648,6 +671,7 @@ ca3pyr_params = {
 }
 
 ca1pyr_params = {
+    "name" : "ca1pyr",
     "R": 0.2,
     "freq": 5,
     "mean_spike_rate": 5,
@@ -655,6 +679,7 @@ ca1pyr_params = {
 }
 
 ec3_params = {
+    "name" : "ec3",
     "R": 0.2,
     "freq": 5,
     "mean_spike_rate": 5,
@@ -662,9 +687,9 @@ ec3_params = {
 }
 
 ########################################
-##### block of synapses params #########
+##### block of synapses params ######### cckbas_params, bis_params, aac_params, ivy_params, ngf_params
 params_net = {
-"params_neurons" : [pvbas_params, olm_params, cckbas_params, bis_params, aac_params, ivy_params, ngf_params],
+"params_neurons" : [pvbas_params, olm_params, ],
 "params_generators" : [ca3pyr_params, ca1pyr_params, ec3_params],
 "params_synapses" : [ca3pyr2aac, ca1pyr2aac, ec32aac, pvbas2aac, cckbas2aac, ngf2aac, olm2aac, bis2aac, ivy2aac, ca3pyr2pvbas, ca1pyr2pvbas, ec32pvbas, pvbas2pvbas, cckbas2pvbas, ngf2pvbas, olm2pvbas, bis2pvbas, ivy2pvbas, ca3pyr2cckbas, ca1pyr2cckbas, ec32cckbas, pvbas2cckbas, cckbas2cckbas, ngf2cckbas, olm2cckbas, bis2cckbas, ivy2cckbas, ec32ngf, ngf2ngf, olm2ngf, ca3pyr2olm, ca1pyr2olm, bis2olm, ivy2olm, ca3pyr2bis, ca1pyr2bis, pvbas2bis, cckbas2bis, bis2bis, ivy2bis, ca3pyr2ivy, ca1pyr2ivy, pvbas2ivy, cckbas2ivy, bis2ivy, ivy2ivy, ],
 }

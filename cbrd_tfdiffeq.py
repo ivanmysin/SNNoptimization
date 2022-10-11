@@ -266,7 +266,14 @@ class VonMissesGenerators(tf.Module):
         omegas = []
         phases = []
         mean_spike_rates = []
-        for p in params:
+
+
+        for params_el in params:
+            if "target" in params_el.keys():
+                p = params_el["target"]
+            else:
+                p = params_el
+
             Rs.append(p["R"])
             omegas.append( p["freq"] )
             phases.append( p["phase"] )
@@ -282,7 +289,7 @@ class VonMissesGenerators(tf.Module):
         self.mult4time = tf.constant( 2 * PI * self.omega * 0.001, dtype=tf.float64)
 
         I0 = bessel_i0(self.kappa)
-        self.normalizator = self.mean_spike_rate / I0 * 0.001 * dt
+        self.normalizator = self.mean_spike_rate / I0 * 0.001
 
 
 
@@ -314,9 +321,10 @@ class Network(tf.keras.Model):
     def __init__(self, params, dt=0.1):
         super(Network, self).__init__(name="Network", dtype=tf.float64)
 
+        params_neurons = params["params_neurons"]
 
         self.synapses = []
-        params_synapses = params["params_synapses"]
+        params_synapses =  self._set_connections(params_neurons, params["params_generators"], params["params_synapses"])
         Syn = PlasticSynapse(params_synapses, dt=dt)
         self.synapses.append(Syn)
         # for idx, param_synapse in enumerate(params_synapses):
@@ -326,7 +334,7 @@ class Network(tf.keras.Model):
         #     self.synapses.append(Syn)
 
         start_idx4_neurons = self.synapses[-1].end_idx
-        params_neurons = params["params_neurons"]
+
         self.neurons = []
 
         ro_0_indexes = []
@@ -346,6 +354,29 @@ class Network(tf.keras.Model):
         self.generators.append(generator)
 
 
+    def _set_connections(self, neurons_params, generators_params, synapses_params):
+        neurons_names = []
+        for n_params in neurons_params:
+            neurons_names.append(n_params["name"])
+
+        for g_params in generators_params:
+            neurons_names.append(g_params["name"])
+
+        updated_params_synapses = []
+        for s_params in synapses_params:
+
+            try:
+                pre_idx = neurons_names.index( s_params["pre_name"] )
+                post_idx = neurons_names.index( s_params["post_name"] )
+            except ValueError:
+                continue
+            s_params["pre"] = pre_idx
+            s_params["post"] = post_idx
+
+            updated_params_synapses.append(s_params)
+
+
+        return updated_params_synapses
 
     @tf.function(
     input_signature=[tf.TensorSpec(shape=(), dtype=tf.float64), tf.TensorSpec(shape=(None, ), dtype=tf.float64)])

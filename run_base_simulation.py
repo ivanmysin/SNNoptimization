@@ -26,25 +26,8 @@ win4_start = 2000
 win4grad = 500
 n_loops = int((n_points_of_simulation - win4_start) / win4grad)
 
-V = tf.zeros(400, dtype=tf.float64) - 90
-ro = tf.zeros(400, dtype=tf.float64)
-ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[399, ]], [1 / 0.5, ]))
-
-simul_y0 = []
-
-# y0syn = tf.Variable([1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=tf.float64)
-X0 = tf.ones(len(params_net["params_synapses"]), dtype=tf.float64)
-R0_U0 = tf.zeros(2 * len(params_net["params_synapses"]), dtype=tf.float64)
-simul_y0.append(X0)
-simul_y0.append(R0_U0)
-
-for _ in range(len(params_net["params_neurons"])):
-    simul_y0.append(ro)
-    simul_y0.append(V)
-
-y0_main = tf.cast(tf.concat(simul_y0, axis=0), dtype=tf.float64)
-
 net = cbrd_tfdiffeq.Network(params_net)
+y0_main = net.get_y0()
 
 for number_of_simulation in range(100):
 
@@ -98,7 +81,9 @@ for number_of_simulation in range(100):
     hf.close()
     AdamOptimizer.apply_gradients( zip( grad_over_simulation, net.synapses[0].trainable_variables ))
     print("Прогон № ", (number_of_simulation + 1), ", Loss = ", loss_over_simulation.numpy())
-#print(grad_over_simulation)
+
+    break  #!!!!!!!!!!!
+
 
 
 

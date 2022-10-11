@@ -4,6 +4,7 @@ filepath = "/home/ivan/Data/hippocampome/mean_connection.txt"
 start_code = r"""########################################
 ##### block of neurons params #########
 pvbas_params = {
+    "name" : "pvbas",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -16,13 +17,16 @@ pvbas_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": 1.5707963267948966,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": 1.5707963267948966,
+    },
 }
 
 olm_params = {
+    "name" : "olm",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -35,13 +39,16 @@ olm_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": 3.14,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": 3.14,
+    },
 }
 
 cckbas_params = {
+    "name" : "cckbas",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -54,12 +61,16 @@ cckbas_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": -1.5707963267948966,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": -1.5707963267948966,
+    },
 }
+
 bis_params = {
+    "name" : "bis",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -72,13 +83,16 @@ bis_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": 3.141592653589793,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": 3.141592653589793,
+    },
 }
 
 aac_params = {
+    "name" : "aac",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -91,13 +105,16 @@ aac_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": 0.0,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": 0.0,
+    },
 }
 
 ivy_params = {
+    "name" : "ivy",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -110,13 +127,16 @@ ivy_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": -1.5707963267948966,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": -1.5707963267948966,
+    },
 }
 
 ngf_params = {
+    "name" : "ngf",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -129,15 +149,18 @@ ngf_params = {
     "N": 400,
     "dts": 0.5,
     
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": 0.0,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": 0.0,
+    },
 }
 
 ##########################################
 ##### block of generators params #########
 ca3pyr_params = {
+    "name" : "ca3pyr",
     "R": 0.3,
     "freq": 5,
     "mean_spike_rate": 5,
@@ -145,6 +168,7 @@ ca3pyr_params = {
 }
 
 ca1pyr_params = {
+    "name" : "ca1pyr",
     "R": 0.2,
     "freq": 5,
     "mean_spike_rate": 5,
@@ -152,6 +176,7 @@ ca1pyr_params = {
 }
 
 ec3_params = {
+    "name" : "ec3",
     "R": 0.2,
     "freq": 5,
     "mean_spike_rate": 5,
@@ -184,8 +209,8 @@ data = pd.read_csv(filepath, delimiter="\t")
 code_full = ""
 code_template = """{:s}2{:s} = {{
     \"w\": {Weight},
-    \"pre\": {pre:d},
-    \"post\": {post:d},
+    \"pre_name\": \"{pre}\",
+    \"post_name\": \"{post}\",
     \"tau_f\": {tau_f},
     \"tau_r\": {tau_r},
     \"tau_d\": {tau_d},
@@ -218,8 +243,8 @@ for idx in range(len(data)):
 
         code = code_template.format(neurons_names[presyncell], neurons_names[postsyncell], \
                                      Weight = Weight,\
-                                     pre = neurons_names_keys_list.index(presyncell), \
-                                     post = neurons_names_keys_list.index(postsyncell), \
+                                     pre = neurons_names[presyncell], \
+                                     post = neurons_names[postsyncell], \
                                      tau_f = data["tau_f"][idx], \
                                      tau_r = data["tau_r"][idx], \
                                      tau_d = data["tau_d"][idx], \

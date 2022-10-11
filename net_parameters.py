@@ -1,6 +1,8 @@
 ########################################
-##### block of neurons params #########
+##### block of neurons params ##########
+
 pvbas_params = {
+    "name" : "pvbas",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -13,13 +15,16 @@ pvbas_params = {
     "N": 400,
     "dts": 0.5,
 
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": 1.5707963267948966,
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": 1.5707963267948966,
+    }
 }
 
 olm_params = {
+    "name" : "olm",
     "Vreset": -90.0,
     "Vt": -50.0,
     "gl": 0.1,
@@ -32,15 +37,18 @@ olm_params = {
     "N": 400,
     "dts": 0.5,
 
-    "R": 0.3,
-    "freq": 5,
-    "mean_spike_rate": 5,
-    "phase": 3.14,
+    "target": {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 5,
+        "phase": 3.14,
+    },
 }
 
 ##########################################
 ##### block of generators params #########
 ca3pyr_params = {
+    "name" : "ca3pyr",
     "R": 0.3,
     "freq": 5,
     "mean_spike_rate": 5.0,
@@ -48,6 +56,7 @@ ca3pyr_params = {
 }
 
 ca1pyr_params = {
+    "name": "ca1pyr",
     "R": 0.2,
     "freq": 5,
     "mean_spike_rate": 5,
@@ -58,8 +67,8 @@ ca1pyr_params = {
 ##### block of synapses params #########
 ca3pyr2pvbas = {
     "w": 1.0,
-    "pre": 2,
-    "post": 0,
+    "pre_name": "ca3pyr",
+    "post_name": "pvbas",
     "tau_f": 29.69023481,
     "tau_r": 440.119068,
     "tau_d": 5.394005967,
@@ -69,8 +78,8 @@ ca3pyr2pvbas = {
 }
 ca1pyr2olm = {
     "w": 1.0,
-    "pre": 3,
-    "post": 1,
+    "pre_name": "ca1pyr",
+    "post_name": "olm",
     "tau_f": 106.9783405,
     "tau_r": 202.0650489,
     "tau_d": 2.947716244,
@@ -80,8 +89,8 @@ ca1pyr2olm = {
 }
 olm2pvbas = {
     "w": 0.1,
-    "pre": 1,
-    "post": 0,
+    "pre_name": "olm",
+    "post_name": "pvbas",
     "tau_f": 16.57863002,
     "tau_r": 650.1346414,
     "tau_d": 5.685709176,
@@ -89,6 +98,19 @@ olm2pvbas = {
     "gbarS": 1.567269637,
     "Erev": -75.0,
 }
+
+olm2aac = {
+    "w": 0.1,
+    "pre_name": "olm",
+    "post_name": "aac",
+    "tau_f": 16.57863002,
+    "tau_r": 650.1346414,
+    "tau_d": 5.685709176,
+    "Uinc": 0.230148227,
+    "gbarS": 1.567269637,
+    "Erev": -75.0,
+}
+
 
 params_net = {
     "params_neurons" : [pvbas_params, olm_params],

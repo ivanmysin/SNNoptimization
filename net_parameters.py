@@ -66,7 +66,7 @@ ca1pyr_params = {
 ########################################
 ##### block of synapses params #########
 ca3pyr2pvbas = {
-    "w": 1.0,
+    "w": 0.1,
     "pre_name": "ca3pyr",
     "post_name": "pvbas",
     "tau_f": 29.69023481,
@@ -77,7 +77,7 @@ ca3pyr2pvbas = {
     "Erev": 0.0,
 }
 ca1pyr2olm = {
-    "w": 1.0,
+    "w": 0.1,
     "pre_name": "ca1pyr",
     "post_name": "olm",
     "tau_f": 106.9783405,
@@ -88,7 +88,7 @@ ca1pyr2olm = {
     "Erev": 0.0,
 }
 olm2pvbas = {
-    "w": 0.1,
+    "w": 0.01,
     "pre_name": "olm",
     "post_name": "pvbas",
     "tau_f": 16.57863002,
@@ -100,7 +100,7 @@ olm2pvbas = {
 }
 
 olm2aac = {
-    "w": 0.1,
+    "w": 0.01,
     "pre_name": "olm",
     "post_name": "aac",
     "tau_f": 16.57863002,

@@ -11,13 +11,10 @@ net = cbrd_tfdiffeq.Network(params_net)
 y0 = net.get_y0()
 
 
-solution_1 = odeint(net, y0, t[:2000], method="euler")
+solution = odeint(net, y0, t, method="euler")
 
-y0_ = solution_1[-1, :]
-solution_2 = odeint(net, y0_, t[2000:], method="euler")
-
-t = t[2000:]
-solution = solution_2   #tf.stack(solution_1, solution_2)
+hf = h5py.File('/home/ivan/Data/interneurons_theta/solution_Target.hdf5', 'w')
+solution_dset = hf.create_dataset('solution', data=solution.numpy() )
 
 fig, axes = plt.subplots(nrows=4, sharex=True)
 axes[0].plot(t, solution[:, 0], label="ca3pyr2pvbas")

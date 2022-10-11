@@ -20,7 +20,7 @@ pvbas_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 5,
+        "mean_spike_rate": 0.5,
         "phase": 1.5707963267948966,
     },
 }
@@ -42,7 +42,7 @@ olm_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 5,
+        "mean_spike_rate": 0.5,
         "phase": 3.14,
     },
 }
@@ -64,7 +64,7 @@ cckbas_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 5,
+        "mean_spike_rate": 0.5,
         "phase": -1.5707963267948966,
     },
 }
@@ -86,7 +86,7 @@ bis_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 5,
+        "mean_spike_rate": 0.5,
         "phase": 3.141592653589793,
     },
 }
@@ -108,7 +108,7 @@ aac_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 5,
+        "mean_spike_rate": 0.5,
         "phase": 0.0,
     },
 }
@@ -130,7 +130,7 @@ ivy_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 5,
+        "mean_spike_rate": 0.5,
         "phase": -1.5707963267948966,
     },
 }
@@ -152,7 +152,7 @@ ngf_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 5,
+        "mean_spike_rate": 0.5,
         "phase": 0.0,
     },
 }
@@ -235,10 +235,12 @@ for idx in range(len(data)):
 
         if presyncell.find("(-)") != -1:
             Erev = -75.0
-            Weight = 0.001
+            Weight = 0.01
+            gbarS_coeff = 1.0
         else:
             Erev = 0.0
-            Weight = 0.01
+            Weight = 0.1
+            gbarS_coeff = 10.0
 
 
         code = code_template.format(neurons_names[presyncell], neurons_names[postsyncell], \
@@ -249,7 +251,7 @@ for idx in range(len(data)):
                                      tau_r = data["tau_r"][idx], \
                                      tau_d = data["tau_d"][idx], \
                                      Uinc = data["U"][idx],\
-                                     gbarS = data["g"][idx],
+                                     gbarS = gbarS_coeff * data["g"][idx],
                                      Erev=Erev)
 
         code_full += code

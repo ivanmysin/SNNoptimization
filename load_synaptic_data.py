@@ -210,10 +210,10 @@ for idx in range(len(data)):
 
         if presyncell.find("(-)") != -1:
             Erev = -75.0
-            Weight = 0.5
+            Weight = 0.001
         else:
             Erev = 0.0
-            Weight = 1.0
+            Weight = 0.01
 
 
         code = code_template.format(neurons_names[presyncell], neurons_names[postsyncell], \

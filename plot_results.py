@@ -53,7 +53,7 @@ fir_start_idx = 3 * number_synapses
 
 firings = solution[:, fir_start_idx+1::800]
 
-t = np.linspace(0, 1.2, solution.shape[0])
+t = np.linspace(0, 0.12, solution.shape[0])
 sine = 0.5 * (np.cos(2 * np.pi * t * 5) + 1)
 
 fig, axes = plt.subplots(nrows=number_neurons)

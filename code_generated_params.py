@@ -1,5 +1,5 @@
 ca3pyr2aac = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 7,
     "post": 4,
     "tau_f": 31.42111393,
@@ -10,7 +10,7 @@ ca3pyr2aac = {
     "Erev": 0.0,
 }
 ca1pyr2aac = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 8,
     "post": 4,
     "tau_f": 68.64285237,
@@ -21,7 +21,7 @@ ca1pyr2aac = {
     "Erev": 0.0,
 }
 ec32aac = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 9,
     "post": 4,
     "tau_f": 42.9199623,
@@ -32,7 +32,7 @@ ec32aac = {
     "Erev": 0.0,
 }
 pvbas2aac = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 0,
     "post": 4,
     "tau_f": 17.45934692,
@@ -43,7 +43,7 @@ pvbas2aac = {
     "Erev": -75.0,
 }
 cckbas2aac = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 2,
     "post": 4,
     "tau_f": 67.94156049,
@@ -54,7 +54,7 @@ cckbas2aac = {
     "Erev": -75.0,
 }
 ngf2aac = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 6,
     "post": 4,
     "tau_f": 23.42714963,
@@ -65,7 +65,7 @@ ngf2aac = {
     "Erev": -75.0,
 }
 olm2aac = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 1,
     "post": 4,
     "tau_f": 19.38979865,
@@ -76,7 +76,7 @@ olm2aac = {
     "Erev": -75.0,
 }
 bis2aac = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 3,
     "post": 4,
     "tau_f": 15.73374895,
@@ -87,7 +87,7 @@ bis2aac = {
     "Erev": -75.0,
 }
 ivy2aac = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 5,
     "post": 4,
     "tau_f": 18.27596659,
@@ -98,7 +98,7 @@ ivy2aac = {
     "Erev": -75.0,
 }
 ca3pyr2pvbas = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 7,
     "post": 0,
     "tau_f": 29.69023481,
@@ -109,7 +109,7 @@ ca3pyr2pvbas = {
     "Erev": 0.0,
 }
 ca1pyr2pvbas = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 8,
     "post": 0,
     "tau_f": 76.85776536,
@@ -120,7 +120,7 @@ ca1pyr2pvbas = {
     "Erev": 0.0,
 }
 ec32pvbas = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 9,
     "post": 0,
     "tau_f": 38.32919213,
@@ -131,7 +131,7 @@ ec32pvbas = {
     "Erev": 0.0,
 }
 pvbas2pvbas = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 0,
     "post": 0,
     "tau_f": 15.09543237,
@@ -142,7 +142,7 @@ pvbas2pvbas = {
     "Erev": -75.0,
 }
 cckbas2pvbas = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 2,
     "post": 0,
     "tau_f": 53.15475426,
@@ -153,7 +153,7 @@ cckbas2pvbas = {
     "Erev": -75.0,
 }
 ngf2pvbas = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 6,
     "post": 0,
     "tau_f": 20.39924327,
@@ -164,7 +164,7 @@ ngf2pvbas = {
     "Erev": -75.0,
 }
 olm2pvbas = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 1,
     "post": 0,
     "tau_f": 16.57863002,
@@ -175,7 +175,7 @@ olm2pvbas = {
     "Erev": -75.0,
 }
 bis2pvbas = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 3,
     "post": 0,
     "tau_f": 12.41977701,
@@ -186,7 +186,7 @@ bis2pvbas = {
     "Erev": -75.0,
 }
 ivy2pvbas = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 5,
     "post": 0,
     "tau_f": 14.29480314,
@@ -197,7 +197,7 @@ ivy2pvbas = {
     "Erev": -75.0,
 }
 ca3pyr2cckbas = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 7,
     "post": 2,
     "tau_f": 61.43867292,
@@ -208,7 +208,7 @@ ca3pyr2cckbas = {
     "Erev": 0.0,
 }
 ca1pyr2cckbas = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 8,
     "post": 2,
     "tau_f": 200.0945674,
@@ -219,7 +219,7 @@ ca1pyr2cckbas = {
     "Erev": 0.0,
 }
 ec32cckbas = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 9,
     "post": 2,
     "tau_f": 97.27041139,
@@ -230,7 +230,7 @@ ec32cckbas = {
     "Erev": 0.0,
 }
 pvbas2cckbas = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 0,
     "post": 2,
     "tau_f": 27.30034173,
@@ -241,7 +241,7 @@ pvbas2cckbas = {
     "Erev": -75.0,
 }
 cckbas2cckbas = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 2,
     "post": 2,
     "tau_f": 89.13915001,
@@ -252,7 +252,7 @@ cckbas2cckbas = {
     "Erev": -75.0,
 }
 ngf2cckbas = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 6,
     "post": 2,
     "tau_f": 40.31598397,
@@ -263,7 +263,7 @@ ngf2cckbas = {
     "Erev": -75.0,
 }
 olm2cckbas = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 1,
     "post": 2,
     "tau_f": 36.41141922,
@@ -274,7 +274,7 @@ olm2cckbas = {
     "Erev": -75.0,
 }
 bis2cckbas = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 3,
     "post": 2,
     "tau_f": 40.08819019,
@@ -285,7 +285,7 @@ bis2cckbas = {
     "Erev": -75.0,
 }
 ivy2cckbas = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 5,
     "post": 2,
     "tau_f": 34.90925551,
@@ -296,7 +296,7 @@ ivy2cckbas = {
     "Erev": -75.0,
 }
 ec32ngf = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 9,
     "post": 6,
     "tau_f": 50.35427898,
@@ -307,7 +307,7 @@ ec32ngf = {
     "Erev": 0.0,
 }
 ngf2ngf = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 6,
     "post": 6,
     "tau_f": 25.480563,
@@ -318,7 +318,7 @@ ngf2ngf = {
     "Erev": -75.0,
 }
 olm2ngf = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 1,
     "post": 6,
     "tau_f": 20.57681507,
@@ -329,7 +329,7 @@ olm2ngf = {
     "Erev": -75.0,
 }
 ca3pyr2olm = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 7,
     "post": 1,
     "tau_f": 38.22553135,
@@ -340,7 +340,7 @@ ca3pyr2olm = {
     "Erev": 0.0,
 }
 ca1pyr2olm = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 8,
     "post": 1,
     "tau_f": 106.9783405,
@@ -351,7 +351,7 @@ ca1pyr2olm = {
     "Erev": 0.0,
 }
 bis2olm = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 3,
     "post": 1,
     "tau_f": 17.81144768,
@@ -362,7 +362,7 @@ bis2olm = {
     "Erev": -75.0,
 }
 ivy2olm = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 5,
     "post": 1,
     "tau_f": 20.46870934,
@@ -373,7 +373,7 @@ ivy2olm = {
     "Erev": -75.0,
 }
 ca3pyr2bis = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 7,
     "post": 3,
     "tau_f": 27.56437073,
@@ -384,7 +384,7 @@ ca3pyr2bis = {
     "Erev": 0.0,
 }
 ca1pyr2bis = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 8,
     "post": 3,
     "tau_f": 45.77509046,
@@ -395,7 +395,7 @@ ca1pyr2bis = {
     "Erev": 0.0,
 }
 pvbas2bis = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 0,
     "post": 3,
     "tau_f": 21.4215323,
@@ -406,7 +406,7 @@ pvbas2bis = {
     "Erev": -75.0,
 }
 cckbas2bis = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 2,
     "post": 3,
     "tau_f": 49.03171673,
@@ -417,7 +417,7 @@ cckbas2bis = {
     "Erev": -75.0,
 }
 bis2bis = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 3,
     "post": 3,
     "tau_f": 14.32265778,
@@ -428,7 +428,7 @@ bis2bis = {
     "Erev": -75.0,
 }
 ivy2bis = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 5,
     "post": 3,
     "tau_f": 16.85933504,
@@ -439,7 +439,7 @@ ivy2bis = {
     "Erev": -75.0,
 }
 ca3pyr2ivy = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 7,
     "post": 5,
     "tau_f": 22.00501845,
@@ -450,7 +450,7 @@ ca3pyr2ivy = {
     "Erev": 0.0,
 }
 ca1pyr2ivy = {
-    "w": 1.0,
+    "w": 0.01,
     "pre": 8,
     "post": 5,
     "tau_f": 29.98390368,
@@ -461,7 +461,7 @@ ca1pyr2ivy = {
     "Erev": 0.0,
 }
 pvbas2ivy = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 0,
     "post": 5,
     "tau_f": 17.30237842,
@@ -472,7 +472,7 @@ pvbas2ivy = {
     "Erev": -75.0,
 }
 cckbas2ivy = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 2,
     "post": 5,
     "tau_f": 39.16684388,
@@ -483,7 +483,7 @@ cckbas2ivy = {
     "Erev": -75.0,
 }
 bis2ivy = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 3,
     "post": 5,
     "tau_f": 11.55699251,
@@ -494,7 +494,7 @@ bis2ivy = {
     "Erev": -75.0,
 }
 ivy2ivy = {
-    "w": 0.5,
+    "w": 0.001,
     "pre": 5,
     "post": 5,
     "tau_f": 13.38354637,

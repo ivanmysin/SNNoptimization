@@ -108,6 +108,8 @@ class BaseNeuron(tf.keras.Model):
         dz_dt = tf.concat([dz_0, dz_1, dz_2], axis=0)
         return dz_dt
 
+    def get_y0(self):
+        return []
 class LIF_Neuron(BaseNeuron):
     def __init__(self, params, dt=0.1):
 
@@ -144,11 +146,21 @@ class LIF_Neuron(BaseNeuron):
         dy_dt = tf.concat([dro_dt, dV_dt], axis=0)
         return dy_dt
 
+    def get_y0(self):
+        V = tf.zeros(self.N, dtype=tf.float64)  + self.Vreset
+        ro = tf.zeros(self.N, dtype=tf.float64)
+        ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[self.N - 1, ]], [1 / self.dts, ]))
+        y0 = tf.concat([ro, V], axis=0)
+        return y0
+
 
 class SimlestSinapse(tf.Module):
     def __init__(self, params, dt):
         super(SimlestSinapse, self).__init__(name="Synapse")
         self.dt = dt
+
+    def get_y0(self):
+        return []
 class PlasticSynapse(SimlestSinapse):
     def __init__(self, params, dt=0.1, start_idx=0):
         super(PlasticSynapse, self).__init__(params, dt)
@@ -181,7 +193,7 @@ class PlasticSynapse(SimlestSinapse):
         self.Uinc = tf.Variable(Uincs, dtype=tf.float64, name='Uinc', trainable=True)
         self.tau1r = tf.where(self.tau_d != self.tau_r,  self.tau_d / (self.tau_d - self.tau_r), 1e-13)
 
-        self.gbarS = tf.Variable(gbarSs, dtype=tf.float64, trainable=False)
+        self.gbarS = tf.Variable(gbarSs, dtype=tf.float64, trainable=True)
         self.Erev = tf.Variable(Erevs, dtype=tf.float64, trainable=False)
         self.W = tf.Variable(Ws, dtype=tf.float64, name='Wplasticsyns', trainable=True)
 
@@ -206,7 +218,7 @@ class PlasticSynapse(SimlestSinapse):
         Rofsyn = y[self.start_idx + self.start_R_idx:self.start_idx + self.end_R_idx]
         gsyn_tmp = tf.where(self.post_indxes == neuron_post_idx, Rofsyn, 0.0)
 
-        gsyn = self.W * self.gbarS * gsyn_tmp
+        gsyn = self.gbarS * gsyn_tmp
         Erev = tf.reshape(self.Erev, shape=(-1, 1))
         gsyn = tf.reshape(gsyn, shape=(-1, 1))
         Isyn = tf.reduce_sum(gsyn * (Erev - tf.reshape(Vpost, shape=(1, -1))), axis=0)
@@ -217,6 +229,8 @@ class PlasticSynapse(SimlestSinapse):
     @tf.function
     def __call__(self, t, y, SRpre=0):
 
+        Spre_normed = SRpre * self.W
+
         X = y[self.start_X_idx : self.end_X_idx]
         Y = y[self.start_R_idx : self.end_R_idx]
         U = y[self.start_U_idx : self.end_U_idx ]
@@ -226,9 +240,9 @@ class PlasticSynapse(SimlestSinapse):
         x_ = 1 + (X - 1 + self.tau1r * Y) * exp(-self.dt / self.tau_r) - self.tau1r * Y
 
         u_ = U * exp(-self.dt / self.tau_f)
-        u0 = u_ + self.Uinc * (1 - u_) * SRpre
-        y0 = y_ + u0 * x_ * SRpre
-        x0 = x_ - u0 * x_ * SRpre
+        u0 = u_ + self.Uinc * (1 - u_) * Spre_normed
+        y0 = y_ + u0 * x_ * Spre_normed
+        x0 = x_ - u0 * x_ * Spre_normed
 
         dXdt = (x0 - X) / self.dt
         dYdt = (y0 - Y) / self.dt
@@ -236,6 +250,12 @@ class PlasticSynapse(SimlestSinapse):
         dy_dt = tf.concat([dXdt, dYdt, dUdt], axis=0)
 
         return dy_dt
+
+    def get_y0(self):
+        X0 = tf.ones(self.num_synapses, dtype=tf.float64) # starting values for X, X0 = 1
+        R0_U0 = tf.zeros(2 * self.num_synapses, dtype=tf.float64) # starting values for R and U, R0 = U0 = 0
+        y0 = tf.concat([X0, R0_U0], axis=0)
+        return y0
 ##########################################
 class VonMissesGenerators(tf.Module):
 
@@ -262,7 +282,7 @@ class VonMissesGenerators(tf.Module):
         self.mult4time = tf.constant( 2 * PI * self.omega * 0.001, dtype=tf.float64)
 
         I0 = bessel_i0(self.kappa)
-        self.normalizator = self.mean_spike_rate / I0 * 0.001
+        self.normalizator = self.mean_spike_rate / I0 * 0.001 * dt
 
 
 
@@ -367,6 +387,15 @@ class Network(tf.keras.Model):
         dy_dt = tf.concat(dy_dt, axis=0)
         return dy_dt
 
+    def get_y0(self):
+        y0 = []
+        for synapse in self.synapses:
+            y0.append(synapse.get_y0())
+        for neuron in self.neurons:
+            y0.append(neuron.get_y0())
+
+        y0 = tf.concat(y0, axis=0)
+        return y0
 
 
 ##########################################

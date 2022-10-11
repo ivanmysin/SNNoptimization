@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.metrics import mean_squared_logarithmic_error
+#from tensorflow.keras.metrics import mean_squared_logarithmic_error
 from tensorflow.keras.optimizers import Adam
 from tfdiffeq import odeint, odeint_adjoint
 import cbrd_tfdiffeq
@@ -10,8 +10,9 @@ from code_generated_params import params_net
 
 AdamOptimizer = Adam(learning_rate=0.01)
 
-Loss_func = mean_squared_logarithmic_error
-
+def Loss_func(y_true, y_pred): # = mean_squared_logarithmic_error
+    L = tf.reduce_sum( tf.math.square(tf.math.log(y_true + 1.) - tf.math.log(y_pred + 1.)))
+    return L
 
 
 generators4targets = cbrd_tfdiffeq.VonMissesGenerators(params_net["params_neurons"])
@@ -50,7 +51,7 @@ for number_of_simulation in range(100):
     solution_start = odeint(net, y0_main, t[:win4_start], method="euler")
 
     hf = h5py.File('/home/ivan/Data/interneurons_theta/solution_' + str(number_of_simulation) + '.hdf5', 'w')
-    solution_dset = hf.create_dataset('solution', shape=(n_points_of_simulation, int(tf.size(y0))) )
+    solution_dset = hf.create_dataset('solution', shape=(n_points_of_simulation, int(tf.size(y0_main))) )
     w_dset = hf.create_dataset('Weights', data = net.synapses[0].W.numpy())
     tau_f_dset = hf.create_dataset('tau_f', data = net.synapses[0].tau_f.numpy())
     tau_r_dset = hf.create_dataset('tau_r', data = net.synapses[0].tau_r.numpy())
@@ -59,7 +60,7 @@ for number_of_simulation in range(100):
 
     solution_dset[:win4_start, :] = solution_start.numpy()
 
-    grad_over_simulation = 0
+    grad_over_simulation = [0] * len(net.synapses[0].trainable_variables)
     loss_over_simulation = 0
 
     y0 = solution_start[-1, :]
@@ -82,16 +83,21 @@ for number_of_simulation in range(100):
 
             grad = tape.gradient(loss, net.synapses[0].trainable_variables)
 
-            loss_over_simulation += loss
-
+        
 
         y0 = solution[-1, :]
-        grad_over_simulation = grad_over_simulation + grad
+        
+
+        for grad_idx in range(len(grad)):
+            grad_over_simulation[grad_idx] = grad_over_simulation[grad_idx] + grad[grad_idx]
+                
+        loss_over_simulation += loss
+        
 
     solution_dset[time_start_idx:time_end_idx, :] = solution.numpy()
     hf.close()
-    AdamOptimizer.apply_gradients( zip( [grad_over_simulation, ], [net.synapses[0].trainable_variables, ] ))
-    print("Прогон модели № ", (number_of_simulation + 1), ", Loss = ", loss_over_simulation)
+    AdamOptimizer.apply_gradients( zip( grad_over_simulation, net.synapses[0].trainable_variables ))
+    print("Прогон № ", (number_of_simulation + 1), ", Loss = ", loss_over_simulation.numpy())
 #print(grad_over_simulation)
 
 

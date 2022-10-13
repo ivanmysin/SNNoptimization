@@ -1,38 +1,38 @@
 ca3pyr2aac = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ca3pyr",
     "post_name": "aac",
     "tau_f": 31.42111393,
     "tau_r": 388.4010873,
     "tau_d": 5.516572108,
     "Uinc": 0.203836307,
-    "gbarS": 9.91873144,
+    "gbarS": 0.991873144,
     "Erev": 0.0,
 }
 ca1pyr2aac = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ca1pyr",
     "post_name": "aac",
     "tau_f": 68.64285237,
     "tau_r": 295.4773937,
     "tau_d": 3.28320237,
     "Uinc": 0.203744416,
-    "gbarS": 14.94119161,
+    "gbarS": 1.494119161,
     "Erev": 0.0,
 }
 ec32aac = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ec3",
     "post_name": "aac",
     "tau_f": 42.9199623,
     "tau_r": 331.4994604,
     "tau_d": 3.65913222,
     "Uinc": 0.243195341,
-    "gbarS": 15.29326081,
+    "gbarS": 1.529326081,
     "Erev": 0.0,
 }
 pvbas2aac = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "pvbas",
     "post_name": "aac",
     "tau_f": 17.45934692,
@@ -43,7 +43,7 @@ pvbas2aac = {
     "Erev": -75.0,
 }
 cckbas2aac = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "cckbas",
     "post_name": "aac",
     "tau_f": 67.94156049,
@@ -54,7 +54,7 @@ cckbas2aac = {
     "Erev": -75.0,
 }
 ngf2aac = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "ngf",
     "post_name": "aac",
     "tau_f": 23.42714963,
@@ -65,7 +65,7 @@ ngf2aac = {
     "Erev": -75.0,
 }
 olm2aac = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "olm",
     "post_name": "aac",
     "tau_f": 19.38979865,
@@ -76,7 +76,7 @@ olm2aac = {
     "Erev": -75.0,
 }
 bis2aac = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "bis",
     "post_name": "aac",
     "tau_f": 15.73374895,
@@ -87,7 +87,7 @@ bis2aac = {
     "Erev": -75.0,
 }
 ivy2aac = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "ivy",
     "post_name": "aac",
     "tau_f": 18.27596659,
@@ -98,40 +98,40 @@ ivy2aac = {
     "Erev": -75.0,
 }
 ca3pyr2pvbas = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ca3pyr",
     "post_name": "pvbas",
     "tau_f": 29.69023481,
     "tau_r": 440.119068,
     "tau_d": 5.394005967,
     "Uinc": 0.198996085,
-    "gbarS": 9.08653493,
+    "gbarS": 0.908653493,
     "Erev": 0.0,
 }
 ca1pyr2pvbas = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ca1pyr",
     "post_name": "pvbas",
     "tau_f": 76.85776536,
     "tau_r": 327.2596661,
     "tau_d": 3.163416515,
     "Uinc": 0.200078943,
-    "gbarS": 13.509685959999999,
+    "gbarS": 1.350968596,
     "Erev": 0.0,
 }
 ec32pvbas = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ec3",
     "post_name": "pvbas",
     "tau_f": 38.32919213,
     "tau_r": 363.4563494,
     "tau_d": 3.914953021,
     "Uinc": 0.247415928,
-    "gbarS": 13.82260541,
+    "gbarS": 1.382260541,
     "Erev": 0.0,
 }
 pvbas2pvbas = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "pvbas",
     "post_name": "pvbas",
     "tau_f": 15.09543237,
@@ -142,7 +142,7 @@ pvbas2pvbas = {
     "Erev": -75.0,
 }
 cckbas2pvbas = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "cckbas",
     "post_name": "pvbas",
     "tau_f": 53.15475426,
@@ -153,7 +153,7 @@ cckbas2pvbas = {
     "Erev": -75.0,
 }
 ngf2pvbas = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "ngf",
     "post_name": "pvbas",
     "tau_f": 20.39924327,
@@ -164,7 +164,7 @@ ngf2pvbas = {
     "Erev": -75.0,
 }
 olm2pvbas = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "olm",
     "post_name": "pvbas",
     "tau_f": 16.57863002,
@@ -175,7 +175,7 @@ olm2pvbas = {
     "Erev": -75.0,
 }
 bis2pvbas = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "bis",
     "post_name": "pvbas",
     "tau_f": 12.41977701,
@@ -186,7 +186,7 @@ bis2pvbas = {
     "Erev": -75.0,
 }
 ivy2pvbas = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "ivy",
     "post_name": "pvbas",
     "tau_f": 14.29480314,
@@ -197,40 +197,40 @@ ivy2pvbas = {
     "Erev": -75.0,
 }
 ca3pyr2cckbas = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ca3pyr",
     "post_name": "cckbas",
     "tau_f": 61.43867292,
     "tau_r": 330.9105197,
     "tau_d": 4.833858548,
     "Uinc": 0.226501333,
-    "gbarS": 12.15139842,
+    "gbarS": 1.215139842,
     "Erev": 0.0,
 }
 ca1pyr2cckbas = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ca1pyr",
     "post_name": "cckbas",
     "tau_f": 200.0945674,
     "tau_r": 170.3265276,
     "tau_d": 2.77089926,
     "Uinc": 0.248751595,
-    "gbarS": 18.89612224,
+    "gbarS": 1.889612224,
     "Erev": 0.0,
 }
 ec32cckbas = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ec3",
     "post_name": "cckbas",
     "tau_f": 97.27041139,
     "tau_r": 274.8237744,
     "tau_d": 3.484495113,
     "Uinc": 0.254792697,
-    "gbarS": 19.03160825,
+    "gbarS": 1.903160825,
     "Erev": 0.0,
 }
 pvbas2cckbas = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "pvbas",
     "post_name": "cckbas",
     "tau_f": 27.30034173,
@@ -241,7 +241,7 @@ pvbas2cckbas = {
     "Erev": -75.0,
 }
 cckbas2cckbas = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "cckbas",
     "post_name": "cckbas",
     "tau_f": 89.13915001,
@@ -252,7 +252,7 @@ cckbas2cckbas = {
     "Erev": -75.0,
 }
 ngf2cckbas = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "ngf",
     "post_name": "cckbas",
     "tau_f": 40.31598397,
@@ -263,7 +263,7 @@ ngf2cckbas = {
     "Erev": -75.0,
 }
 olm2cckbas = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "olm",
     "post_name": "cckbas",
     "tau_f": 36.41141922,
@@ -274,7 +274,7 @@ olm2cckbas = {
     "Erev": -75.0,
 }
 bis2cckbas = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "bis",
     "post_name": "cckbas",
     "tau_f": 40.08819019,
@@ -285,7 +285,7 @@ bis2cckbas = {
     "Erev": -75.0,
 }
 ivy2cckbas = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "ivy",
     "post_name": "cckbas",
     "tau_f": 34.90925551,
@@ -296,18 +296,18 @@ ivy2cckbas = {
     "Erev": -75.0,
 }
 ec32ngf = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ec3",
     "post_name": "ngf",
     "tau_f": 50.35427898,
     "tau_r": 345.1417744,
     "tau_d": 4.255231343,
     "Uinc": 0.218766637,
-    "gbarS": 16.50136928,
+    "gbarS": 1.650136928,
     "Erev": 0.0,
 }
 ngf2ngf = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "ngf",
     "post_name": "ngf",
     "tau_f": 25.480563,
@@ -318,7 +318,7 @@ ngf2ngf = {
     "Erev": -75.0,
 }
 olm2ngf = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "olm",
     "post_name": "ngf",
     "tau_f": 20.57681507,
@@ -329,29 +329,29 @@ olm2ngf = {
     "Erev": -75.0,
 }
 ca3pyr2olm = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ca3pyr",
     "post_name": "olm",
     "tau_f": 38.22553135,
     "tau_r": 358.2571628,
     "tau_d": 5.430321889,
     "Uinc": 0.102925387,
-    "gbarS": 8.66891054,
+    "gbarS": 0.866891054,
     "Erev": 0.0,
 }
 ca1pyr2olm = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ca1pyr",
     "post_name": "olm",
     "tau_f": 106.9783405,
     "tau_r": 202.0650489,
     "tau_d": 2.947716244,
     "Uinc": 0.089607609,
-    "gbarS": 16.99075536,
+    "gbarS": 1.699075536,
     "Erev": 0.0,
 }
 bis2olm = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "bis",
     "post_name": "olm",
     "tau_f": 17.81144768,
@@ -362,7 +362,7 @@ bis2olm = {
     "Erev": -75.0,
 }
 ivy2olm = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "ivy",
     "post_name": "olm",
     "tau_f": 20.46870934,
@@ -373,29 +373,29 @@ ivy2olm = {
     "Erev": -75.0,
 }
 ca3pyr2bis = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ca3pyr",
     "post_name": "bis",
     "tau_f": 27.56437073,
     "tau_r": 369.3806703,
     "tau_d": 6.184627383,
     "Uinc": 0.213215335,
-    "gbarS": 11.505421570000001,
+    "gbarS": 1.150542157,
     "Erev": 0.0,
 }
 ca1pyr2bis = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ca1pyr",
     "post_name": "bis",
     "tau_f": 45.77509046,
     "tau_r": 242.468234,
     "tau_d": 3.394198844,
     "Uinc": 0.225236757,
-    "gbarS": 21.55417698,
+    "gbarS": 2.155417698,
     "Erev": 0.0,
 }
 pvbas2bis = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "pvbas",
     "post_name": "bis",
     "tau_f": 21.4215323,
@@ -406,7 +406,7 @@ pvbas2bis = {
     "Erev": -75.0,
 }
 cckbas2bis = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "cckbas",
     "post_name": "bis",
     "tau_f": 49.03171673,
@@ -417,7 +417,7 @@ cckbas2bis = {
     "Erev": -75.0,
 }
 bis2bis = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "bis",
     "post_name": "bis",
     "tau_f": 14.32265778,
@@ -428,7 +428,7 @@ bis2bis = {
     "Erev": -75.0,
 }
 ivy2bis = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "ivy",
     "post_name": "bis",
     "tau_f": 16.85933504,
@@ -439,29 +439,29 @@ ivy2bis = {
     "Erev": -75.0,
 }
 ca3pyr2ivy = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ca3pyr",
     "post_name": "ivy",
     "tau_f": 22.00501845,
     "tau_r": 419.0888672,
     "tau_d": 6.514490352,
     "Uinc": 0.211997085,
-    "gbarS": 11.39035363,
+    "gbarS": 1.139035363,
     "Erev": 0.0,
 }
 ca1pyr2ivy = {
-    "w": 0.1,
+    "w": 0.5,
     "pre_name": "ca1pyr",
     "post_name": "ivy",
     "tau_f": 29.98390368,
     "tau_r": 294.5593265,
     "tau_d": 3.90415446,
     "Uinc": 0.223851273,
-    "gbarS": 21.250869790000003,
+    "gbarS": 2.125086979,
     "Erev": 0.0,
 }
 pvbas2ivy = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "pvbas",
     "post_name": "ivy",
     "tau_f": 17.30237842,
@@ -472,7 +472,7 @@ pvbas2ivy = {
     "Erev": -75.0,
 }
 cckbas2ivy = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "cckbas",
     "post_name": "ivy",
     "tau_f": 39.16684388,
@@ -483,7 +483,7 @@ cckbas2ivy = {
     "Erev": -75.0,
 }
 bis2ivy = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "bis",
     "post_name": "ivy",
     "tau_f": 11.55699251,
@@ -494,7 +494,7 @@ bis2ivy = {
     "Erev": -75.0,
 }
 ivy2ivy = {
-    "w": 0.01,
+    "w": 0.1,
     "pre_name": "ivy",
     "post_name": "ivy",
     "tau_f": 13.38354637,
@@ -523,7 +523,7 @@ pvbas_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 0.5,
+        "mean_spike_rate": 50.0,
         "phase": 1.5707963267948966,
     },
 }
@@ -545,7 +545,7 @@ olm_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 0.5,
+        "mean_spike_rate": 50.0,
         "phase": 3.14,
     },
 }
@@ -567,7 +567,7 @@ cckbas_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 0.5,
+        "mean_spike_rate": 50.0,
         "phase": -1.5707963267948966,
     },
 }
@@ -589,7 +589,7 @@ bis_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 0.5,
+        "mean_spike_rate": 50.0,
         "phase": 3.141592653589793,
     },
 }
@@ -611,7 +611,7 @@ aac_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 0.5,
+        "mean_spike_rate": 50.0,
         "phase": 0.0,
     },
 }
@@ -633,7 +633,7 @@ ivy_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 0.5,
+        "mean_spike_rate": 50.0,
         "phase": -1.5707963267948966,
     },
 }
@@ -655,7 +655,7 @@ ngf_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 0.5,
+        "mean_spike_rate": 50.0,
         "phase": 0.0,
     },
 }

@@ -62,19 +62,15 @@ for number_of_simulation in range(100):
 
             grad = tape.gradient(loss, net.synapses[0].trainable_variables)
 
-        path = path4savingresults_template.format(str(number_of_simulation + 1))
-        net.save_simulation_data(path, tf.concat(solutions_full, axis=1), Targets_spikes_rates)
-
-
         y0 = solution[-1, :]
         
 
         for grad_idx in range(len(grad)):
             grad_over_simulation[grad_idx] = grad_over_simulation[grad_idx] + grad[grad_idx]
         loss_over_simulation += loss
-        
 
-
+    path = path4savingresults_template.format(str(number_of_simulation + 1))
+    net.save_simulation_data(path, tf.concat(solutions_full, axis=0), Targets_spikes_rates)
 
     AdamOptimizer.apply_gradients( zip( grad_over_simulation, net.synapses[0].trainable_variables ))
     print("Прогон № ", (number_of_simulation + 1), ", Loss = ", float(loss_over_simulation) )

@@ -433,8 +433,8 @@ class Network(tf.keras.Model):
     def save_simulation_data(self, file_path, solution, targets):
        # net.save_simulation_data(path, tf.concat(solutions_full, axis=1), Targets_spikes_rates)
         hf = h5py.File(file_path, 'w')
-        solution_dset = self.hf.create_dataset('solution', data=solution.numpy())
-        targets_dset = self.hf.create_dataset('targets', data=targets.numpy())
+        solution_dset = hf.create_dataset('solution', data=solution.numpy())
+        targets_dset = hf.create_dataset('targets', data=targets.numpy())
         for val in self.synapses[0].trainable_variables:
             hf.create_dataset(val.name, data=val.numpy())
 

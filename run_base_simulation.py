@@ -13,8 +13,8 @@ def Loss_func(y_true, y_pred): # = mean_squared_logarithmic_error
     return L
 ##########################################################################
 
-
-AdamOptimizer = Adam(learning_rate=0.01)
+path4savingresults_template = '/home/ivan/Data/interneurons_theta/solution_{:s}.hdf5'
+AdamOptimizer = Adam(learning_rate=0.05)
 t = tf.range(0.0, 1200.0, 0.1, dtype=tf.float64)
 generators4targets = cbrd_tfdiffeq.VonMissesGenerators(params_net["params_neurons"])
 Targets_spikes_rates = generators4targets(tf.reshape(t, shape=(-1, 1)))
@@ -28,27 +28,20 @@ net = cbrd_tfdiffeq.Network(params_net)
 y0_main = net.get_y0()
 
 for number_of_simulation in range(100):
+    solutions_full = []
 
-    solution_start = odeint(net, y0_main, t[:win4_start], method="euler")
-
-    hf = h5py.File('/home/ivan/Data/interneurons_theta/solution_' + str(number_of_simulation) + '.hdf5', 'w')
-    solution_dset = hf.create_dataset('solution', shape=(n_points_of_simulation, int(tf.size(y0_main))) )
-    w_dset = hf.create_dataset('Weights', data = net.synapses[0].W.numpy())
-    tau_f_dset = hf.create_dataset('tau_f', data = net.synapses[0].tau_f.numpy())
-    tau_r_dset = hf.create_dataset('tau_r', data = net.synapses[0].tau_r.numpy())
-    tau_d_dset = hf.create_dataset('tau_d', data = net.synapses[0].tau_d.numpy())
-    Uinc_dset = hf.create_dataset('Uinc', data = net.synapses[0].Uinc.numpy())
-    gbarS_dset = hf.create_dataset('gbarS', data = net.synapses[0].gbarS.numpy())
-
-    solution_dset[:win4_start, :] = solution_start.numpy()
+    time_start_idx = 0
+    time_end_idx = win4_start
+    solution = odeint(net, y0_main, t[time_start_idx:time_end_idx], method="euler")
+    solutions_full.append(solution)
 
     grad_over_simulation = [0] * len(net.synapses[0].trainable_variables)
     loss_over_simulation = 0
 
-    y0 = solution_start[-1, :]
+    y0 = solution[-1, :]
     for idx in range(n_loops):
 
-        time_start_idx = win4_start + win4grad * idx
+        time_start_idx = win4grad + win4grad * idx
         time_end_idx = time_start_idx + win4grad
         t_slice = t[time_start_idx:time_end_idx]
         with tf.GradientTape(watch_accessed_variables=False) as tape:
@@ -56,9 +49,12 @@ for number_of_simulation in range(100):
             tape.watch(net.synapses[0].trainable_variables)
 
             solution = odeint_adjoint(net, y0, t_slice, method="euler")
+            solutions_full.append(solution)
 
             number_nun = tf.reduce_sum( tf.cast(tf.math.is_nan(solution), dtype=tf.int64))
-            if number_nun > 0: break # !!!!!!!
+            if number_nun > 0:
+                print("Nans values in results!!!!")
+                break
 
             firings = tf.gather( solution, net.ro_0_indexes, axis=1)
 
@@ -66,7 +62,10 @@ for number_of_simulation in range(100):
 
             grad = tape.gradient(loss, net.synapses[0].trainable_variables)
 
-        solution_dset[time_start_idx:time_end_idx, :] = solution.numpy()
+        path = path4savingresults_template.format(str(number_of_simulation + 1))
+        net.save_simulation_data(path, tf.concat(solutions_full, axis=1), Targets_spikes_rates)
+
+
         y0 = solution[-1, :]
         
 
@@ -76,11 +75,11 @@ for number_of_simulation in range(100):
         
 
 
-    hf.close()
+
     AdamOptimizer.apply_gradients( zip( grad_over_simulation, net.synapses[0].trainable_variables ))
     print("Прогон № ", (number_of_simulation + 1), ", Loss = ", float(loss_over_simulation) )
 
-    #break  #!!!!!!!!!!!
+
 
 
 

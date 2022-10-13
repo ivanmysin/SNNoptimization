@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from tfdiffeq import odeint, odeint_adjoint
-
+import h5py
 import matplotlib.pyplot as plt
 
 erf = tf.math.erf
@@ -52,6 +52,8 @@ class BaseNeuron(tf.keras.Model):
 
         self.max_roH_idx = tf.Variable(0, dtype=tf.int32, trainable=False)
         self.dt = dt
+
+        self.population_name = params["name"]
 
     @tf.function
     def H_function(self, V, dVdt, tau_m, Vt, sigma):
@@ -427,6 +429,24 @@ class Network(tf.keras.Model):
 
         y0 = tf.concat(y0, axis=0)
         return y0
+
+    def save_simulation_data(self, file_path, solution, targets):
+       # net.save_simulation_data(path, tf.concat(solutions_full, axis=1), Targets_spikes_rates)
+        hf = h5py.File(file_path, 'w')
+        solution_dset = self.hf.create_dataset('solution', data=solution.numpy())
+        targets_dset = self.hf.create_dataset('targets', data=targets.numpy())
+        for val in self.synapses[0].trainable_variables:
+            hf.create_dataset(val.name, data=val.numpy())
+
+        for neurons_idx, neuron in enumerate(self.neurons):
+            solution_dset.attrs[neuron.population_name] = self.ro_0_indexes[neurons_idx]
+
+        hf.close()
+
+        return
+
+
+
 
 
 ##########################################

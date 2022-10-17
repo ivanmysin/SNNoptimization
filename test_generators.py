@@ -1,35 +1,24 @@
 import numpy as np
 import tensorflow as tf
-from tfdiffeq import odeint
 import cbrd_tfdiffeq as ctfeq
 import matplotlib.pyplot as plt
 
+from code_generated_params import params_net
 
-params1 = {
-    "R" : 0.3,
-    "freq" : 5,
-    "mean_spike_rate" : 18,
-    "phase" : 0,
-}
 
-params2 = {
-    "R" : 0.3,
-    "freq" : 5,
-    "mean_spike_rate" : 10,
-    "phase" : np.pi,
-}
+genrators = ctfeq.VonMissesGenerators( params_net["params_neurons"] )
+t = tf.range(0, 1000.0, 0.1, dtype=tf.float64)
+outs = genrators( tf.reshape(t, shape=(-1, 1)))
 
-genrator = ctfeq.VonMissesGenerators( [params1, params2] )
+sine = 0.5 * (np.cos(2 * np.pi * 0.001* t * 5) + 1)
+fig, axes = plt.subplots( nrows=len(params_net["params_neurons"]), sharex=True )
+for idx, neuron in enumerate(params_net["params_neurons"]):
+    ax = axes[idx]
+    firings = outs[:, idx]
+    ax.plot(t, firings, label=neuron["name"])
+    sine_ampls = sine * np.max(firings)
+    ax.plot(t, sine_ampls, linestyle="--", label = "cos")
+    ax.legend(loc = "upper right")
 
-t = tf.range(0, 400, 0.1, dtype=tf.float64)
-out = []
-for idx in range(tf.size(t)):
-    out.append( genrator(t[idx]) )
-out = tf.stack(out)
 
-plt.plot(t, out[:, 0])
-plt.plot(t, out[:, 1])
-
-out_means = tf.reduce_mean(out, axis=0) / 0.1
-print(out_means.numpy())
 plt.show()

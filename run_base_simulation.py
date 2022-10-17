@@ -3,9 +3,6 @@ import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 from tfdiffeq import odeint, odeint_adjoint
 import cbrd_tfdiffeq
-import h5py
-
-# from net_parameters import params_net
 from code_generated_params import params_net
 
 def Loss_func(y_true, y_pred): # = mean_squared_logarithmic_error
@@ -14,7 +11,7 @@ def Loss_func(y_true, y_pred): # = mean_squared_logarithmic_error
 ##########################################################################
 
 path4savingresults_template = '/home/ivan/Data/interneurons_theta/solution_{:s}.hdf5'
-AdamOptimizer = Adam(learning_rate=0.05)
+AdamOptimizer = Adam(learning_rate=0.001)
 t = tf.range(0.0, 1200.0, 0.1, dtype=tf.float64)
 generators4targets = cbrd_tfdiffeq.VonMissesGenerators(params_net["params_neurons"])
 Targets_spikes_rates = generators4targets(tf.reshape(t, shape=(-1, 1)))
@@ -27,7 +24,7 @@ n_loops = int((n_points_of_simulation - win4_start) / win4grad)
 net = cbrd_tfdiffeq.Network(params_net)
 y0_main = net.get_y0()
 
-for number_of_simulation in range(100):
+for number_of_simulation in range(1000):
     solutions_full = []
 
     time_start_idx = 0
@@ -59,6 +56,8 @@ for number_of_simulation in range(100):
             firings = tf.gather( solution, net.ro_0_indexes, axis=1)
 
             loss = Loss_func(Targets_spikes_rates[time_start_idx:time_end_idx, :], firings )
+            for val in net.synapses[0].trainable_variables:
+                loss += tf.reduce_sum( 10e6 * tf.nn.relu(0.005 - val) )
 
             grad = tape.gradient(loss, net.synapses[0].trainable_variables)
 
@@ -68,6 +67,8 @@ for number_of_simulation in range(100):
         for grad_idx in range(len(grad)):
             grad_over_simulation[grad_idx] = grad_over_simulation[grad_idx] + grad[grad_idx]
         loss_over_simulation += loss
+
+
 
     path = path4savingresults_template.format(str(number_of_simulation + 1))
     net.save_simulation_data(path, tf.concat(solutions_full, axis=0), Targets_spikes_rates)

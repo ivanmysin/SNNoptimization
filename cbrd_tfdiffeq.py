@@ -445,6 +445,68 @@ class Network(tf.keras.Model):
 
         return
 
+    def set_optimizator(self, optimizer):
+        self.optimizer = optimizer
+
+    def loss_function(self, y_true, y_pred): # = mean_squared_logarithmic_error
+        L = tf.reduce_sum( tf.math.square(tf.math.log(y_true + 1.) - tf.math.log(y_pred + 1.)))
+        return L
+    #@tf.function
+    def fit(self, t, targets_firings, n_inter=50, win4_start = 2000, win4grad = 500):
+        n_points_of_simulation = int(tf.size(t))
+        n_loops = int((n_points_of_simulation - win4_start) / win4grad)
+
+        y0_main = self.get_y0()
+        for number_of_simulation in range(n_inter):
+            solutions_full = []
+
+            time_start_idx = 0
+            time_end_idx = win4_start
+
+            solution = odeint(self, y0_main, t[time_start_idx:time_end_idx], method="euler")
+            solutions_full.append(solution)
+
+            grad_over_simulation = [0] * len(self.synapses[0].trainable_variables)
+            loss_over_simulation = 0
+
+            y0 = solution[-1, :]
+            for idx in range(n_loops):
+
+                time_start_idx = win4grad + win4grad * idx
+                time_end_idx = time_start_idx + win4grad
+                t_slice = t[time_start_idx:time_end_idx]
+                with tf.GradientTape(watch_accessed_variables=False) as tape:
+
+                    tape.watch(self.synapses[0].trainable_variables)
+
+                    solution = odeint_adjoint(self, y0, t_slice, method="euler")
+                    solutions_full.append(solution)
+
+                    number_nun = tf.reduce_sum(tf.cast(tf.math.is_nan(solution), dtype=tf.int32))
+                    if number_nun > 0:
+                        print("Nans values in results!!!!")
+                        break
+
+                    firings = tf.gather(solution, self.ro_0_indexes, axis=1)
+
+                    loss = self.loss_function(targets_firings[time_start_idx:time_end_idx, :], firings)
+                    for val in self.synapses[0].trainable_variables:
+                        loss += tf.reduce_sum(10e6 * tf.nn.relu(0.005 - val))
+
+                    grad = tape.gradient(loss, self.synapses[0].trainable_variables)
+
+                y0 = solution[-1, :]
+
+                for grad_idx in range(len(grad)):
+                    grad_over_simulation[grad_idx] = grad_over_simulation[grad_idx] + grad[grad_idx]
+                loss_over_simulation += loss
+
+
+
+            self.optimizer.apply_gradients(zip(grad_over_simulation, self.synapses[0].trainable_variables))
+
+        return  tf.concat(solutions_full, axis=0), loss_over_simulation
+
 
 
 

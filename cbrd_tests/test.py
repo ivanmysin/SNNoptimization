@@ -1,4 +1,14 @@
+import tensorflow as tf
 
+a = tf.ones(shape=(5, 7), dtype=tf.float64)
+b = tf.zeros(shape=(5, 4), dtype=tf.float64)
+
+c = tf.concat([a, b], axis=1)
+
+
+print(c.numpy())
+
+"""
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -13,6 +23,7 @@ print(V.numpy() )
 
 print("#############################################")
 print(Vsl.numpy() )
+"""
 
 
 

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 
-hf = h5py.File('/home/ivan/Data/interneurons_theta/solution_253.hdf5', 'r')
+hf = h5py.File('/home/ivan/Data/interneurons_theta/solution_299.hdf5', 'r')
 dset_solution = hf['solution']
 dset_targets = hf['targets']
 solution = dset_solution[:]
@@ -22,6 +22,8 @@ for idx, (neuron_name, neuron_idx) in enumerate(sorted(dset_solution.attrs.items
     ax.plot(t, sine_ampls, linestyle="--", label = "cos")
     ax.plot(t, target, label = "target")
     ax.legend(loc = "upper right")
+
+    ax.set_ylim(0, np.max(target))
 
 
 

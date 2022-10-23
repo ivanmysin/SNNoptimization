@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 
-hf = h5py.File('/home/ivan/Data/interneurons_theta/solution_299.hdf5', 'r')
+hf = h5py.File('/home/ivan/Data/interneurons_theta/solution_062.hdf5', 'r')
 dset_solution = hf['solution']
 dset_targets = hf['targets']
 solution = dset_solution[:]

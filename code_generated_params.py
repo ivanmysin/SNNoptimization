@@ -550,6 +550,49 @@ olm_params = {
     },
 }
 
+pvbas_params = {
+    "name" : "pvbas",
+    "Vreset": -90.0,
+    "Vt": -50.0,
+    "gl": 0.1,
+    "El": -60.0,
+    "C": 1.0,
+    "sigma": 0.3,
+    "ref_dvdt": 3.0,
+    "refactory": 3.0,  # refactory for threshold
+    "Iext": 0.0,
+    "N": 400,
+    "dts": 0.5,
+
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 50.0,
+        "phase": 1.5707963267948966,
+    },
+}
+
+olm_params = {
+    "name" : "olm",
+    "Vreset": -90.0,
+    "Vt": -50.0,
+    "gl": 0.1,
+    "El": -60.0,
+    "C": 1.5,
+    "sigma": 0.3,
+    "ref_dvdt": 3.0,
+    "refactory": 3.0,  # refactory for threshold
+    "Iext": 0.3,
+    "N": 400,
+    "dts": 0.5,
+
+    "target" : {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 50.0,
+        "phase": 3.14,
+    },
+}
 cckbas_params = {
     "name" : "cckbas",
     "Vreset": -90.0,

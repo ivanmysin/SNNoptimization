@@ -127,7 +127,7 @@ class LIF_Neuron(BaseNeuron):
 
 
     @tf.function
-    def __call__(self, t, y, gsyn=0.0, Isyn=0.0):
+    def __call__(self, t, y, gsyn=tf.Variable(0.0, dtype=tf.float64), Isyn=tf.Variable(0.0, dtype=tf.float64)):
         ro = y[self.ro_start_idx : self.ro_end_idx]
         V = y[self.V_start_idx : self.V_end_idx]
 
@@ -441,9 +441,16 @@ class Network(tf.keras.Model):
         for neurons_idx, neuron in enumerate(self.neurons):
             solution_dset.attrs[neuron.population_name] = self.ro_0_indexes[neurons_idx]
 
+            solution_dset.attrs[neuron.population_name + "_Iext"] = neuron.Iext.numpy()
+
         hf.close()
 
         return
+
+    def load_trained_variables(self, filepath):
+        hf = h5py.File(filepath, 'r')
+        for val in self.synapses[0].trainable_variables:
+            val.assign(hf[val.name][:])
 
     def set_optimizator(self, optimizer):
         self.optimizer = optimizer
@@ -451,6 +458,7 @@ class Network(tf.keras.Model):
     def loss_function(self, y_true, y_pred): # = mean_squared_logarithmic_error
         L = tf.reduce_sum( tf.math.square(tf.math.log(y_true + 1.) - tf.math.log(y_pred + 1.)))
         return L
+    
     #@tf.function
     def fit(self, t, targets_firings, n_inter=50, win4_start = 2000, win4grad = 500):
         n_points_of_simulation = int(tf.size(t))
@@ -466,10 +474,15 @@ class Network(tf.keras.Model):
             solution = odeint(self, y0_main, t[time_start_idx:time_end_idx], method="euler")
             solutions_full.append(solution)
 
-            grad_over_simulation = [0] * len(self.synapses[0].trainable_variables)
+            
             loss_over_simulation = 0
 
             y0 = solution[-1, :]
+
+            trainable_variables = tuple(neuron.Iext for neuron in self.neurons)
+            trainable_variables = trainable_variables + self.synapses[0].trainable_variables
+            grad_over_simulation = [0] * len(trainable_variables)
+
             for idx in range(n_loops):
 
                 time_start_idx = win4grad + win4grad * idx
@@ -477,7 +490,7 @@ class Network(tf.keras.Model):
                 t_slice = t[time_start_idx:time_end_idx]
                 with tf.GradientTape(watch_accessed_variables=False) as tape:
 
-                    tape.watch(self.synapses[0].trainable_variables)
+                    tape.watch(trainable_variables)
 
                     solution = odeint_adjoint(self, y0, t_slice, method="euler")
                     solutions_full.append(solution)
@@ -491,9 +504,13 @@ class Network(tf.keras.Model):
 
                     loss = self.loss_function(targets_firings[time_start_idx:time_end_idx, :], firings)
                     for val in self.synapses[0].trainable_variables:
-                        loss += tf.reduce_sum(10e6 * tf.nn.relu(0.005 - val))
+                        #loss += tf.reduce_sum(10e6 * tf.nn.relu(0.005 - val))
+                        loss += tf.reduce_sum(-0.1 * tf.math.log(100 * val))
 
-                    grad = tape.gradient(loss, self.synapses[0].trainable_variables)
+                    for neuron in self.neurons:
+                        loss += tf.reduce_sum(-0.1 * tf.math.log(1.5 - neuron.Iext))
+
+                    grad = tape.gradient(loss, trainable_variables)
 
                 y0 = solution[-1, :]
 
@@ -503,7 +520,7 @@ class Network(tf.keras.Model):
 
 
 
-            self.optimizer.apply_gradients(zip(grad_over_simulation, self.synapses[0].trainable_variables))
+            self.optimizer.apply_gradients(zip(grad_over_simulation, trainable_variables))
 
         return  tf.concat(solutions_full, axis=0), loss_over_simulation
 
@@ -513,137 +530,100 @@ class Network(tf.keras.Model):
 
 ##########################################
 def main():
+    pvbas_params = {
+        "name": "pvbas",
+        "Vreset": -90.0,
+        "Vt": -50.0,
+        "gl": 0.1,
+        "El": -60.0,
+        "C": 1.0,
+        "sigma": 0.3,
+        "ref_dvdt": 3.0,
+        "refactory": 3.0,  # refactory for threshold
+        "Iext": 0.8,
+        "N": 400,
+        "dts": 0.5,
 
-
-    params_neurons1 = {
-        "Vreset" : -90.0,
-        "Vt" : -50.0,
-        "gl" : 0.1,
-        "El" : -60.0,
-        "C"  : 1.0,
-        "sigma" : 0.3,
-        "ref_dvdt" : 3.0,
-        "refactory" :  3.0, # refactory for threshold
-        "w_in_distr" : 1.0,  # weight of neuron in model
-        "Iext" : 0.1,
-
-        "use_CBRD" : True,
-        "N" : 400,
-        "dts" : 0.5
+        "target": {
+            "R": 0.3,
+            "freq": 5,
+            "mean_spike_rate": 50.0,
+            "phase": 1.5707963267948966,
+        },
     }
 
-    params_neurons2 = {
-        "Vreset" : -90.0,
-        "Vt" : -50.0,
-        "gl" : 0.1,
-        "El" : -60.0,
-        "C"  : 1.0,
-        "sigma" : 0.3,
-        "ref_dvdt" : 3.0,
-        "refactory" :  3.0, # refactory for threshold
-        "w_in_distr" : 1.0,  # weight of neuron in model
-        "Iext" : 1.1,
+    olm_params = {
+        "name": "olm",
+        "Vreset": -90.0,
+        "Vt": -50.0,
+        "gl": 0.1,
+        "El": -60.0,
+        "C": 1.5,
+        "sigma": 0.3,
+        "ref_dvdt": 3.0,
+        "refactory": 3.0,  # refactory for threshold
+        "Iext": 1.3,
+        "N": 400,
+        "dts": 0.5,
 
-        "use_CBRD" : True,
-        "N" : 400,
-        "dts" : 0.5
+        "target": {
+            "R": 0.3,
+            "freq": 5,
+            "mean_spike_rate": 50.0,
+            "phase": 3.14,
+        },
     }
 
-    synapse_params1 = {
-        "w" : 1.6,
-        "pre" : 0, # None,
-        "post": 1, # None,
-        "tau_f" : 12.0,  # ms
-        "tau_r" : 1912.0, #  ms   # Synaptic depression rate
-        "tau_d" : 2.8, #
-        "Uinc"  : 0.153,
-        "gbarS" : 1.0,
+    olm2pvbas = {
+        "w": 0.1,
+        "pre_name": "olm",
+        "post_name": "pvbas",
+        "tau_f": 16.57863002,
+        "tau_r": 650.1346414,
+        "tau_d": 5.685709176,
+        "Uinc": 0.230148227,
+        "gbarS": 1.567269637,
         "Erev": -75.0,
     }
-
-    synapse_params2 = {
-        "w" : 1.2,
-        "pre" : 1, # None,
-        "post": 0, # None,
-        "tau_f" : 12.0,  # ms
-        "tau_r" : 912.0, #  ms   # Synaptic depression rate
-        "tau_d" : 2.8, #
-        "Uinc"  : 0.153,
-        "gbarS" : 1.0,
-        "Erev": -75.0,
-    }
-
-    synapse_params3 = {
-        "w" : 10.0,
-        "pre" : 2, # None,
-        "post": 0, # None,
-        "tau_f" : 12.0,  # ms
-        "tau_r" : 912.0, #  ms   # Synaptic depression rate
-        "tau_d" : 2.8, #
-        "Uinc"  : 0.153,
-        "gbarS" : 1.0,
+    ca3pyr2pvbas = {
+        "w": 0.5,
+        "pre_name": "ca3pyr",
+        "post_name": "pvbas",
+        "tau_f": 29.69023481,
+        "tau_r": 440.119068,
+        "tau_d": 5.394005967,
+        "Uinc": 0.198996085,
+        "gbarS": 0.908653493,
         "Erev": 0.0,
     }
 
-    generator1 = {
+    ca3pyr_params = {
+        "name": "ca3pyr",
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 18,
-        "phase": 0,
+        "mean_spike_rate": 5,
+        "phase": 1.58,
     }
-
 
     params_net = {
-        "params_neurons" : [params_neurons1, params_neurons2],
-        "params_synapses" : [synapse_params1, synapse_params2, synapse_params3],
-        "params_generators" : [generator1, ],
+        "params_neurons" : [pvbas_params, olm_params],
+        "params_synapses" : [olm2pvbas, ca3pyr2pvbas],
+        "params_generators" : [ca3pyr_params, ],
     }
 
 
 
-    t = tf.range(0.0, 500.0, 0.1, dtype=tf.float64) #tf.Variable(0, dtype=tf.float64)
-    V = tf.zeros(400, dtype=tf.float64) - 90
-    ro = tf.zeros(400, dtype=tf.float64)
-    ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[399, ]], [1 / 0.5, ]))
-    # y0 = tf.concat([ro, V, ro, V], axis=0)
-    #dydt = net(t, y0)
-    y0syn = tf.Variable([1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=tf.float64)
-    y0 = tf.cast( tf.concat([y0syn, ro, V, ro, V], axis=0), dtype=tf.float64)
-
+    t = tf.range(0.0, 5.0, 0.1, dtype=tf.float64) #tf.Variable(0, dtype=tf.float64)
     net = Network(params_net)
+    y0 = net.get_y0()
 
-    solution = odeint_adjoint(net, y0, t, method="euler" )
+    solution = odeint(net, y0, t, method="euler" )  #odeint_adjoint
     # with tf.GradientTape() as tape:
     #     tape.watch(net.neurons[0].Iext)
     #     solution = odeint_adjoint(net, y0, t, method="euler")
     #     grad = tape.gradient(solution[-1, 0], net.neurons[0].Iext)
-    #
-    # print(grad)
-    #np.savetxt("test.txt", solution.numpy(), fmt='%.2f', delimiter='\t')
-    #print(solution.numpy())
-    # Pop = LIF_Neuron(params_neurons)
 
-    # V = tf.zeros(400, dtype=tf.float64) - 90
-    # ro = tf.zeros(400, dtype=tf.float64)
-    # ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[399, ]], [1 / 0.5, ]))
-    # y0 = tf.concat([ro, V], axis=0)
-    # # dydt = Pop.update(t, y)
-    # # t = tf.Variable(0, dtype=tf.float64)
-    # t = tf.range(0.0, 500.0, 0.1, dtype=tf.float64)
-    #
-    # #solution = odeint(Pop.update, y0, t, method="euler")
-    # # odeint_adjoint(func, y0, t, rtol=1e-6, atol=1e-12, method=None, options=None, adjoint_method=None, adjoint_rtol=None,
-    # #                    adjoint_atol=None, adjoint_options=None)
 
-    # with tf.GradientTape() as tape:
-    #     tape.watch(Pop.Iext)
-    #     #sol = odeint_adjoint(Pop, y0, t, method="euler")
-    #     sol = odeint(Pop, y0, t, method="euler")
-    #
-    #     grad = tape.gradient(sol[-1, 0], Pop.Iext)
-    #
-    # print(grad)
-    # solution = sol
     fig, axes = plt.subplots(nrows=4, sharex=True)
     # t = t.numpy()
     # solution = solution.numpy()

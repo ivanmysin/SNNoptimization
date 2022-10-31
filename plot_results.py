@@ -2,18 +2,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 
-hf = h5py.File('/home/ivan/Data/interneurons_theta/solution_062.hdf5', 'r')
+hf = h5py.File('/home/ivan/Data/interneurons_theta/solution_013.hdf5', 'r')
 dset_solution = hf['solution']
 dset_targets = hf['targets']
 solution = dset_solution[:]
 targets = dset_targets[:]
 
-t = np.linspace(0, 1.2, solution.shape[0])
+t = np.linspace(0, 2.0, solution.shape[0])
 sine = 0.5 * (np.cos(2 * np.pi * t * 5) + 1)
 
+pop_indxes_keys = {}
+for key, value in dset_solution.attrs.items():
+	if key.find("Iext") == -1:
+		pop_indxes_keys[key] = value
 
-fig, axes = plt.subplots( nrows=len(dset_solution.attrs.keys()), sharex=True )
-for idx, (neuron_name, neuron_idx) in enumerate(sorted(dset_solution.attrs.items(),key=lambda item:item[1] )):
+
+fig, axes = plt.subplots( nrows=len(pop_indxes_keys), sharex=True )
+if len(pop_indxes_keys) == 1:
+    axes = [axes, ]
+for idx, (neuron_name, neuron_idx) in enumerate(sorted(pop_indxes_keys.items(),key=lambda item:item[1] )):
     ax = axes[idx]
     firings = solution[:, neuron_idx]
     target = targets[:, idx]
@@ -23,9 +30,7 @@ for idx, (neuron_name, neuron_idx) in enumerate(sorted(dset_solution.attrs.items
     ax.plot(t, target, label = "target")
     ax.legend(loc = "upper right")
 
-    ax.set_ylim(0, np.max(target))
-
-
+    #ax.set_ylim(0, np.max(target))
 
 hf.close()
 plt.show()

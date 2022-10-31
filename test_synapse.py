@@ -16,8 +16,14 @@ synapse_params = {
     "Erev": -75.0,
 }
 
+W_new = np.array([0.5, 0.5], dtype=np.float64)
 
 synapse = ctfeq.PlasticSynapse([synapse_params, synapse_params])
+print(synapse.W)
+w = synapse.W
+w.assign(W_new)
+print(synapse.W)
+
 y = tf.Variable([1.0, 0.5, 0.0, 1.0, 0.5, 0.0], dtype=tf.float64)
 t = tf.Variable(0, dtype=tf.float64)
 SRpre = tf.Variable([0.5, 0.5], dtype=tf.float64)

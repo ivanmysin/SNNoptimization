@@ -195,7 +195,7 @@ class PlasticSynapse(SimlestSinapse):
         self.Uinc = tf.Variable(Uincs, dtype=tf.float64, name='Uinc', trainable=True)
         self.tau1r = tf.where(self.tau_d != self.tau_r,  self.tau_d / (self.tau_d - self.tau_r), 1e-13)
 
-        self.gbarS = tf.Variable(gbarSs, dtype=tf.float64, trainable=True)
+        self.gbarS = tf.Variable(gbarSs, dtype=tf.float64, name='SynapticConductance', trainable=True)
         self.Erev = tf.Variable(Erevs, dtype=tf.float64, trainable=False)
         self.W = tf.Variable(Ws, dtype=tf.float64, name='Wplasticsyns', trainable=True)
 
@@ -460,7 +460,7 @@ class Network(tf.keras.Model):
         return L
     
     #@tf.function
-    def fit(self, t, targets_firings, n_inter=50, win4_start = 2000, win4grad = 500):
+    def fit(self, t, targets_firings, n_inter=50, path4saving=None, win4_start = 2000, win4grad = 500):
         n_points_of_simulation = int(tf.size(t))
         n_loops = int((n_points_of_simulation - win4_start) / win4grad)
 
@@ -481,6 +481,8 @@ class Network(tf.keras.Model):
 
             trainable_variables = tuple(neuron.Iext for neuron in self.neurons)
             trainable_variables = trainable_variables + self.synapses[0].trainable_variables
+
+            #trainable_variables = self.synapses[0].trainable_variables
             grad_over_simulation = [0] * len(trainable_variables)
 
             for idx in range(n_loops):
@@ -505,10 +507,13 @@ class Network(tf.keras.Model):
                     loss = self.loss_function(targets_firings[time_start_idx:time_end_idx, :], firings)
                     for val in self.synapses[0].trainable_variables:
                         #loss += tf.reduce_sum(10e6 * tf.nn.relu(0.005 - val))
-                        loss += tf.reduce_sum(-0.1 * tf.math.log(100 * val))
+                        loss += tf.reduce_sum(-0.01 * tf.math.log(100 * val))
 
-                    for neuron in self.neurons:
-                        loss += tf.reduce_sum(-0.1 * tf.math.log(1.5 - neuron.Iext))
+                    loss += tf.reduce_sum(-0.01 * tf.math.log(100 * (1.0 - self.synapses[0].Uinc) ))
+                    loss += tf.reduce_sum(-0.01 * tf.math.log(100 * (1.0 - self.synapses[0].W) ))
+                    
+                    # for neuron in self.neurons:
+                    #     loss += tf.reduce_sum(-0.1 * tf.math.log(1.5 - neuron.Iext))
 
                     grad = tape.gradient(loss, trainable_variables)
 
@@ -517,9 +522,10 @@ class Network(tf.keras.Model):
                 for grad_idx in range(len(grad)):
                     grad_over_simulation[grad_idx] = grad_over_simulation[grad_idx] + grad[grad_idx]
                 loss_over_simulation += loss
-
-
-
+            
+            if not (path4saving is None):
+                self.save_simulation_data(path4saving, tf.concat(solutions_full, axis=0), targets_firings)
+            
             self.optimizer.apply_gradients(zip(grad_over_simulation, trainable_variables))
 
         return  tf.concat(solutions_full, axis=0), loss_over_simulation

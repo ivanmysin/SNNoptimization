@@ -456,11 +456,24 @@ class Network(tf.keras.Model):
         self.optimizer = optimizer
 
     def loss_function(self, y_true, y_pred): # = mean_squared_logarithmic_error
-        L = tf.reduce_sum( tf.math.square(tf.math.log(y_true + 1.) - tf.math.log(y_pred + 1.)))
+
+        #L = tf.reduce_sum( tf.math.square(tf.math.log(y_true + 1.) - tf.math.log(y_pred + 1.)))
+        L = tf.reduce_sum( tf.math.square( y_true - y_pred ) )
+
+        # cos_line = 0.1 * (tf.math.cos(2*np.pi*8.0*0.001*t) + 1)
+        # print(len(self.neurons))
+        # fig, axes = plt.subplots(nrows=len(self.neurons), sharex=True)
+        # for idx in range(len(self.neurons)):
+        #     axes[idx].set_title( self.neurons[idx].population_name )
+        #     axes[idx].plot(t, cos_line)
+        #     axes[idx].plot(t, y_pred[:, idx])
+        #     axes[idx].plot(t, y_true[:, idx])
+        #
+        # plt.show()
         return L
     
     #@tf.function
-    def fit(self, t, targets_firings, n_inter=50, path4saving=None, win4_start = 2000, win4grad = 500):
+    def fit(self, t, generators4targets, n_inter=50, path4saving=None, win4_start = 2000, win4grad = 500):
         n_points_of_simulation = int(tf.size(t))
         n_loops = int((n_points_of_simulation - win4_start) / win4grad)
 
@@ -475,7 +488,8 @@ class Network(tf.keras.Model):
             solutions_full.append(solution)
 
             
-            loss_over_simulation = 0
+            loss_over_simulation = 0.0
+            clear_loss_over_simulation = 0.0
 
             y0 = solution[-1, :]
 
@@ -485,16 +499,24 @@ class Network(tf.keras.Model):
             #trainable_variables = self.synapses[0].trainable_variables
             grad_over_simulation = [0] * len(trainable_variables)
 
+            # print(n_loops)
+            targets_firings_list = []
+
             for idx in range(n_loops):
 
                 time_start_idx = win4grad + win4grad * idx
                 time_end_idx = time_start_idx + win4grad
-                t_slice = t[time_start_idx:time_end_idx]
+                t_slice = t[time_start_idx-1 : time_end_idx]
+
+                targets_firings = generators4targets(tf.reshape(t_slice, shape=(-1, 1)))
+                targets_firings_list.append(targets_firings)
+
                 with tf.GradientTape(watch_accessed_variables=False) as tape:
 
                     tape.watch(trainable_variables)
 
                     solution = odeint_adjoint(self, y0, t_slice, method="euler")
+
                     solutions_full.append(solution)
 
                     number_nun = tf.reduce_sum(tf.cast(tf.math.is_nan(solution), dtype=tf.int32))
@@ -504,13 +526,15 @@ class Network(tf.keras.Model):
 
                     firings = tf.gather(solution, self.ro_0_indexes, axis=1)
 
-                    loss = self.loss_function(targets_firings[time_start_idx:time_end_idx, :], firings)
+                    clear_loss = self.loss_function(targets_firings, firings)
+                    clear_loss_over_simulation += clear_loss
+                    loss = clear_loss
                     for val in self.synapses[0].trainable_variables:
                         #loss += tf.reduce_sum(10e6 * tf.nn.relu(0.005 - val))
-                        loss += tf.reduce_sum(-0.01 * tf.math.log(100 * val))
+                        loss += tf.reduce_sum(-0.001 * tf.math.log(100 * val))
 
-                    loss += tf.reduce_sum(-0.01 * tf.math.log(100 * (1.0 - self.synapses[0].Uinc) ))
-                    loss += tf.reduce_sum(-0.01 * tf.math.log(100 * (1.0 - self.synapses[0].W) ))
+                    loss += tf.reduce_sum(-0.001 * tf.math.log(100 * (1.0 - self.synapses[0].Uinc) ))
+                    loss += tf.reduce_sum(-0.001 * tf.math.log(100 * (1.0 - self.synapses[0].W) ))
                     
                     # for neuron in self.neurons:
                     #     loss += tf.reduce_sum(-0.1 * tf.math.log(1.5 - neuron.Iext))
@@ -524,11 +548,11 @@ class Network(tf.keras.Model):
                 loss_over_simulation += loss
             
             if not (path4saving is None):
-                self.save_simulation_data(path4saving, tf.concat(solutions_full, axis=0), targets_firings)
+                self.save_simulation_data(path4saving, tf.concat(solutions_full, axis=0), tf.concat(targets_firings_list, axis=0))
             
             self.optimizer.apply_gradients(zip(grad_over_simulation, trainable_variables))
 
-        return  tf.concat(solutions_full, axis=0), loss_over_simulation
+        return  tf.concat(solutions_full, axis=0), clear_loss_over_simulation
 
 
 

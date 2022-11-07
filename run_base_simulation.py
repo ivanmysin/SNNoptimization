@@ -21,10 +21,10 @@ for idx in range(20):
     number_of_simulation = number_of_simulation_0 + idx + 1
     
     path = path4savingresults_template.format(number_of_simulation)
-    solution, loss = net.fit(t, generators4targets, path4saving=path, n_inter=1, win4_start = 10000, win4grad = 500)
+    solution, clearloss, fullloss = net.fit(t, generators4targets, path4saving=path, n_inter=1, win4_start = 10000, win4grad = 500)
 
     #net.save_simulation_data(path, solution, Targets_spikes_rates)
-    print("Прогон № ", str(number_of_simulation), ", Loss = ", float(loss))
+    print("Прогон № ", str(number_of_simulation), ", Clear Loss = ", float(clearloss), ", Full Loss = ", float(fullloss) )
 
 
 

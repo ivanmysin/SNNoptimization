@@ -504,9 +504,9 @@ class Network(tf.keras.Model):
 
             for idx in range(n_loops):
 
-                time_start_idx = win4grad + win4grad * idx
+                time_start_idx = win4grad + win4grad * idx - 1
                 time_end_idx = time_start_idx + win4grad
-                t_slice = t[time_start_idx-1 : time_end_idx]
+                t_slice = t[time_start_idx : time_end_idx]
 
                 targets_firings = generators4targets(tf.reshape(t_slice, shape=(-1, 1)))
                 targets_firings_list.append(targets_firings)
@@ -552,7 +552,7 @@ class Network(tf.keras.Model):
             
             self.optimizer.apply_gradients(zip(grad_over_simulation, trainable_variables))
 
-        return  tf.concat(solutions_full, axis=0), clear_loss_over_simulation
+        return  tf.concat(solutions_full, axis=0), clear_loss_over_simulation, loss_over_simulation
 
 
 

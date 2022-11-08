@@ -500,16 +500,17 @@ class Network(tf.keras.Model):
             grad_over_simulation = [0] * len(trainable_variables)
 
             # print(n_loops)
-            targets_firings_list = []
+            targets_firings = generators4targets(tf.reshape(t[time_start_idx:time_end_idx], shape=(-1, 1)))
+            targets_firings_list = [targets_firings, ]
 
             for idx in range(n_loops):
 
-                time_start_idx = win4grad + win4grad * idx - 1
-                time_end_idx = time_start_idx + win4grad
+                time_start_idx = win4_start + win4grad * idx - 1
+                time_end_idx = time_start_idx + win4grad + 1
                 t_slice = t[time_start_idx : time_end_idx]
 
                 targets_firings = generators4targets(tf.reshape(t_slice, shape=(-1, 1)))
-                targets_firings_list.append(targets_firings)
+                targets_firings_list.append(targets_firings[1:])
 
                 with tf.GradientTape(watch_accessed_variables=False) as tape:
 
@@ -517,7 +518,7 @@ class Network(tf.keras.Model):
 
                     solution = odeint_adjoint(self, y0, t_slice, method="euler")
 
-                    solutions_full.append(solution)
+                    solutions_full.append(solution[1:])
 
                     number_nun = tf.reduce_sum(tf.cast(tf.math.is_nan(solution), dtype=tf.int32))
                     if number_nun > 0:

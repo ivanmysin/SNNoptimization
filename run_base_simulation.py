@@ -17,7 +17,7 @@ net.set_optimizator(Optimizer)
 #net.load_trained_variables('/home/ivan/Data/interneurons_theta/solution_000.hdf5')
 
 number_of_simulation_0 = 0
-for idx in range(20):
+for idx in range(200):
     number_of_simulation = number_of_simulation_0 + idx + 1
     
     path = path4savingresults_template.format(number_of_simulation)

@@ -1,8 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
+import tensorflow as tf
+import cbrd_tfdiffeq
+from code_generated_params import params_net
 
-hf = h5py.File('/home/ivan/Data/interurons_test/solution_011.hdf5', 'r')
+generators4targets = cbrd_tfdiffeq.VonMissesGenerators(params_net["params_neurons"])
+
+
+hf = h5py.File('/home/ivan/Data/interurons_test/solution_000.hdf5', 'r')
 dset_solution = hf['solution']
 dset_targets = hf['targets']
 solution = dset_solution[:]
@@ -17,6 +23,9 @@ for key, value in dset_solution.attrs.items():
         pop_indxes_keys[key] = value
 
 
+Targets_spikes_rates = generators4targets(1000.0 * tf.reshape(t, shape=(-1, 1)))
+
+
 fig, axes = plt.subplots( nrows=len(pop_indxes_keys.keys()), sharex=True )
 if len(pop_indxes_keys) == 1:
     axes = [axes, ]
@@ -26,8 +35,9 @@ for idx, (neuron_name, neuron_idx) in enumerate(sorted(pop_indxes_keys.items(),k
     target = targets[:, idx]
     ax.plot(t, firings, label=neuron_name)
     sine_ampls = sine * np.max(target)
-    ax.plot(t, sine_ampls, linestyle="--", label = "cos")
-    #ax.plot(t[10000:], target, label = "target")
+    ax.plot(t, sine_ampls, linestyle="--", label = "cos", color='black')
+    ax.plot(t, Targets_spikes_rates[:, idx], linewidth=2, label = "full target", color='red')
+    ax.plot(t, target, label = "target", linewidth=1, color='green')
     ax.legend(loc = "upper right")
 
     #ax.set_ylim(0, np.max(target))

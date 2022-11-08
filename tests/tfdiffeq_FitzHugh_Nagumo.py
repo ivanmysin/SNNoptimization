@@ -29,7 +29,7 @@ class ODEFunc(tf.keras.Model):
         self.tau_u = tf.constant(12.5, dtype=tf.float64)
 
     @tf.function
-    def call(self, t, y):
+    def __call__(self, t, y):
         dv_dt = y[0] - (y[0] ** 3) / 3 - y[1] + self.Iext
         du_dt = (y[0] + self.a - self.b * y[1]) / self.tau_u
 

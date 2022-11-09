@@ -20,7 +20,7 @@ pvbas_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 50.0,
+        "mean_spike_rate": 20.0,
         "phase": 1.5707963267948966,
     },
 }
@@ -42,7 +42,7 @@ olm_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 50.0,
+        "mean_spike_rate": 20.0,
         "phase": 3.14,
     },
 }
@@ -64,7 +64,7 @@ cckbas_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 50.0,
+        "mean_spike_rate": 20.0,
         "phase": -1.5707963267948966,
     },
 }
@@ -86,7 +86,7 @@ bis_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 50.0,
+        "mean_spike_rate": 20.0,
         "phase": 3.141592653589793,
     },
 }
@@ -108,7 +108,7 @@ aac_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 50.0,
+        "mean_spike_rate": 20.0,
         "phase": 0.0,
     },
 }
@@ -130,7 +130,7 @@ ivy_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 50.0,
+        "mean_spike_rate": 20.0,
         "phase": -1.5707963267948966,
     },
 }
@@ -152,7 +152,7 @@ ngf_params = {
     "target" : {
         "R": 0.3,
         "freq": 5,
-        "mean_spike_rate": 50.0,
+        "mean_spike_rate": 20.0,
         "phase": 0.0,
     },
 }
@@ -205,6 +205,8 @@ neurons_names["EC LIII Pyramidal (+)223111p"] = "ec3"
 neurons_names_keys_list = list(neurons_names.keys())
 
 data = pd.read_csv(filepath, delimiter="\t")
+
+print(data.iloc[-1])
 
 code_full = ""
 code_template = """{:s}2{:s} = {{

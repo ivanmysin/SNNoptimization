@@ -8,7 +8,7 @@ from code_generated_params import params_net
 generators4targets = cbrd_tfdiffeq.VonMissesGenerators(params_net["params_neurons"])
 
 
-hf = h5py.File('/home/ivan/Data/interurons_test/solution_000.hdf5', 'r')
+hf = h5py.File('/home/ivan/Data/interurons_test/solution_200.hdf5', 'r')
 dset_solution = hf['solution']
 dset_targets = hf['targets']
 solution = dset_solution[:]
@@ -40,7 +40,7 @@ for idx, (neuron_name, neuron_idx) in enumerate(sorted(pop_indxes_keys.items(),k
     ax.plot(t, target, label = "target", linewidth=1, color='green')
     ax.legend(loc = "upper right")
 
-    #ax.set_ylim(0, np.max(target))
+    ax.set_ylim(0, np.max(target))
 
 hf.close()
 plt.show()

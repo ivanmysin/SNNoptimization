@@ -515,6 +515,28 @@ ec32ivy = {
     "gbarS": 1.650136928,
     "Erev": 0.0,
 }
+ca3pyr2ngf = {
+    "w": 0.5,
+    "pre_name": "ca3pyr",
+    "post_name": "ngf",
+    "tau_f": 50.35427898,
+    "tau_r": 345.1417744,
+    "tau_d": 4.255231343,
+    "Uinc": 0.218766637,
+    "gbarS": 1.650136928,
+    "Erev": 0.0,
+}
+ivy2ngf = {
+    "w": 0.1,
+    "pre_name": "ivy",
+    "post_name": "ngf",
+    "tau_f": 25.480563,
+    "tau_r": 553.4916051,
+    "tau_d": 8.831768275,
+    "Uinc": 0.212282632,
+    "gbarS": 1.588573475,
+    "Erev": -75.0,
+}
 ########################################
 ##### block of neurons params #########
 pvbas_params = {
@@ -702,5 +724,5 @@ ec3_params = {
 params_net = {
 "params_neurons" : [pvbas_params, olm_params, cckbas_params, bis_params, aac_params, ivy_params, ngf_params],
 "params_generators" : [ca3pyr_params, ca1pyr_params, ec3_params],
-"params_synapses" : [ca3pyr2aac, ca1pyr2aac, ec32aac, pvbas2aac, cckbas2aac, ngf2aac, olm2aac, bis2aac, ivy2aac, ca3pyr2pvbas, ca1pyr2pvbas, ec32pvbas, pvbas2pvbas, cckbas2pvbas, ngf2pvbas, olm2pvbas, bis2pvbas, ivy2pvbas, ca3pyr2cckbas, ca1pyr2cckbas, ec32cckbas, pvbas2cckbas, cckbas2cckbas, ngf2cckbas, olm2cckbas, bis2cckbas, ivy2cckbas, ec32ngf, ngf2ngf, olm2ngf, ca3pyr2olm, ca1pyr2olm, bis2olm, ivy2olm, ca3pyr2bis, ca1pyr2bis, pvbas2bis, cckbas2bis, bis2bis, ivy2bis, ca3pyr2ivy, ca1pyr2ivy, pvbas2ivy, cckbas2ivy, bis2ivy, ivy2ivy, ec32ivy, ],
+"params_synapses" : [ca3pyr2aac, ca1pyr2aac, ec32aac, pvbas2aac, cckbas2aac, ngf2aac, olm2aac, bis2aac, ivy2aac, ca3pyr2pvbas, ca1pyr2pvbas, ec32pvbas, pvbas2pvbas, cckbas2pvbas, ngf2pvbas, olm2pvbas, bis2pvbas, ivy2pvbas, ca3pyr2cckbas, ca1pyr2cckbas, ec32cckbas, pvbas2cckbas, cckbas2cckbas, ngf2cckbas, olm2cckbas, bis2cckbas, ivy2cckbas, ec32ngf, ngf2ngf, olm2ngf, ca3pyr2olm, ca1pyr2olm, bis2olm, ivy2olm, ca3pyr2bis, ca1pyr2bis, pvbas2bis, cckbas2bis, bis2bis, ivy2bis, ca3pyr2ivy, ca1pyr2ivy, pvbas2ivy, cckbas2ivy, bis2ivy, ivy2ivy, ec32ivy, ca3pyr2ngf, ivy2ngf, ],
 }

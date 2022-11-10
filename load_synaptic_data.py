@@ -1,6 +1,6 @@
 import pandas as pd
 from collections import OrderedDict
-filepath = "/home/ivan/Data/hippocampome/mean_connection.txt"
+filepath = "mean_connection.txt"
 start_code = r"""########################################
 ##### block of neurons params #########
 pvbas_params = {
@@ -206,7 +206,6 @@ neurons_names_keys_list = list(neurons_names.keys())
 
 data = pd.read_csv(filepath, delimiter="\t")
 
-print(data.iloc[-1])
 
 code_full = ""
 code_template = """{:s}2{:s} = {{

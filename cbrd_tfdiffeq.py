@@ -155,6 +155,78 @@ class LIF_Neuron(BaseNeuron):
         y0 = tf.concat([ro, V], axis=0)
         return y0
 
+class HHNeuron(BaseNeuron):
+
+    def __init__(self, params, dt=0.1):
+        super(HHNeuron, self).__init__(params, dt)
+
+        self.sigma = self.sigma / self.gl * sqrt(0.5 * self.gl / self.C)
+
+        self.ro_start_idx = 0
+        self.ro_end_idx = self.N
+        self.V_start_idx = self.ro_end_idx
+        self.V_end_idx = self.V_start_idx + self.N
+
+        self.channels = []
+        for chann_param in params["channels_params"]:
+            chann = chann_param["channel_class"](chann_param)
+            self.channels.append(chann)
+
+
+
+    def __call__(self, t, y, gsyn=tf.Variable(0.0, dtype=tf.float64), Isyn=tf.Variable(0.0, dtype=tf.float64)):
+        dydt = 0
+        return dydt
+
+    def get_y0(self):
+        V = tf.zeros(self.N, dtype=tf.float64) + self.Vreset
+        ro = tf.zeros(self.N, dtype=tf.float64)
+        ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[self.N - 1, ]], [1 / self.dts, ]))
+        y0 = tf.concat([ro, V], axis=0)
+        return y0
+
+class BaseChannel(tf.Module):
+
+    def __init__(self, params, N, dt=0.1):
+
+        self.gmax = tf.Variable(params['gmax'] , dtype=tf.float64 )
+        self.Erev = tf.Variable(params['Erev'], dtype=tf.float64 )
+        self.x_reset = tf.Variable(params['x_reset'], dtype=tf.float64 )
+        self.degrees =  tf.Variable(params['degrees'], dtype=tf.int32 )
+
+        self.N = N
+        self.n_gate_vars = tf.size(self.degrees)
+        self.dt = dt
+
+        self.start_V_idx = 0
+        self.end_V_idx = self.start_V_idx + self.N
+
+        self.start_x_idx = 0 # !!!!!!!
+        self.end_x_idx = self.start_x_idx + self.N * self.n_gate_vars
+
+    def __call__(self, t, y):
+        V = y[self.start_V_idx : self.end_V_idx]
+        x_inf, tau_x = self.get_x_inf_tau_x(V)
+        x = y[self.start_x_idx : self.end_x_idx]
+
+        dxdy = (x_inf - x) / tau_x
+        return dxdy
+    def get_y0(self):
+        return 0
+
+    def get_x_inf_tau_x(self, V):
+        return 1, 1
+
+    def get_I_and_g(self, y):
+        V = y[self.start_V_idx: self.end_V_idx]
+        x = y[self.start_x_idx: self.end_x_idx]
+
+        x = tf.reshape(x, shape=(self.N, self.n_gate_vars) )
+        x = tf.math.pow(x, self.degrees)
+        g = self.gmax * tf.math.reduce_prod(x, axis=1)
+        I = g * (self.Erev - V)
+        return g, I
+
 
 class SimlestSinapse(tf.Module):
     def __init__(self, params, dt):
@@ -456,20 +528,8 @@ class Network(tf.keras.Model):
         self.optimizer = optimizer
 
     def loss_function(self, y_true, y_pred): # = mean_squared_logarithmic_error
-
-        #L = tf.reduce_sum( tf.math.square(tf.math.log(y_true + 1.) - tf.math.log(y_pred + 1.)))
-        L = tf.reduce_sum( tf.math.square( y_true - y_pred ) )
-
-        # cos_line = 0.1 * (tf.math.cos(2*np.pi*8.0*0.001*t) + 1)
-        # print(len(self.neurons))
-        # fig, axes = plt.subplots(nrows=len(self.neurons), sharex=True)
-        # for idx in range(len(self.neurons)):
-        #     axes[idx].set_title( self.neurons[idx].population_name )
-        #     axes[idx].plot(t, cos_line)
-        #     axes[idx].plot(t, y_pred[:, idx])
-        #     axes[idx].plot(t, y_true[:, idx])
-        #
-        # plt.show()
+        L = tf.reduce_sum( tf.math.square(tf.math.log(y_true + 1.) - tf.math.log(y_pred + 1.)))
+        # L = tf.reduce_sum( tf.math.square( y_true - y_pred ) )
         return L
     
     #@tf.function
@@ -558,122 +618,3 @@ class Network(tf.keras.Model):
 
 
 
-
-##########################################
-def main():
-    pvbas_params = {
-        "name": "pvbas",
-        "Vreset": -90.0,
-        "Vt": -50.0,
-        "gl": 0.1,
-        "El": -60.0,
-        "C": 1.0,
-        "sigma": 0.3,
-        "ref_dvdt": 3.0,
-        "refactory": 3.0,  # refactory for threshold
-        "Iext": 0.8,
-        "N": 400,
-        "dts": 0.5,
-
-        "target": {
-            "R": 0.3,
-            "freq": 5,
-            "mean_spike_rate": 50.0,
-            "phase": 1.5707963267948966,
-        },
-    }
-
-    olm_params = {
-        "name": "olm",
-        "Vreset": -90.0,
-        "Vt": -50.0,
-        "gl": 0.1,
-        "El": -60.0,
-        "C": 1.5,
-        "sigma": 0.3,
-        "ref_dvdt": 3.0,
-        "refactory": 3.0,  # refactory for threshold
-        "Iext": 1.3,
-        "N": 400,
-        "dts": 0.5,
-
-        "target": {
-            "R": 0.3,
-            "freq": 5,
-            "mean_spike_rate": 50.0,
-            "phase": 3.14,
-        },
-    }
-
-    olm2pvbas = {
-        "w": 0.1,
-        "pre_name": "olm",
-        "post_name": "pvbas",
-        "tau_f": 16.57863002,
-        "tau_r": 650.1346414,
-        "tau_d": 5.685709176,
-        "Uinc": 0.230148227,
-        "gbarS": 1.567269637,
-        "Erev": -75.0,
-    }
-    ca3pyr2pvbas = {
-        "w": 0.5,
-        "pre_name": "ca3pyr",
-        "post_name": "pvbas",
-        "tau_f": 29.69023481,
-        "tau_r": 440.119068,
-        "tau_d": 5.394005967,
-        "Uinc": 0.198996085,
-        "gbarS": 0.908653493,
-        "Erev": 0.0,
-    }
-
-    ca3pyr_params = {
-        "name": "ca3pyr",
-        "R": 0.3,
-        "freq": 5,
-        "mean_spike_rate": 5,
-        "phase": 1.58,
-    }
-
-    params_net = {
-        "params_neurons" : [pvbas_params, olm_params],
-        "params_synapses" : [olm2pvbas, ca3pyr2pvbas],
-        "params_generators" : [ca3pyr_params, ],
-    }
-
-
-
-    t = tf.range(0.0, 5.0, 0.1, dtype=tf.float64) #tf.Variable(0, dtype=tf.float64)
-    net = Network(params_net)
-    y0 = net.get_y0()
-
-    solution = odeint(net, y0, t, method="euler" )  #odeint_adjoint
-    # with tf.GradientTape() as tape:
-    #     tape.watch(net.neurons[0].Iext)
-    #     solution = odeint_adjoint(net, y0, t, method="euler")
-    #     grad = tape.gradient(solution[-1, 0], net.neurons[0].Iext)
-
-
-    fig, axes = plt.subplots(nrows=4, sharex=True)
-    # t = t.numpy()
-    # solution = solution.numpy()
-    # #print(solution[:, -1])
-
-    firing1 = solution[:, 9]
-    firing2 = solution[:, 809]
-    gsyn1 = solution[:, 3]
-    gsyn2 = solution[:, 4]
-    gsyn3 = solution[:, 5]
-    # Vm = solution[:, -1]
-
-    axes[0].plot(t, firing1)
-    axes[1].plot(t, firing2)
-    axes[2].plot(t, gsyn1)
-    axes[2].plot(t, gsyn3)
-    axes[3].plot(t, gsyn2)
-    plt.show()
-
-
-if __name__ == '__main__':
-    main()

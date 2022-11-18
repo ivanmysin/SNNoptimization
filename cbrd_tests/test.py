@@ -1,12 +1,15 @@
 import tensorflow as tf
 
-a = tf.ones(shape=(5, 7), dtype=tf.float64)
-b = tf.zeros(shape=(5, 4), dtype=tf.float64)
+x = tf.range(4, dtype=tf.float64)
+x = tf.reshape(x, shape=[4, -1])
 
-c = tf.concat([a, b], axis=1)
+d = tf.Variable([4,], dtype=tf.float64)
+d = tf.reshape(d, shape=[1, 1])
+y = tf.math.pow(x, d)
 
-
-print(c.numpy())
+print(x)
+print(d)
+print(y)
 
 """
 import numpy as np

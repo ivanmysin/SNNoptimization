@@ -97,12 +97,10 @@ class BaseNeuron(tf.keras.Model):
         wi_1 = tf.concat([[0, ], wi_1], axis=0)
 
         dz_1 = -1 / dts * (diff_z[:-1] + 0.5*(1 - self.dt / dts) * (wi - wi_1) ) - Sourse[1:-1]
-        # dz_1 = -dt / dts * (diff_z[:-1] + dt / dts * (wi - wi_1)) - dt * S[1:-1]
 
         dz_0 = -1 / dts * z[0] - Sourse[0]
 
         dz_2 = 1 / dts * (z[-2] + 0.5 * (1 - self.dt / dts) * wi[-1]) - Sourse[-1]
-        # dz_2 = dt/dts * (z[-2] + dt/dts * wi[-1]) - dt * S[-1]
 
         dz_0 = tf.reshape(dz_0, [1, ])
         dz_2 = tf.reshape(dz_2, [1, ])
@@ -155,10 +153,10 @@ class LIF_Neuron(BaseNeuron):
         y0 = tf.concat([ro, V], axis=0)
         return y0
 
-class HHNeuron(BaseNeuron):
+class HH_Neuron(BaseNeuron):
 
     def __init__(self, params, dt=0.1):
-        super(HHNeuron, self).__init__(params, dt)
+        super(HH_Neuron, self).__init__(params, dt)
 
         self.sigma = self.sigma / self.gl * sqrt(0.5 * self.gl / self.C)
 
@@ -167,22 +165,75 @@ class HHNeuron(BaseNeuron):
         self.V_start_idx = self.ro_end_idx
         self.V_end_idx = self.V_start_idx + self.N
 
+        self.max_roH_idx = tf.Variable(0, dtype=tf.int32, trainable=False)
+
         self.channels = []
-        for chann_param in params["channels_params"]:
-            chann = chann_param["channel_class"](chann_param)
+        end_idx = self.V_end_idx
+        for ch_idx, chann_param in enumerate(params["channels_params"]):
+            chann = chann_param["channel_class"](chann_param, self.N, dt=self.dt)
+            end_idx = chann.set_start_x_idx(end_idx)
             self.channels.append(chann)
 
 
 
     def __call__(self, t, y, gsyn=tf.Variable(0.0, dtype=tf.float64), Isyn=tf.Variable(0.0, dtype=tf.float64)):
-        dydt = 0
-        return dydt
+        ro = y[self.ro_start_idx : self.ro_end_idx]
+        V = y[self.V_start_idx : self.V_end_idx]
+
+
+        gch = 0.0
+        Ichs = 0.0
+        for chann in self.channels:
+            gch_tmp, Ichs_tmp = chann.get_gch_and_Ich(y)
+            gch = gch + gch_tmp
+            Ichs = Ichs + Ichs_tmp
+
+
+        dVdt = (self.gl * (self.El - V) + Ichs + self.Iext + Isyn) / self.C  # !!!!!![self.ref_dvdt_idx: ]
+        tau_m = self.C / (self.gl + tf.reduce_sum(gsyn) + tf.reduce_sum(gch))
+
+        tau_m = tf.reshape(tau_m, shape=(-1,))
+        dVdt = tf.reshape(dVdt, shape=(-1,))
+
+        H = self.H_function(V[self.ref_idx:], dVdt[self.ref_idx:], tau_m, self.Vt, self.sigma)
+        H = tf.concat([tf.zeros(self.ref_idx, dtype=tf.float64), H], axis=0) ### !!!!! Убрать генерацию массива нулей каждый раз
+
+        sourse4Pts = ro * H
+        firing = tf.math.reduce_sum(sourse4Pts)
+        sourse4Pts = tf.tensor_scatter_nd_update(sourse4Pts, [[0], ], -tf.reshape(firing, [1, ]))
+
+        dro_dt = self.update_z(ro, self.dts, sourse4Pts)
+        dV_dt = self.update_z(V, self.dts, -dVdt)
+
+        dV_dt = tf.concat([tf.zeros(self.ref_dvdt_idx, dtype=tf.float64), dV_dt[self.ref_dvdt_idx: ]], axis=0)  ### !!!!! Убрать генерацию массива нулей каждый раз
+
+
+        dx_dt_list = []
+        for chann in self.channels:
+            dxdt = chann(t, y)
+            dx_dt = self.update_z(y[chann.start_x_idx : chann.end_x_idx], self.dts, -dxdt)
+            dx_dt = tf.tensor_scatter_nd_update(dx_dt, [[0], [tf.size(dx_dt) - 1]], [0, dxdt[-1]])
+            dx_dt = tf.concat([tf.zeros(self.ref_dvdt_idx, dtype=tf.float64), dx_dt[self.ref_dvdt_idx:]], axis=0) ### !!!!! Убрать генерацию массива нулей каждый раз
+            dx_dt_list.append(dx_dt)
+        dx_dt = tf.concat(dx_dt_list, axis=0)
+
+
+        dV_dt = tf.tensor_scatter_nd_update(dV_dt, [[0], [tf.size(dV_dt) - 1]], [0, dVdt[-1]])
+        dy_dt = tf.concat([dro_dt, dV_dt, dx_dt], axis=0)
+
+        return dy_dt
+
 
     def get_y0(self):
-        V = tf.zeros(self.N, dtype=tf.float64) + self.Vreset
+        V = tf.zeros(self.N, dtype=tf.float64) + self.El
         ro = tf.zeros(self.N, dtype=tf.float64)
         ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[self.N - 1, ]], [1 / self.dts, ]))
-        y0 = tf.concat([ro, V], axis=0)
+
+        x0 = []
+        for chann in self.channels:
+            x0.append( chann.get_y0(V) )
+        x0 = tf.concat(x0, axis=0)
+        y0 = tf.concat([ro, V, x0], axis=0)
         return y0
 
 class BaseChannel(tf.Module):
@@ -192,36 +243,60 @@ class BaseChannel(tf.Module):
         self.gmax = tf.Variable(params['gmax'] , dtype=tf.float64 )
         self.Erev = tf.Variable(params['Erev'], dtype=tf.float64 )
         self.x_reset = tf.Variable(params['x_reset'], dtype=tf.float64 )
-        self.degrees =  tf.Variable(params['degrees'], dtype=tf.int32 )
+        self.degrees =  tf.Variable(params['degrees'], dtype=tf.float64 )
+
+        self.n_gate_vars = tf.size(self.degrees)
+        self.degrees =  tf.reshape(self.degrees, shape=[-1, self.n_gate_vars] )
 
         self.N = N
-        self.n_gate_vars = tf.size(self.degrees)
+
         self.dt = dt
 
-        self.start_V_idx = 0
+        self.start_ro_idx = 0
+        self.end_ro_idx = self.N
+
+        self.start_V_idx = self.end_ro_idx
         self.end_V_idx = self.start_V_idx + self.N
 
-        self.start_x_idx = 0 # !!!!!!!
+        self.start_x_idx = 0
         self.end_x_idx = self.start_x_idx + self.N * self.n_gate_vars
+
+        self.max_roH_idx = tf.Variable(0, dtype=tf.int32, trainable=False)
+
+    def set_start_x_idx(self, idx):
+        self.start_x_idx = idx
+        self.end_x_idx = self.start_x_idx + self.N * self.n_gate_vars
+        return self.end_x_idx
 
     def __call__(self, t, y):
         V = y[self.start_V_idx : self.end_V_idx]
-        x_inf, tau_x = self.get_x_inf_tau_x(V)
+        x_inf = self.get_x_inf(V)
+        tau_x = self.get_tau_x(V)
         x = y[self.start_x_idx : self.end_x_idx]
 
-        dxdy = (x_inf - x) / tau_x
-        return dxdy
-    def get_y0(self):
-        return 0
+        x_new = x - (x - x_inf)*(1 - exp( -self.dt / tau_x) )
+        #dxdy = (x_inf - x) / tau_x # !!!!!! Переписать через экспоненцаильный Эйлер
+        dxdt = (x_new - x) / self.dt
 
-    def get_x_inf_tau_x(self, V):
-        return 1, 1
 
-    def get_I_and_g(self, y):
-        V = y[self.start_V_idx: self.end_V_idx]
-        x = y[self.start_x_idx: self.end_x_idx]
+        return dxdt
+    def get_y0(self, V):
+        x_inf = self.get_x_inf(V)
+        return x_inf
+
+    def get_x_inf(self, V):
+        x_inf = 1.0 / (1.0 + exp(-0.045 * (V + 10)) )
+        return x_inf
+    def get_tau_x(self, V):
+        tau_x = 0.5 + 2.0/(1 + exp(0.045 * (V - 50)))
+        return tau_x
+
+    def get_gch_and_Ich(self, y):
+        V = y[self.start_V_idx : self.end_V_idx]
+        x = y[self.start_x_idx : self.end_x_idx]
 
         x = tf.reshape(x, shape=(self.N, self.n_gate_vars) )
+
         x = tf.math.pow(x, self.degrees)
         g = self.gmax * tf.math.reduce_prod(x, axis=1)
         I = g * (self.Erev - V)

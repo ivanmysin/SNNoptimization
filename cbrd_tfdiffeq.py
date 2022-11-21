@@ -190,7 +190,7 @@ class HH_Neuron(BaseNeuron):
 
 
         dVdt = (self.gl * (self.El - V) + Ichs + self.Iext + Isyn) / self.C  # !!!!!![self.ref_dvdt_idx: ]
-        tau_m = self.C / (self.gl + tf.reduce_sum(gsyn) + tf.reduce_sum(gch))
+        tau_m = self.C / (self.gl + tf.reduce_sum(gsyn) ) # + tf.reduce_sum(gch)
 
         tau_m = tf.reshape(tau_m, shape=(-1,))
         dVdt = tf.reshape(dVdt, shape=(-1,))
@@ -206,7 +206,7 @@ class HH_Neuron(BaseNeuron):
         dV_dt = self.update_z(V, self.dts, -dVdt)
 
         dV_dt = tf.concat([tf.zeros(self.ref_dvdt_idx, dtype=tf.float64), dV_dt[self.ref_dvdt_idx: ]], axis=0)  ### !!!!! Убрать генерацию массива нулей каждый раз
-
+        dV_dt = tf.tensor_scatter_nd_update(dV_dt, [[0], [tf.size(dV_dt) - 1]], [0, dVdt[-1]])
 
         dx_dt_list = []
         for chann in self.channels:
@@ -215,25 +215,28 @@ class HH_Neuron(BaseNeuron):
             dx_dt = tf.tensor_scatter_nd_update(dx_dt, [[0], [tf.size(dx_dt) - 1]], [0, dxdt[-1]])
             dx_dt = tf.concat([tf.zeros(self.ref_dvdt_idx, dtype=tf.float64), dx_dt[self.ref_dvdt_idx:]], axis=0) ### !!!!! Убрать генерацию массива нулей каждый раз
             dx_dt_list.append(dx_dt)
-        dx_dt = tf.concat(dx_dt_list, axis=0)
-
-
-        dV_dt = tf.tensor_scatter_nd_update(dV_dt, [[0], [tf.size(dV_dt) - 1]], [0, dVdt[-1]])
-        dy_dt = tf.concat([dro_dt, dV_dt, dx_dt], axis=0)
+        if len(dx_dt_list) > 0:
+            dx_dt = tf.concat(dx_dt_list, axis=0)
+            dy_dt = tf.concat([dro_dt, dV_dt, dx_dt], axis=0)
+        else:
+            dy_dt = tf.concat([dro_dt, dV_dt], axis=0)
 
         return dy_dt
 
 
     def get_y0(self):
-        V = tf.zeros(self.N, dtype=tf.float64) + self.El
+        V = tf.zeros(self.N, dtype=tf.float64) - 90.0 #  self.El
         ro = tf.zeros(self.N, dtype=tf.float64)
         ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[self.N - 1, ]], [1 / self.dts, ]))
 
         x0 = []
         for chann in self.channels:
             x0.append( chann.get_y0(V) )
-        x0 = tf.concat(x0, axis=0)
-        y0 = tf.concat([ro, V, x0], axis=0)
+        if len(x0) > 0:
+            x0 = tf.concat(x0, axis=0)
+            y0 = tf.concat([ro, V, x0], axis=0)
+        else:
+            y0 = tf.concat([ro, V], axis=0)
         return y0
 
 class BaseChannel(tf.Module):
@@ -275,9 +278,8 @@ class BaseChannel(tf.Module):
         x = y[self.start_x_idx : self.end_x_idx]
 
         x_new = x - (x - x_inf)*(1 - exp( -self.dt / tau_x) )
-        #dxdy = (x_inf - x) / tau_x # !!!!!! Переписать через экспоненцаильный Эйлер
         dxdt = (x_new - x) / self.dt
-
+        #dxdy = (x_inf - x) / tau_x # !!!!!! Переписать через экспоненцаильный Эйлер
 
         return dxdt
     def get_y0(self, V):

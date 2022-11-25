@@ -2,30 +2,30 @@ import numpy as np
 import tensorflow as tf
 from tfdiffeq import odeint
 import cbrd_tfdiffeq as ctfeq
+import channels as Chs
 import matplotlib.pyplot as plt
-from scipy.signal.windows import parzen
-
+import h5py
 
 kdr_channel = {
-    "channel_class" : ctfeq.BaseChannel,
+    "channel_class" : Chs.Kdr_channel,
 
-    "gmax" : 40.0,
+    "gmax" : 23.0, # 40.0,
     "Erev" : -90.0,
 
     "degrees" : [4, ],
-    "x_reset" : [0.45,],
+    "x_reset" : [0.65, ], #[0.45,],
 }
 
 int_params = {
-    "name" : "int",
+    "name" : "ngf",
     "Vreset": -40.0,
-    "Vt": -50.0,
-    "gl": 0.1,
+    "Vt": -65.0,
+    "gl": 0.18, # 0.1,
     "El": -60.0,
     "C": 1.0,
     "sigma": 0.3,
-    "ref_dvdt": 1.5,   # AP duration
-    "refactory": 5.0,  # refactory for threshold
+    "ref_dvdt": 5.5,   # AP duration
+    "refactory": 10.0,  # refactory for threshold
     "Iext": 1.5,
     "N": 400,
     "dts": 0.5,
@@ -51,14 +51,20 @@ t = tf.range(0.0, 200.0, 0.1, dtype=tf.float64)
 
 solution = odeint(population, y0, t, method="euler")
 firing_cbrd = solution[:, 0]
-# Vm = solution[:, 798]
-# n = solution[:, 1198]
-fig, axes = plt.subplots(nrows=1, sharex=True)
-# axes[0].plot(t, Vm, linewidth=4)
-# axes[1].plot(t, n, linewidth=4)
+Vm = solution[:, 791]
+n = solution[:, 1191]
+
+with h5py.File("com.hdf5", "w") as file:
+    file.create_dataset("Vm", data=Vm)
+    file.create_dataset("SpikeRate", data=firing_cbrd)
+
+
+fig, axes = plt.subplots(nrows=3, sharex=True)
+axes[0].plot(t, Vm, linewidth=4)
+axes[1].plot(t, n**4, linewidth=4)
 
 ###firing_monte_carlo = get_monte_carlo()
-axes.plot(t, firing_cbrd, linewidth=1)
+axes[2].plot(t, firing_cbrd, linewidth=1)
 ####axes.plot(t, firing_monte_carlo, linewidth=1)
 # axes.set_ylim(0, None)
 # axes.set_xlim(0, None)

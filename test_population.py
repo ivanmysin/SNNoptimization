@@ -8,7 +8,7 @@ from scipy.signal.windows import parzen
 def get_monte_carlo():
     N = 5000
 
-    duration = 1000
+    duration = 200
     dt = 0.1
 
     Cm = 1.0
@@ -67,7 +67,7 @@ pvbas_params = {
 
 population = ctfeq.LIF_Neuron(pvbas_params, dt=0.1)
 y0 = population.get_y0()
-t = tf.range(0.0, 1000.0, 0.1, dtype=tf.float64)
+t = tf.range(0.0, 200.0, 0.1, dtype=tf.float64)
 solution = odeint(population, y0, t, method="euler")
 
 fig, axes = plt.subplots(nrows=1, sharex=True)

@@ -24,7 +24,7 @@ class BaseNeuron(tf.keras.Model):
     def __init__(self, params, dt):
         super(BaseNeuron, self).__init__(name="NeuronPopulation")
 
-        self.Vreset = tf.constant(params["Vreset"], shape=[1, ], dtype=tf.float64)
+        self.Vreset = tf.constant(params["Vreset"], dtype=tf.float64)
         self.Vt = tf.constant(params["Vt"], dtype=tf.float64)
 
 
@@ -57,7 +57,7 @@ class BaseNeuron(tf.keras.Model):
 
     @tf.function
     def H_function(self, V, dVdt, tau_m, Vt, sigma):
-        delta_V = maximum((Vt - V), -1.0)
+        delta_V = maximum((Vt - V), -1.0) #!!!!
         T = delta_V / sigma / SQRT_FROM_2
         A = exp(0.0061 - 1.12 * T - 0.257 * T**2 - 0.072 * T**3 - 0.0117 * T**4)
         dT_dt = -1.0 / sigma / SQRT_FROM_2 * dVdt
@@ -66,6 +66,7 @@ class BaseNeuron(tf.keras.Model):
         B = -SQRT_FROM_2 * dT_dt * F_T * tau_m
         H = (A + B) / tau_m
         H = maximum(H, 0.0)
+        H = minimum(H, 1.0)
         return H
 
     @tf.function
@@ -190,7 +191,7 @@ class HH_Neuron(BaseNeuron):
 
 
         dVdt = (self.gl * (self.El - V) + Ichs + self.Iext + Isyn) / self.C  # !!!!!![self.ref_dvdt_idx: ]
-        tau_m = self.C / (self.gl + tf.reduce_sum(gsyn) ) # + tf.reduce_sum(gch)
+        tau_m = self.C / (self.gl + tf.reduce_sum(gsyn) + tf.reduce_sum(gch) )
 
         tau_m = tf.reshape(tau_m, shape=(-1,))
         dVdt = tf.reshape(dVdt, shape=(-1,))
@@ -200,6 +201,7 @@ class HH_Neuron(BaseNeuron):
 
         sourse4Pts = ro * H
         firing = tf.math.reduce_sum(sourse4Pts)
+
         sourse4Pts = tf.tensor_scatter_nd_update(sourse4Pts, [[0], ], -tf.reshape(firing, [1, ]))
 
         dro_dt = self.update_z(ro, self.dts, sourse4Pts)
@@ -215,6 +217,7 @@ class HH_Neuron(BaseNeuron):
             dx_dt = tf.tensor_scatter_nd_update(dx_dt, [[0], [tf.size(dx_dt) - 1]], [0, dxdt[-1]])
             dx_dt = tf.concat([tf.zeros(self.ref_dvdt_idx, dtype=tf.float64), dx_dt[self.ref_dvdt_idx:]], axis=0) ### !!!!! Убрать генерацию массива нулей каждый раз
             dx_dt_list.append(dx_dt)
+
         if len(dx_dt_list) > 0:
             dx_dt = tf.concat(dx_dt_list, axis=0)
             dy_dt = tf.concat([dro_dt, dV_dt, dx_dt], axis=0)
@@ -226,6 +229,8 @@ class HH_Neuron(BaseNeuron):
 
     def get_y0(self):
         V = tf.zeros(self.N, dtype=tf.float64) - 90.0 #  self.El
+
+        V = tf.tensor_scatter_nd_update(V, [[0], ], [self.Vreset, ])
         ro = tf.zeros(self.N, dtype=tf.float64)
         ro = tf.Variable(tf.tensor_scatter_nd_update(ro, [[self.N - 1, ]], [1 / self.dts, ]))
 
@@ -273,25 +278,38 @@ class BaseChannel(tf.Module):
 
     def __call__(self, t, y):
         V = y[self.start_V_idx : self.end_V_idx]
-        x_inf = self.get_x_inf(V)
-        tau_x = self.get_tau_x(V)
+        x_inf, tau_x = self.get_x_inf_and_tau_x(V)
+
         x = y[self.start_x_idx : self.end_x_idx]
 
-        x_new = x - (x - x_inf)*(1 - exp( -self.dt / tau_x) )
+        x_new = x - (x - x_inf) * (1 - exp( -self.dt / tau_x) )
         dxdt = (x_new - x) / self.dt
-        #dxdy = (x_inf - x) / tau_x # !!!!!! Переписать через экспоненцаильный Эйлер
+
+        #dxdt[:ref] = 0
+
+
+        # dxdt = (x_inf - x) / tau_x # !!!!!! Переписать через экспоненцаильный Эйлер
 
         return dxdt
     def get_y0(self, V):
-        x_inf = self.get_x_inf(V)
+        x_inf, _ = self.get_x_inf_and_tau_x(V)
+        x_inf = tf.tensor_scatter_nd_update(x_inf, [[0], ], [self.x_reset[0], ])
+
         return x_inf
 
-    def get_x_inf(self, V):
+    def __get_x_inf(self, V):
         x_inf = 1.0 / (1.0 + exp(-0.045 * (V + 10)) )
         return x_inf
-    def get_tau_x(self, V):
+    def __get_tau_x(self, V):
         tau_x = 0.5 + 2.0/(1 + exp(0.045 * (V - 50)))
         return tau_x
+
+    def get_x_inf_and_tau_x(self, V):
+        x_inf = self.__get_x_inf(V)
+        tau_x = self.__get_tau_x(V)
+
+        return x_inf, tau_x
+
 
     def get_gch_and_Ich(self, y):
         V = y[self.start_V_idx : self.end_V_idx]
@@ -302,6 +320,7 @@ class BaseChannel(tf.Module):
         x = tf.math.pow(x, self.degrees)
         g = self.gmax * tf.math.reduce_prod(x, axis=1)
         I = g * (self.Erev - V)
+
         return g, I
 
 

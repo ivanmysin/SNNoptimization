@@ -6,20 +6,33 @@ import channels as Chs
 import matplotlib.pyplot as plt
 import h5py
 
-kdr_channel = {
-    "channel_class" : Chs.Kdr_channel,
 
-    "gmax" : 23.0, # 40.0,
+#Kdr_channelOLM
+
+kdr_channel = {
+    "channel_class" : ctfeq.BaseChannel,
+
+    "gmax" : 0.0, # 23.0, # 40.0,
     "Erev" : -90.0,
 
     "degrees" : [4, ],
     "x_reset" : [0.65, ], #[0.45,],
 }
 
+ka_channel = {
+    "channel_class" : Chs.KA_channel,
+
+    "gmax" : 0.0, #10.0,
+    "Erev" : -90.0,
+
+    "degrees" : [1, 1],
+    "x_reset" : [0.31, -0.05],
+}
+
 int_params = {
     "name" : "ngf",
     "Vreset": -40.0,
-    "Vt": -65.0,
+    "Vt": -50.0, #-65.0,
     "gl": 0.18, # 0.1,
     "El": -60.0,
     "C": 1.0,
@@ -28,9 +41,9 @@ int_params = {
     "refactory": 10.0,  # refactory for threshold
     "Iext": 1.5,
     "N": 400,
-    "dts": 0.5,
+    "dts": 0.05,
 
-    "channels_params"  : [kdr_channel, ],
+    "channels_params"  : [kdr_channel, ka_channel],
 
     "target" : {
         "R": 0.3,
@@ -45,26 +58,32 @@ population = ctfeq.HH_Neuron(int_params, dt=0.1)
 y0 = population.get_y0()
 
 #print(y0)
-t = tf.range(0.0, 200.0, 0.1, dtype=tf.float64)
+t = tf.range(0.0, 20.0, 0.1, dtype=tf.float64)
 # dydt = population(t[0], y0)
 # print(dydt)
 
 solution = odeint(population, y0, t, method="euler")
 firing_cbrd = solution[:, 0]
 Vm = solution[:, 791]
-n = solution[:, 1191]
+n = solution[:, 801]
+a = solution[:, 1599]
+b = solution[:, 1999]
 
 with h5py.File("com.hdf5", "w") as file:
     file.create_dataset("Vm", data=Vm)
     file.create_dataset("SpikeRate", data=firing_cbrd)
+    file.create_dataset("Solution", data=solution)
 
 
-fig, axes = plt.subplots(nrows=3, sharex=True)
-axes[0].plot(t, Vm, linewidth=4)
-axes[1].plot(t, n**4, linewidth=4)
+fig, axes = plt.subplots(nrows=5, sharex=True)
+axes[0].plot(t, firing_cbrd, linewidth=1)
+axes[0].set_title("Firing rate")
+axes[1].plot(t, Vm, linewidth=4)
+axes[2].plot(t, n, linewidth=4)
 
 ###firing_monte_carlo = get_monte_carlo()
-axes[2].plot(t, firing_cbrd, linewidth=1)
+axes[3].plot(t, a, linewidth=1)
+axes[4].plot(t, b, linewidth=1)
 ####axes.plot(t, firing_monte_carlo, linewidth=1)
 # axes.set_ylim(0, None)
 # axes.set_xlim(0, None)

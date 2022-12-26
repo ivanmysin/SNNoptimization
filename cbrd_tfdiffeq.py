@@ -183,14 +183,12 @@ class HH_Neuron(BaseNeuron):
         ro = y[self.ro_start_idx : self.ro_end_idx]
         V = y[self.V_start_idx : self.V_end_idx]
 
-
         gch = 0.0
         Ichs = 0.0
         for chann in self.channels:
             gch_tmp, Ichs_tmp = chann.get_gch_and_Ich(y)
             gch = gch + gch_tmp
             Ichs = Ichs + Ichs_tmp
-
 
         dVdt = (self.gl * (self.El - V) + Ichs + self.Iext + Isyn) / self.C  # !!!!!![self.ref_dvdt_idx: ]
         tau_m = self.C / (self.gl + tf.reduce_sum(gsyn) + tf.reduce_sum(gch) )
@@ -217,18 +215,40 @@ class HH_Neuron(BaseNeuron):
         dx_dt_list = []
         for chann in self.channels:
             dxdt = chann(t, y, argmax_ro_H)
+            # x_new_ch = y[800 : ] + self.dt * dxdt
+            # is_nan = tf.reduce_sum(tf.cast(x_new_ch < 0.0, dtype=tf.int64))
+            # if is_nan > 0:
+            #     print("print channel method")
+            #     print(y[800 : ][x_new_ch < 0.0])
+            #     print("####################")
 
-            dxdt = tf.reshape(dxdt, shape=(self.N, chann.n_gate_vars))
+
+            dxdt = tf.reshape(dxdt, shape=(chann.n_gate_vars, self.N))
             start_x_idx = chann.start_x_idx
             end_x_idx = start_x_idx + self.N
             for idx_x_var in range(chann.n_gate_vars):
-                dx_dt = self.update_z(y[start_x_idx : end_x_idx], self.dts, -dxdt[:, idx_x_var])
-                dx_dt = tf.tensor_scatter_nd_update(dx_dt, [[0], [tf.size(dx_dt) - 1]], [0, dxdt[-1, idx_x_var]])
-                dx_dt_list.append(dx_dt)
+                x = y[start_x_idx : end_x_idx]
+                dx_dt = self.update_z(x, self.dts, -dxdt[idx_x_var, :])
+                dx_dt = tf.tensor_scatter_nd_update(dx_dt, [[0], [self.N - 1]], [0, dxdt[idx_x_var, -1]])
+                x_new = x + self.dt * dx_dt
+                is_nan = tf.reduce_sum(tf.cast(x_new < 0.0, dtype=tf.int64))
 
+                # if is_nan > 0:
+                #     print("print after z shift")
+                #     print(tf.where(x_new < 0.0))
+                #     # print(start_x_idx)
+                #     print("x_new ", x_new[200])
+                #     print("x_new_ch ", x_new_ch[200])
+                #     print(dx_dt[200])
+                #     print(dxdt[0, 200])
+                #
+                #     print("####################")
+
+                dx_dt_list.append(dx_dt)
                 start_x_idx += self.N
                 end_x_idx += self.N
 
+        assert is_nan == 0
 
         if len(dx_dt_list) > 0:
             dx_dt = tf.concat(dx_dt_list, axis=0)
@@ -240,8 +260,10 @@ class HH_Neuron(BaseNeuron):
 
 
     def get_y0(self):
-        V = tf.zeros(self.N, dtype=tf.float64) + self.El
-        V = tf.tensor_scatter_nd_update(V, [[0], ], [self.Vreset, ])
+        V1 = tf.zeros(self.ref_dvdt_idx, dtype=tf.float64) + self.Vreset
+        V2 = tf.zeros(self.N-self.ref_dvdt_idx, dtype=tf.float64) + self.El
+        V = tf.concat([V1, V2], axis=0)
+        #tf.tensor_scatter_nd_update(V, [[0], ], [self.Vreset, ])
 
 
         ro = tf.zeros(self.N, dtype=tf.float64)
@@ -293,23 +315,21 @@ class BaseChannel(tf.Module):
     def __call__(self, t, y, argmax_ro_H=0):
         V = y[self.start_V_idx : self.end_V_idx]
         x_inf, tau_x = self.get_x_inf_and_tau_x(V)
-        x_inf = tf.reshape(x_inf, shape=(self.N, self.n_gate_vars))
-        tau_x = tf.reshape(tau_x, shape=(self.N, self.n_gate_vars))
+        x_inf = tf.reshape(x_inf, shape=(self.n_gate_vars, self.N))
+        tau_x = tf.reshape(tau_x, shape=(self.n_gate_vars, self.N))
 
         x = y[self.start_x_idx : self.end_x_idx]
-        x_reshaped = tf.reshape(x, shape=(self.N, self.n_gate_vars))
+        x_reshaped = tf.reshape(x, shape=(self.n_gate_vars, self.N))
 
         ## dxdt = (x_inf - x) / tau_x # !!!!!! Переписать через экспоненцаильный Эйлер
         ##  x_inf - (x_inf - x) * exp(-self.dt / tau_x)  #
+
         x_new = x_reshaped - (x_reshaped - x_inf) * (1 - exp( -self.dt / tau_x) )
 
         dxdt = (x_new - x_reshaped) / self.dt
 
-
-        x4reset = x_reshaped[argmax_ro_H, :] - x_reshaped[0, :]
+        x4reset = x_reshaped[:, argmax_ro_H] - x_reshaped[:, 0]
         dxdt = self.reset(dxdt, x4reset)
-
-
         return dxdt
     def get_y0(self, V):
         x_inf, _ = self.get_x_inf_and_tau_x(V)
@@ -321,6 +341,9 @@ class BaseChannel(tf.Module):
                 indexes_list.append([idx, 0])
             x_inf = tf.tensor_scatter_nd_update(x_inf, indexes_list, self.x_reset)
 
+
+        xr = tf.zeros((self.n_gate_vars, self.ref_dvdt_idx), dtype=tf.float64) + tf.reshape(self.x_reset, shape=(self.n_gate_vars, 1))
+        x_inf = tf.concat([xr, x_inf[:, self.ref_dvdt_idx:]], axis=1)
         x_inf = tf.reshape(x_inf, shape=(tf.size(x_inf)))
 
         return x_inf
@@ -342,19 +365,15 @@ class BaseChannel(tf.Module):
     def get_gch_and_Ich(self, y):
         V = y[self.start_V_idx : self.end_V_idx]
         x = y[self.start_x_idx : self.end_x_idx]
-
         x = tf.reshape(x, shape=(self.N, self.n_gate_vars) )
-
         x = tf.math.pow(x, self.degrees)
         g = self.gmax * tf.math.reduce_prod(x, axis=1)
         I = g * (self.Erev - V)
-
         return g, I
 
     def reset(self, dxdt, x4reset):
-        #dxdt = tf.reshape(dxdt, shape=(self.N, self.n_gate_vars))
-        xr = tf.zeros((self.ref_dvdt_idx, self.n_gate_vars), dtype=tf.float64)
-        dxdt = tf.concat([xr, dxdt[self.ref_dvdt_idx:, :]], axis=0)
+        xr = tf.zeros((self.n_gate_vars, self.ref_dvdt_idx), dtype=tf.float64)
+        dxdt = tf.concat([xr, dxdt[:, self.ref_dvdt_idx:]], axis=1)
         dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt)))
         return dxdt
 

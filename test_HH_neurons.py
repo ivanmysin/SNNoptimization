@@ -29,21 +29,32 @@ ka_channel = {
     "x_reset" : [0.31, -0.05],
 }
 
-int_params = {
-    "name" : "ngf",
+##################################################################
+kdr_channelPyrChizhovGraham = {
+    "channel_class" : Chs.Kdr_channelPyrChizhovGraham,
+
+    "gmax" : 0.76, # 10.0,
+    "Erev" : -90.0,
+
+    "degrees" : [1, 1],
+    "x_reset" : [0.26, 0.47],
+}
+
+pyr_params = {
+    "name" : "pyr",
     "Vreset": -40.0,
-    "Vt": -50.0, #-65.0,
-    "gl": 0.18, # 0.1,
-    "El": -60.0,
-    "C": 1.0,
+    "Vt": -55.0, #-65.0,
+    "gl": 0.025, # 0.18, # 0.1,
+    "El": -61.22, #-60.0,
+    "C": 0.7, #
     "sigma": 0.3,
-    "ref_dvdt": 5.5,   # AP duration
+    "ref_dvdt": 1.5,   # AP duration
     "refactory": 10.0,  # refactory for threshold
     "Iext": 1.5,
     "N": 400,
-    "dts": 0.05,
+    "dts": 0.5,
 
-    "channels_params"  : [kdr_channel, ka_channel],
+    "channels_params"  : [kdr_channelPyrChizhovGraham, ], #[kdr_channel, ka_channel],
 
     "target" : {
         "R": 0.3,
@@ -54,20 +65,22 @@ int_params = {
 }
 
 
-population = ctfeq.HH_Neuron(int_params, dt=0.1)
+
+
+population = ctfeq.HH_Neuron(pyr_params, dt=0.1)
 y0 = population.get_y0()
 
 #print(y0)
-t = tf.range(0.0, 20.0, 0.1, dtype=tf.float64)
+t = tf.range(0.0, 100.0, 0.1, dtype=tf.float64)
 # dydt = population(t[0], y0)
 # print(dydt)
 
 solution = odeint(population, y0, t, method="euler")
 firing_cbrd = solution[:, 0]
-Vm = solution[:, 791]
-n = solution[:, 801]
+Vm = solution[:, 799]
+n = solution[:, 1199]
 a = solution[:, 1599]
-b = solution[:, 1999]
+#b = solution[:, 1999]
 
 with h5py.File("com.hdf5", "w") as file:
     file.create_dataset("Vm", data=Vm)
@@ -83,7 +96,7 @@ axes[2].plot(t, n, linewidth=4)
 
 ###firing_monte_carlo = get_monte_carlo()
 axes[3].plot(t, a, linewidth=1)
-axes[4].plot(t, b, linewidth=1)
+#axes[4].plot(t, b, linewidth=1)
 ####axes.plot(t, firing_monte_carlo, linewidth=1)
 # axes.set_ylim(0, None)
 # axes.set_xlim(0, None)

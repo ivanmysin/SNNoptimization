@@ -230,8 +230,8 @@ class HH_Neuron(BaseNeuron):
                 x = y[start_x_idx : end_x_idx]
                 dx_dt = self.update_z(x, self.dts, -dxdt[idx_x_var, :])
                 dx_dt = tf.tensor_scatter_nd_update(dx_dt, [[0], [self.N - 1]], [0, dxdt[idx_x_var, -1]])
-                x_new = x + self.dt * dx_dt
-                is_nan = tf.reduce_sum(tf.cast(x_new < 0.0, dtype=tf.int64))
+                # x_new = x + self.dt * dx_dt
+                # is_nan = tf.reduce_sum(tf.cast(x_new < 0.0, dtype=tf.int64))
 
                 # if is_nan > 0:
                 #     print("print after z shift")
@@ -248,7 +248,7 @@ class HH_Neuron(BaseNeuron):
                 start_x_idx += self.N
                 end_x_idx += self.N
 
-        assert is_nan == 0
+        #assert is_nan == 0
 
         if len(dx_dt_list) > 0:
             dx_dt = tf.concat(dx_dt_list, axis=0)
@@ -289,7 +289,7 @@ class BaseChannel(tf.Module):
         self.degrees =  tf.Variable(params['degrees'], dtype=tf.float64 )
 
         self.n_gate_vars = tf.size(self.degrees)
-        self.degrees =  tf.reshape(self.degrees, shape=[-1, self.n_gate_vars] )
+        self.degrees =  tf.reshape(self.degrees, shape=[self.n_gate_vars, -1] )
 
         self.N = N
 
@@ -365,9 +365,10 @@ class BaseChannel(tf.Module):
     def get_gch_and_Ich(self, y):
         V = y[self.start_V_idx : self.end_V_idx]
         x = y[self.start_x_idx : self.end_x_idx]
-        x = tf.reshape(x, shape=(self.N, self.n_gate_vars) )
+        x = tf.reshape(x, shape=(self.n_gate_vars, self.N) )
         x = tf.math.pow(x, self.degrees)
-        g = self.gmax * tf.math.reduce_prod(x, axis=1)
+        g = self.gmax * tf.math.reduce_prod(x, axis=0)
+        #print(tf.shape(g))
         I = g * (self.Erev - V)
         return g, I
 

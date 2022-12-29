@@ -57,19 +57,26 @@ class KA_channel(ctfeq.BaseChannel):
         return b_inf, tau_b
 
     def reset(self, dxdt, x4reset):
-        #dxdt = tf.reshape(dxdt, shape=(self.N, self.n_gate_vars))
-        xr = tf.zeros((self.ref_dvdt_idx, self.n_gate_vars), dtype=tf.float64)
-        xres = (x4reset[1] + self.x_reset[1]) / self.dt
-        xr = tf.tensor_scatter_nd_update(xr, [[1, 0]], [xres, ])
+        dxdt = tf.reshape(dxdt, shape=(self.n_gate_vars, self.N))
 
-        dxdt = tf.concat([xr, dxdt[self.ref_dvdt_idx:, :]], axis=0)
+        xr = tf.zeros((self.n_gate_vars, self.ref_dvdt_idx), dtype=tf.float64)
+        xres = (x4reset[1] + self.x_reset[1]) / self.dt
+        xr = tf.tensor_scatter_nd_update(xr, [[1, 1]], [xres, ])
+
+        #tf.concat([xr, xres], axis=0)
+        #print(xr)
+
+        dxdt = tf.concat([xr, dxdt[:, self.ref_dvdt_idx:]], axis=1)
         dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt)))
 
         return dxdt
 
     def get_y0(self, V):
         x_inf, _ = self.get_x_inf_and_tau_x(V)
-        x_inf = tf.tensor_scatter_nd_update(x_inf, [[0, 0]], [self.x_reset[0], ])
+        xr1 = tf.zeros((1, self.ref_dvdt_idx), dtype=tf.float64) + self.x_reset[0]
+        xr2 = tf.zeros((1, self.ref_dvdt_idx), dtype=tf.float64) + 1.0 #!!!! x_inf[1, 0]
+        xr = tf.concat([xr1, xr2], axis=0)
+        x_inf = tf.concat([xr, x_inf[:, self.ref_dvdt_idx:]], axis=1)
         x_inf = tf.reshape(x_inf, shape=(tf.size(x_inf)))
 
         return x_inf

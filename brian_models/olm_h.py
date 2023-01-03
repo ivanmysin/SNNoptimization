@@ -75,7 +75,7 @@ dn/dt = (alpha_n*(1-n)-beta_n*n) : 1  (unless refractory)
 alpha_n = 0.1 / exprel(-(V+55*mV)/(10*mV))/ms : Hz
 beta_n = 0.125*exp(-(V+65*mV)/(80*mV))/ms : Hz
 
-dmnap/dt = (alpha_mnap*(1-mnap)-beta_mnap*mnap) : 1
+dmnap/dt = (alpha_mnap*(1-mnap)-beta_mnap*mnap) : 1 (unless refractory)
 alpha_mnap = 1.0 / (0.15 *  exp( -(V + 38*mV)/(6.5*mV)) )/ms : Hz
 beta_mnap = 1.0 / (0.15 *  exprel( -(V + 38*mV)/(6.5*mV)))/ms : Hz
 
@@ -88,23 +88,19 @@ dlso/dt = (lso_inf - lso) / tau_lso : 1 (unless refractory)
 lso_inf = 1 / (1 + exp( (V + 2.83*mV)/(15.9*mV) ) ) : 1
 tau_lso = 5.6*ms / ( exp( (V - 1.7*mV)/(14*mV)) + exp( -(V + 260*mV)/(43*mV))  ) : second
 
-dVT/dt = (-60*mV - VT)/(4*ms) : volt
+dVT/dt = (-55*mV - VT)/(4*ms) : volt
 '''
 
 
 
 reduced_neuron = NeuronGroup(N, reduced_eqs, threshold='V > VT', \
-                    reset='V =-40*mV;n = 0.8; VT=-20*mV; lso=lso-0.015; lfo = lfo-0.011', \
+                    reset='V =-40*mV;n = 0.8; VT=-20*mV; lso=lso-0.015; lfo = lfo-0.011; mnap=0.95', \
                     refractory=2.0*ms, method='exponential_euler', namespace={"Iext" : -0.1*uA})
 
 reduced_neuron.V = -90*mV
-reduced_neuron.VT = -60*mV
+reduced_neuron.VT = -55*mV
 reduced_neuron.n = 0.09
 reduced_neuron.lso = 0.2
-
-
-
-
 
 
 M_full_V = StateMonitor(neuron, 'V', record=0)
@@ -113,16 +109,18 @@ M_full_IK = StateMonitor(neuron, 'IKdr', record=0)
 M_full_n = StateMonitor(neuron, 'n', record=0)
 M_full_lso = StateMonitor(neuron, 'lso', record=0)
 M_full_lfo = StateMonitor(neuron, 'lfo', record=0)
+M_full_mnap = StateMonitor(neuron, 'mnap', record=0)
 
 M_reduced = StateMonitor(reduced_neuron, 'V', record=0)
 M_reduced_VT = StateMonitor(reduced_neuron, 'VT', record=0)
 M_reduced_n = StateMonitor(reduced_neuron, 'n', record=0)
 M_reduced_lso = StateMonitor(reduced_neuron, 'lso', record=0)
 M_reduced_lfo = StateMonitor(reduced_neuron, 'lfo', record=0)
+M_reduced_mnap = StateMonitor(reduced_neuron, 'mnap', record=0)
 
 run(200*ms, report='text')
 
-fig, axes = plt.subplots(nrows=5, sharex=True)
+fig, axes = plt.subplots(nrows=6, sharex=True)
 axes[0].plot(M_full_V.t/ms, M_full_V[0].V/mV)
 axes[0].plot(M_reduced.t/ms, M_reduced[0].V/mV)
 axes[0].plot(M_reduced_VT.t/ms, M_reduced_VT[0].VT/mV)
@@ -142,5 +140,10 @@ axes[3].legend(loc="upper right")
 axes[4].plot(M_full_lfo.t/ms, M_full_lfo[0].lfo, label="full")
 axes[4].plot(M_reduced_lfo.t/ms, M_reduced_lfo[0].lfo, label="reduced")
 axes[4].legend(loc="upper right")
+
+
+axes[5].plot(M_full_mnap.t/ms, M_full_mnap[0].mnap, label="full")
+axes[5].plot(M_reduced_mnap.t/ms, M_reduced_mnap[0].mnap, label="reduced")
+axes[5].legend(loc="upper right")
 
 plt.show()

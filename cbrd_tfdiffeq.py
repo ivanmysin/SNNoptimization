@@ -215,14 +215,16 @@ class HH_Neuron(BaseNeuron):
 
         dx_dt_list = []
         for chann in self.channels:
-            dxdt = chann(t, y, argmax_ro_H)
+            dxdt, dxdt_reset = chann(t, y, argmax_ro_H)
             dxdt = tf.reshape(dxdt, shape=(chann.n_gate_vars, self.N))
             start_x_idx = chann.start_x_idx
             end_x_idx = start_x_idx + self.N
             for idx_x_var in range(chann.n_gate_vars):
                 x = y[start_x_idx : end_x_idx]
                 dx_dt = self.update_z(x, self.dts, -dxdt[idx_x_var, :])
-                dx_dt = tf.tensor_scatter_nd_update(dx_dt, [[0], [self.N - 1]], [0, dxdt[idx_x_var, -1]])
+                # print(tf.shape(dxdt_reset))
+                # print(dxdt_reset[idx_x_var])
+                dx_dt = tf.tensor_scatter_nd_update(dx_dt, [[0], [self.N - 1]], [dxdt_reset[idx_x_var], dxdt[idx_x_var, -1]])
                 dx_dt_list.append(dx_dt)
                 start_x_idx += self.N
                 end_x_idx += self.N
@@ -306,8 +308,8 @@ class BaseChannel(tf.Module):
         dxdt = (x_new - x_reshaped) / self.dt
 
         x4reset = x_reshaped[:, argmax_ro_H] - x_reshaped[:, 0]
-        dxdt = self.reset(dxdt, x4reset)
-        return dxdt
+        dxdt, dxdt_reset = self.reset(dxdt, x4reset)
+        return dxdt, dxdt_reset
     def get_y0(self, V):
         x_inf, _ = self.get_x_inf_and_tau_x(V)
         if len(tf.shape(x_inf)) == 1:
@@ -351,7 +353,8 @@ class BaseChannel(tf.Module):
         xr = tf.zeros((self.n_gate_vars, self.ref_dvdt_idx), dtype=tf.float64)
         dxdt = tf.concat([xr, dxdt[:, self.ref_dvdt_idx:]], axis=1)
         dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt)))
-        return dxdt
+        dxdt_reset =  tf.zeros(self.n_gate_vars, dtype=tf.float64)
+        return dxdt, dxdt_reset
 
 class SimlestSinapse(tf.Module):
     def __init__(self, params, dt):

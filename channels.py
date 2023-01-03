@@ -60,16 +60,13 @@ class KA_channel(ctfeq.BaseChannel):
         dxdt = tf.reshape(dxdt, shape=(self.n_gate_vars, self.N))
 
         xr = tf.zeros((self.n_gate_vars, self.ref_dvdt_idx), dtype=tf.float64)
-        xres = (x4reset[1] + self.x_reset[1]) / self.dt
-        xr = tf.tensor_scatter_nd_update(xr, [[1, 1]], [xres, ])
-
-        #tf.concat([xr, xres], axis=0)
-        #print(xr)
-
         dxdt = tf.concat([xr, dxdt[:, self.ref_dvdt_idx:]], axis=1)
         dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt)))
 
-        return dxdt
+        dxdt_reset = tf.zeros(self.n_gate_vars, dtype=tf.float64)
+        xres = (x4reset[1] + self.x_reset[1]) / self.dt
+        dxdt_reset = tf.tensor_scatter_nd_update(dxdt_reset, [[1]], [xres, ])
+        return dxdt, dxdt_reset
 
     def get_y0(self, V):
         x_inf, _ = self.get_x_inf_and_tau_x(V)

@@ -41,7 +41,8 @@ class BaseNeuron(tf.keras.Model):
 
         self.N = params["N"]
         self.start_idx = 0
-        self.end_idx = 2 * self.N
+        self.n_dynamic_vars = 2
+        self.end_idx = self.n_dynamic_vars  * self.N
 
 
         self.gl = tf.constant(params["gl"], dtype=tf.float64)
@@ -112,6 +113,12 @@ class BaseNeuron(tf.keras.Model):
 
     def get_y0(self):
         return []
+
+    def set_indexes(self, start_idx):
+        self.start_idx = start_idx
+        self.end_idx = self.start_idx + self.n_dynamic_vars * self.N
+        return self.end_idx
+
 class LIF_Neuron(BaseNeuron):
     def __init__(self, params, dt=0.1):
 
@@ -169,13 +176,17 @@ class HH_Neuron(BaseNeuron):
 
         self.max_roH_idx = tf.Variable(0, dtype=tf.int32, trainable=False)
 
+        self.n_dynamic_vars = 2
         self.channels = []
-        end_idx = self.V_end_idx
+
+        start_x_idx = self.V_end_idx
         for ch_idx, chann_param in enumerate(params["channels_params"]):
             chann = chann_param["channel_class"](chann_param, self.N, dt=self.dt)
-            end_idx = chann.set_start_x_idx(end_idx)
+            end_x_idx = chann.set_start_x_idx(self.ro_start_idx, start_x_idx)
             chann.ref_dvdt_idx = self.ref_dvdt_idx
             self.channels.append(chann)
+            self.n_dynamic_vars += chann.n_gate_vars
+            start_x_idx = end_x_idx
 
 
 
@@ -258,6 +269,18 @@ class HH_Neuron(BaseNeuron):
             y0 = tf.concat([ro, V], axis=0)
         return y0
 
+    def set_indexes(self, start_idx):
+        self.start_idx = start_idx
+        self.end_idx = self.start_idx + self.n_dynamic_vars * self.N
+
+        start_x_idx = self.start_idx + 2 * self.N
+        for chann in self.channels:
+            end_x_idx = chann.set_start_x_idx(self.start_idx, start_x_idx)
+            start_x_idx = end_x_idx
+
+        return self.end_idx
+
+
 class BaseChannel(tf.Module):
 
     def __init__(self, params, N, dt=0.1):
@@ -280,14 +303,19 @@ class BaseChannel(tf.Module):
         self.start_V_idx = self.end_ro_idx
         self.end_V_idx = self.start_V_idx + self.N
 
-        self.start_x_idx = 0
+        self.start_x_idx = self.end_V_idx
         self.end_x_idx = self.start_x_idx + self.N * self.n_gate_vars
-
 
         self.ref_dvdt_idx = 1
 
-    def set_start_x_idx(self, idx):
-        self.start_x_idx = idx
+    def set_start_x_idx(self, start_idx, start_x_idx):
+        self.start_ro_idx = start_idx
+        self.end_ro_idx = self.start_ro_idx + self.N
+
+        self.start_V_idx = self.end_ro_idx
+        self.end_V_idx = self.start_V_idx + self.N
+
+        self.start_x_idx = start_x_idx
         self.end_x_idx = self.start_x_idx + self.N * self.n_gate_vars
         return self.end_x_idx
 
@@ -540,12 +568,15 @@ class Network(tf.keras.Model):
         self.neurons = []
 
         ro_0_indexes = []
+        start_idx = start_idx4_neurons
         for idx, param_neuron in enumerate(params_neurons):
-            Pop = LIF_Neuron(param_neuron, dt=dt)
-            start_idx = start_idx4_neurons + idx * 2 * Pop.N
-            Pop.start_idx = start_idx
-            Pop.end_idx = start_idx + 2*Pop.N
+            Pop = param_neuron["neuron_class"](param_neuron, dt=dt)
+            end_idx = Pop.set_indexes(start_idx)
+            # start_idx = start_idx4_neurons + idx * Pop.n_dynamic_vars * Pop.N
+            # Pop.start_idx = start_idx
+            # Pop.end_idx = start_idx + Pop.n_dynamic_vars * Pop.N
             ro_0_indexes.append(start_idx)
+            start_idx = end_idx
             self.neurons.append(Pop)
 
         self.ro_0_indexes = tf.convert_to_tensor(ro_0_indexes, dtype=tf.int32)

@@ -1,3 +1,7 @@
+
+import cbrd_tfdiffeq as ctfeq
+import channels as Chs
+
 ca3pyr2aac = {
     "w": 0.5,
     "pre_name": "ca3pyr",
@@ -538,21 +542,76 @@ ivy2ngf = {
     "Erev": -75.0,
 }
 ########################################
+##### block of channels params ##########################
+kdr_channel = {
+    "channel_class" : ctfeq.BaseChannel,
+
+    "gmax" : 23.0,
+    "Erev" : -90.0,
+
+    "degrees" : [4, ],
+    "x_reset" : [0.45,],
+}
+
+kdr_channel4olm = {
+    "channel_class" : Chs.Kdr_channelOLM,
+    "gmax": 36.0,
+    "Erev": -77.0,
+
+    "degrees": [4, ],
+    "x_reset": [0.8, ],
+
+}
+
+ka_channel = {
+    "channel_class" : Chs.KA_channel,
+
+    "gmax" : 10.0,
+    "Erev" : -90.0,
+
+    "degrees" : [1, 1],
+    "x_reset" : [0.31, -0.05],
+}
+
+na_persis_channel = {
+    "channel_class" : Chs.PersistentPotassiumChannel,
+
+    "gmax" : 2.5,
+    "Erev" : 50.0,
+
+    "degrees" : [1, ],
+    "x_reset" : [0.95, ],
+}
+
+h_channel4OLM = {
+    "channel_class" : Chs.H_Channel4OLM,
+
+    "gmax" : 1.5,
+    "Erev" : -20.0,
+
+    "degrees" : [1, 1],
+    "x_reset" : [-0.015, -0.01],
+}
+
+
 ##### block of neurons params #########
 pvbas_params = {
     "name" : "pvbas",
-    "Vreset": -90.0,
-    "Vt": -50.0,
-    "gl": 0.1,
+    "neuron_class" : ctfeq.HH_Neuron,
+    "Vreset": -40.0,
+    "Vt": -55.0,
+    "gl": 0.18,
     "El": -60.0,
-    "C": 1.0,
+    "C": 1.0, #
     "sigma": 0.3,
-    "ref_dvdt": 3.0,
-    "refactory": 3.0,  # refactory for threshold
-    "Iext": 0.0,
+    "ref_dvdt": 2.5,   # AP duration
+    "refactory": 15.0,  # refactory for threshold
+    "Iext": 1.0,
     "N": 400,
     "dts": 0.5,
-    
+
+    "channels_params"  : [kdr_channel, ka_channel],
+
     "target" : {
         "R": 0.3,
         "freq": 5,
@@ -563,18 +622,21 @@ pvbas_params = {
 
 olm_params = {
     "name" : "olm",
-    "Vreset": -90.0,
-    "Vt": -50.0,
-    "gl": 0.1,
-    "El": -60.0,
-    "C": 1.5,
+    "neuron_class" : ctfeq.HH_Neuron,
+    "Vreset": -40.0,
+    "Vt": -55.0, 
+    "gl": 0.3,
+    "El": -54.4,
+    "C": 1.0,
     "sigma": 0.3,
-    "ref_dvdt": 3.0,
-    "refactory": 3.0,  # refactory for threshold
-    "Iext": 0.3,
+    "ref_dvdt": 2.0,   # AP duration
+    "refactory": 15.0,  # refactory for threshold
+    "Iext": -0.5,
     "N": 400,
     "dts": 0.5,
-    
+
+    "channels_params"  : [kdr_channel4olm, na_persis_channel, h_channel4OLM],
+
     "target" : {
         "R": 0.3,
         "freq": 5,
@@ -585,18 +647,21 @@ olm_params = {
 
 cckbas_params = {
     "name" : "cckbas",
-    "Vreset": -90.0,
-    "Vt": -50.0,
-    "gl": 0.1,
+    "neuron_class" : ctfeq.HH_Neuron,
+    "Vreset": -40.0,
+    "Vt": -55.0,
+    "gl": 0.18,
     "El": -60.0,
-    "C": 1.5,
+    "C": 1.0, 
     "sigma": 0.3,
-    "ref_dvdt": 3.0,
-    "refactory": 3.0,  # refactory for threshold
-    "Iext": 0.0,
+    "ref_dvdt": 2.5,   # AP duration
+    "refactory": 15.0,  # refactory for threshold
+    "Iext": 1.0,
     "N": 400,
     "dts": 0.5,
-    
+
+    "channels_params"  : [kdr_channel, ka_channel],
+
     "target" : {
         "R": 0.3,
         "freq": 5,
@@ -607,18 +672,22 @@ cckbas_params = {
 
 bis_params = {
     "name" : "bis",
-    "Vreset": -90.0,
-    "Vt": -50.0,
-    "gl": 0.1,
+    "neuron_class" : ctfeq.HH_Neuron,
+    "Vreset": -40.0,
+    "Vt": -55.0,
+    "gl": 0.18,
     "El": -60.0,
-    "C": 1.0,
+    "C": 1.0, 
     "sigma": 0.3,
-    "ref_dvdt": 5.0,
-    "refactory": 5.0,  # refactory for threshold
-    "Iext": 0.2,
+    "ref_dvdt": 2.5,   # AP duration
+    "refactory": 15.0,  # refactory for threshold
+    "Iext": 1.0,
     "N": 400,
     "dts": 0.5,
-    
+
+    "channels_params"  : [kdr_channel, ka_channel],
+    "dts": 0.5,
+
     "target" : {
         "R": 0.3,
         "freq": 5,
@@ -629,18 +698,21 @@ bis_params = {
 
 aac_params = {
     "name" : "aac",
-    "Vreset": -90.0,
-    "Vt": -50.0,
-    "gl": 0.1,
+    "neuron_class" : ctfeq.HH_Neuron,
+    "Vreset": -40.0,
+    "Vt": -55.0,
+    "gl": 0.18,
     "El": -60.0,
-    "C": 1.0,
+    "C": 1.0, 
     "sigma": 0.3,
-    "ref_dvdt": 3.0,
-    "refactory": 3.0,  # refactory for threshold
-    "Iext": 0.0,
+    "ref_dvdt": 2.5,   # AP duration
+    "refactory": 15.0,  # refactory for threshold
+    "Iext": 1.0,
     "N": 400,
     "dts": 0.5,
-    
+
+    "channels_params"  : [kdr_channel, ka_channel],
+
     "target" : {
         "R": 0.3,
         "freq": 5,
@@ -651,18 +723,21 @@ aac_params = {
 
 ivy_params = {
     "name" : "ivy",
-    "Vreset": -90.0,
-    "Vt": -50.0,
-    "gl": 0.1,
+    "neuron_class" : ctfeq.HH_Neuron,
+    "Vreset": -40.0,
+    "Vt": -55.0,
+    "gl": 0.18,
     "El": -60.0,
-    "C": 1.7,
+    "C": 1.0, 
     "sigma": 0.3,
-    "ref_dvdt": 3.0,
-    "refactory": 3.0,  # refactory for threshold
-    "Iext": 0.0,
+    "ref_dvdt": 2.5,   # AP duration
+    "refactory": 15.0,  # refactory for threshold
+    "Iext": 1.0,
     "N": 400,
     "dts": 0.5,
-    
+
+    "channels_params"  : [kdr_channel, ka_channel],
+
     "target" : {
         "R": 0.3,
         "freq": 5,
@@ -673,18 +748,21 @@ ivy_params = {
 
 ngf_params = {
     "name" : "ngf",
-    "Vreset": -90.0,
-    "Vt": -50.0,
-    "gl": 0.1,
+    "neuron_class" : ctfeq.HH_Neuron,
+    "Vreset": -40.0,
+    "Vt": -55.0,
+    "gl": 0.18,
     "El": -60.0,
-    "C": 1.4,
+    "C": 1.0,
     "sigma": 0.3,
-    "ref_dvdt": 3.0,
-    "refactory": 3.0,  # refactory for threshold
-    "Iext": 0.2,
+    "ref_dvdt": 2.5,   # AP duration
+    "refactory": 15.0,  # refactory for threshold
+    "Iext": 1.0,
     "N": 400,
     "dts": 0.5,
-    
+
+    "channels_params"  : [kdr_channel],
+
     "target" : {
         "R": 0.3,
         "freq": 5,

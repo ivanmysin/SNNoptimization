@@ -189,8 +189,9 @@ class HH_Neuron(BaseNeuron):
             start_x_idx = end_x_idx
 
 
+    @tf.function
+    def __call__(self, t, y, gsyn=tf.Variable([0.0, ], dtype=tf.float64), Isyn=tf.Variable([0.0, ], dtype=tf.float64)):
 
-    def __call__(self, t, y, gsyn=tf.Variable(0.0, dtype=tf.float64), Isyn=tf.Variable(0.0, dtype=tf.float64)):
         ro = y[self.ro_start_idx : self.ro_end_idx]
         V = y[self.V_start_idx : self.V_end_idx]
 
@@ -200,7 +201,7 @@ class HH_Neuron(BaseNeuron):
             gch_tmp, Ichs_tmp = chann.get_gch_and_Ich(y)
             gch = gch + gch_tmp
             Ichs = Ichs + Ichs_tmp
-        #print(Ichs[6].numpy())
+
 
         dVdt = (self.gl * (self.El - V) + Ichs + self.Iext + Isyn) / self.C  # !!!!!![self.ref_dvdt_idx: ]
         tau_m = self.C / (self.gl + tf.reduce_sum(gsyn) + tf.reduce_sum(gch) )
@@ -224,7 +225,8 @@ class HH_Neuron(BaseNeuron):
         dV_dt = self.update_z(V, self.dts, -dV_dt)
         dV_dt = tf.tensor_scatter_nd_update(dV_dt, [[0], [tf.size(dV_dt) - 1]], [0, dVdt[-1]])
 
-        dx_dt_list = []
+        dx_dt_list = tf.TensorArray(tf.float64, size=0, dynamic_size=True) # = []
+        dx_dt_list_idx = 0
         for chann in self.channels:
             dxdt, dxdt_reset = chann(t, y, argmax_ro_H)
             dxdt = tf.reshape(dxdt, shape=(chann.n_gate_vars, self.N))
@@ -236,15 +238,19 @@ class HH_Neuron(BaseNeuron):
                 # print(tf.shape(dxdt_reset))
                 # print(dxdt_reset[idx_x_var])
                 dx_dt = tf.tensor_scatter_nd_update(dx_dt, [[0], [self.N - 1]], [dxdt_reset[idx_x_var], dxdt[idx_x_var, -1]])
-                dx_dt_list.append(dx_dt)
+                # dx_dt_list.append(dx_dt)
+                dx_dt_list.write(dx_dt_list_idx, dx_dt).mark_used()
+                dx_dt_list_idx += 1
                 start_x_idx += self.N
                 end_x_idx += self.N
 
 
 
-        if len(dx_dt_list) > 0:
-            dx_dt = tf.concat(dx_dt_list, axis=0)
+        if dx_dt_list.size() > 0:
+            dx_dt = dx_dt_list.stack()
+            dx_dt = tf.reshape(dx_dt, [-1,])
             dy_dt = tf.concat([dro_dt, dV_dt, dx_dt], axis=0)
+
         else:
             dy_dt = tf.concat([dro_dt, dV_dt], axis=0)
 
@@ -273,7 +279,14 @@ class HH_Neuron(BaseNeuron):
         self.start_idx = start_idx
         self.end_idx = self.start_idx + self.n_dynamic_vars * self.N
 
-        start_x_idx = self.start_idx + 2 * self.N
+        self.ro_start_idx = self.start_idx
+        self.ro_end_idx = self.ro_start_idx + self.N
+        self.V_start_idx = self.ro_end_idx
+        self.V_end_idx = self.V_start_idx + self.N
+
+
+
+        start_x_idx = self.V_end_idx
         for chann in self.channels:
             end_x_idx = chann.set_start_x_idx(self.start_idx, start_x_idx)
             start_x_idx = end_x_idx
@@ -319,6 +332,7 @@ class BaseChannel(tf.Module):
         self.end_x_idx = self.start_x_idx + self.N * self.n_gate_vars
         return self.end_x_idx
 
+    @tf.function
     def __call__(self, t, y, argmax_ro_H=0):
         V = y[self.start_V_idx : self.end_V_idx]
         x_inf, tau_x = self.get_x_inf_and_tau_x(V)
@@ -377,11 +391,12 @@ class BaseChannel(tf.Module):
         I = g * (self.Erev - V)
         return g, I
 
+    @tf.function
     def reset(self, dxdt, x4reset):
         xr = tf.zeros((self.n_gate_vars, self.ref_dvdt_idx), dtype=tf.float64)
         dxdt = tf.concat([xr, dxdt[:, self.ref_dvdt_idx:]], axis=1)
-        dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt)))
-        dxdt_reset =  tf.zeros(self.n_gate_vars, dtype=tf.float64)
+        dxdt = tf.reshape(dxdt, shape=[-1])
+        dxdt_reset = tf.zeros(self.n_gate_vars, dtype=tf.float64)
         return dxdt, dxdt_reset
 
 class SimlestSinapse(tf.Module):
@@ -564,7 +579,6 @@ class Network(tf.keras.Model):
         #     self.synapses.append(Syn)
 
         start_idx4_neurons = self.synapses[-1].end_idx
-
         self.neurons = []
 
         ro_0_indexes = []
@@ -643,8 +657,10 @@ class Network(tf.keras.Model):
                 gsyn_full = gsyn_full + gsyn
                 Isyn_full = Isyn_full + Isyn
 
-
-            dneur_dt = neuron(t, y4neuron, gsyn=gsyn_full, Isyn=Isyn_full)
+            if tf.size(Isyn_full) == 0:
+                Isyn_full = tf.zeros(neuron.N, dtype=tf.float64)
+                gsyn_full = tf.zeros(neuron.N, dtype=tf.float64)
+            dneur_dt = neuron(t, y, gsyn=gsyn_full, Isyn=Isyn_full) # for LIF y4neuron
 
             dy_dt.append( dneur_dt )
 

@@ -239,7 +239,7 @@ class HH_Neuron(BaseNeuron):
                 # print(dxdt_reset[idx_x_var])
                 dx_dt = tf.tensor_scatter_nd_update(dx_dt, [[0], [self.N - 1]], [dxdt_reset[idx_x_var], dxdt[idx_x_var, -1]])
                 # dx_dt_list.append(dx_dt)
-                dx_dt_list.write(dx_dt_list_idx, dx_dt).mark_used()
+                dx_dt_list = dx_dt_list.write(dx_dt_list_idx, dx_dt)
                 dx_dt_list_idx += 1
                 start_x_idx += self.N
                 end_x_idx += self.N

@@ -1,15 +1,17 @@
 import tensorflow as tf
+@tf.function
+def func ():
+    dx_dt_list = tf.TensorArray(tf.float64, size=0, dynamic_size=True) # = []
+    dx_dt_list_idx = 0
+    for _ in range(3):
+        dxdt = tf.random.normal((4, ), mean=0.0, stddev=1.0, dtype=tf.dtypes.float64)
+        dx_dt_list = dx_dt_list.write(dx_dt_list_idx, dxdt)
+        dx_dt_list_idx = dx_dt_list_idx + 1
+    dx_dt_list = dx_dt_list.stack()
+    return dx_dt_list
 
-x = tf.range(4, dtype=tf.float64)
-x = tf.reshape(x, shape=[4, -1])
-
-d = tf.Variable([4,], dtype=tf.float64)
-d = tf.reshape(d, shape=[1, 1])
-y = tf.math.pow(x, d)
-
-print(x)
-print(d)
-print(y)
+dx_dt_list = func()
+print(dx_dt_list.numpy())
 
 """
 import numpy as np

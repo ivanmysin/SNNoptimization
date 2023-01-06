@@ -15,6 +15,8 @@ tau = 0.1 * ms
 
 N = 4000
 
+# sqrt(2*sigma**2/tau)
+
 eqs = '''
 dV/dt = (gK*(n**4)*(EK - V) + gL*(EL - V) + Iapp )/Cm  + sigma*xi/ms**0.5 : volt (unless refractory)
 

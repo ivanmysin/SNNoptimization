@@ -61,7 +61,8 @@ class KA_channel(ctfeq.BaseChannel):
 
         xr = tf.zeros((self.n_gate_vars, self.ref_dvdt_idx), dtype=tf.float64)
         dxdt = tf.concat([xr, dxdt[:, self.ref_dvdt_idx:]], axis=1)
-        dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt)))
+        #dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt)))
+        dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt), ))
 
         dxdt_reset = tf.zeros(self.n_gate_vars, dtype=tf.float64)
         xres = (x4reset[1] + self.x_reset[1]) / self.dt
@@ -149,7 +150,8 @@ class H_Channel4OLM(ctfeq.BaseChannel):
 
         xr = tf.zeros((self.n_gate_vars, self.ref_dvdt_idx), dtype=tf.float64)
         dxdt = tf.concat([xr, dxdt[:, self.ref_dvdt_idx:]], axis=1)
-        dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt)))
+        # dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt)))
+        dxdt = tf.reshape(dxdt, shape=(-1, ))
 
         # dxdt_reset = tf.zeros(self.n_gate_vars, dtype=tf.float64)
         # xres =

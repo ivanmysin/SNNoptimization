@@ -16,26 +16,37 @@ net = cbrd_tfdiffeq.Network(params_net)
 net.set_optimizator(Optimizer)
 #net.load_trained_variables('/home/ivan/Data/interneurons_theta/solution_000.hdf5')
 
-print(len(params_net["params_synapses"]))
-for neuron in net.neurons:
-    print(neuron.start_idx)
+# import h5py
+# y0_main = net.get_y0()
+# with h5py.File("com.hdf5", "w") as file:
+#     file.create_dataset("y0", data=y0_main)
 
-    for channel in neuron.channels:
-        print(channel.start_x_idx)
 
-    print("#######################")
 
-# number_of_simulation_0 = 0
-# for idx in range(200):
-#     number_of_simulation = number_of_simulation_0 + idx + 1
+# print(len(params_net["params_synapses"]))
+# for neuron in net.neurons:
+#     print(neuron.Iext)
+
+#     ro = y0_main[neuron.ro_start_idx : neuron.ro_end_idx]
+#     print(ro[0], ro[-1])
+#     V =  y0_main[neuron.V_start_idx : neuron.V_end_idx]
+#     print(V[0], V[-1])
+#     for channel in neuron.channels:
+#         print(channel.start_x_idx)
 #
-#     path = path4savingresults_template.format(number_of_simulation)
-#     solution, clearloss, fullloss = net.fit(t, generators4targets, path4saving=path, n_inter=1, win4_start = 10000, win4grad = 500)
-#
-#     #net.save_simulation_data(path, solution, Targets_spikes_rates)
-#     print("Прогон № ", str(number_of_simulation), ", Clear Loss = ", float(clearloss), ", Full Loss = ", float(fullloss) )
-#
-#     break
+#     print("#######################")
+
+number_of_simulation_0 = 0
+for idx in range(200):
+    number_of_simulation = number_of_simulation_0 + idx + 1
+
+    path = path4savingresults_template.format(number_of_simulation)
+    solution, clearloss, fullloss = net.fit(t, generators4targets, path4saving=path, n_inter=1, win4_start = 10000, win4grad = 500)
+
+    #net.save_simulation_data(path, solution, Targets_spikes_rates)
+    print("Прогон № ", str(number_of_simulation), ", Clear Loss = ", float(clearloss), ", Full Loss = ", float(fullloss) )
+
+    break
 
 
 

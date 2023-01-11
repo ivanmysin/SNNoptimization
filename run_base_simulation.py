@@ -6,36 +6,24 @@ from code_generated_params import params_net
 
 
 
-path4savingresults_template = '/home/ivan/Data/interurons_test/solution_{:03}.hdf5'
+path4savingresults_template = '/media/reseacher/3baf6c7e-8a20-4236-b3c9-a0ae7bed9266/Data/SSN_simulated/HH/solution_{:03}.hdf5'  #'/home/ivan/Data/interurons_test/solution_{:03}.hdf5'
 Optimizer = Adagrad(learning_rate=0.01)
 t = tf.range(0.0, 1800.0, 0.1, dtype=tf.float64)
 generators4targets = cbrd_tfdiffeq.VonMissesGenerators(params_net["params_neurons"])
-#Targets_spikes_rates = generators4targets(tf.reshape(t, shape=(-1, 1)))
+Targets_spikes_rates = generators4targets(tf.reshape(t, shape=(-1, 1)))
 
 net = cbrd_tfdiffeq.Network(params_net)
 net.set_optimizator(Optimizer)
-#net.load_trained_variables('/home/ivan/Data/interneurons_theta/solution_000.hdf5')
+#net.load_trained_variables('/media/reseacher/3baf6c7e-8a20-4236-b3c9-a0ae7bed9266/Data/SSN_simulated/HH/solution_003.hdf5')
+net.load_trained_variables('/media/reseacher/8f91cdcb-03d4-4fce-b560-a5796564d923/home/reseacher/Data/snn3/solution_500.hdf5')
+"""
+y0 = net.get_y0()
+solution = net.run_simulation(t, y0)
 
-# import h5py
-# y0_main = net.get_y0()
-# with h5py.File("com.hdf5", "w") as file:
-#     file.create_dataset("y0", data=y0_main)
+path = path4savingresults_template.format(0)
+net.save_simulation_data(path, solution, Targets_spikes_rates)
 
-
-
-# print(len(params_net["params_synapses"]))
-# for neuron in net.neurons:
-#     print(neuron.Iext)
-
-#     ro = y0_main[neuron.ro_start_idx : neuron.ro_end_idx]
-#     print(ro[0], ro[-1])
-#     V =  y0_main[neuron.V_start_idx : neuron.V_end_idx]
-#     print(V[0], V[-1])
-#     for channel in neuron.channels:
-#         print(channel.start_x_idx)
-#
-#     print("#######################")
-
+"""
 number_of_simulation_0 = 0
 for idx in range(200):
     number_of_simulation = number_of_simulation_0 + idx + 1
@@ -43,10 +31,8 @@ for idx in range(200):
     path = path4savingresults_template.format(number_of_simulation)
     solution, clearloss, fullloss = net.fit(t, generators4targets, path4saving=path, n_inter=1, win4_start = 10000, win4grad = 500)
 
-    #net.save_simulation_data(path, solution, Targets_spikes_rates)
+    net.save_simulation_data(path, solution, Targets_spikes_rates)
     print("Прогон № ", str(number_of_simulation), ", Clear Loss = ", float(clearloss), ", Full Loss = ", float(fullloss) )
-
-    break
 
 
 

@@ -1,17 +1,20 @@
 import tensorflow as tf
 @tf.function
-def func ():
-    dx_dt_list = tf.TensorArray(tf.float64, size=0, dynamic_size=True) # = []
-    dx_dt_list_idx = 0
-    for _ in range(3):
-        dxdt = tf.random.normal((4, ), mean=0.0, stddev=1.0, dtype=tf.dtypes.float64)
-        dx_dt_list = dx_dt_list.write(dx_dt_list_idx, dxdt)
-        dx_dt_list_idx = dx_dt_list_idx + 1
-    dx_dt_list = dx_dt_list.stack()
-    return dx_dt_list
+def func (a, b):
+    a = tf.reshape(a, (-1, 1))
+    b = tf.reshape(b, (1, -1))
+    prod = a@b
+    c = tf.math.reduce_sum(prod, axis=0)
+    return c
+    
 
-dx_dt_list = func()
-print(dx_dt_list.numpy())
+
+a = tf.ones([100, 2], dtype=tf.float64)
+b = tf.ones([10, ], dtype=tf.float64)
+
+c = func (a, b)
+print(c.numpy())
+
 
 """
 import numpy as np

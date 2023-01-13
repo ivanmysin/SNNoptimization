@@ -406,6 +406,7 @@ class SimlestSinapse(tf.Module):
 
     def get_y0(self):
         return []
+
 class PlasticSynapse(SimlestSinapse):
     def __init__(self, params, dt=0.1, start_idx=0):
         super(PlasticSynapse, self).__init__(params, dt)
@@ -440,6 +441,8 @@ class PlasticSynapse(SimlestSinapse):
 
         self.gbarS = tf.Variable(gbarSs, dtype=tf.float64, name='SynapticConductance', trainable=True)
         self.Erev = tf.Variable(Erevs, dtype=tf.float64, trainable=False)
+        self.Erev = tf.reshape(self.Erev, shape=(-1, 1))
+        
         self.W = tf.Variable(Ws, dtype=tf.float64, name='Wplasticsyns', trainable=True)
 
         self.pre_indxes = tf.convert_to_tensor(pre_indxes, dtype=tf.int32)
@@ -464,9 +467,19 @@ class PlasticSynapse(SimlestSinapse):
         gsyn_tmp = tf.where(self.post_indxes == neuron_post_idx, Rofsyn, 0.0)
 
         gsyn = self.gbarS * gsyn_tmp
-        Erev = tf.reshape(self.Erev, shape=(-1, 1))
+        #Erev = tf.reshape(self.Erev, shape=(-1, 1))
         gsyn = tf.reshape(gsyn, shape=(-1, 1))
-        Isyn = tf.reduce_sum(gsyn * (Erev - tf.reshape(Vpost, shape=(1, -1))), axis=0)
+        if tf.math.equal(tf.size(gsyn), 0):
+            return tf.zeros_like(Vpost), tf.zeros_like(Vpost)
+        else:
+            Vdiff = self.Erev - tf.reshape(Vpost, shape=(1, -1))
+            Itmp = gsyn * Vdiff
+            #tf.debugging.assert_equal( tf.shape(Itmp)[1], tf.size(Vpost), message="First")
+            #tf.debugging.assert_equal( tf.shape(Itmp)[0], tf.size(Vpost), message="Second")
+            Isyn = tf.reduce_sum(Itmp, axis=0)
+            
+            #tf.debugging.assert_equal( tf.size(Isyn), tf.size(Vpost), message="First")
+           
         return gsyn, Isyn
 
 
@@ -648,7 +661,7 @@ class Network(tf.keras.Model):
 
         for neuron_idx, neuron in enumerate(self.neurons):
             y4neuron = y[ neuron.start_idx:neuron.end_idx ]
-            Vpost = y4neuron[neuron.V_start_idx:neuron.V_end_idx]
+            Vpost = y[neuron.V_start_idx:neuron.V_end_idx] # 4neuron for LIF
 
             gsyn_full = 0.0
             Isyn_full = 0.0
@@ -789,6 +802,10 @@ class Network(tf.keras.Model):
             self.optimizer.apply_gradients(zip(grad_over_simulation, trainable_variables))
 
         return  tf.concat(solutions_full, axis=0), clear_loss_over_simulation, loss_over_simulation
+        
+    def run_simulation(self, t, y0):
+        solution = odeint(self, y0, t, method="euler")
+        return solution
 
 
 

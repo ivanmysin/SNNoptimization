@@ -606,7 +606,7 @@ pvbas_params = {
     "sigma": 0.3,
     "ref_dvdt": 2.5,   # AP duration
     "refactory": 15.0,  # refactory for threshold
-    "Iext": 1.0,
+    "Iext": 0.0,
     "N": 400,
     "dts": 0.5,
 
@@ -614,7 +614,7 @@ pvbas_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 5,
+        "freq": 8.0,
         "mean_spike_rate": 20.0,
         "phase": 1.5707963267948966,
     },
@@ -631,7 +631,7 @@ olm_params = {
     "sigma": 0.3,
     "ref_dvdt": 2.0,   # AP duration
     "refactory": 15.0,  # refactory for threshold
-    "Iext": -0.5,
+    "Iext": -1.5,
     "N": 400,
     "dts": 0.5,
 
@@ -639,7 +639,7 @@ olm_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 5,
+        "freq": 8.0,
         "mean_spike_rate": 20.0,
         "phase": 3.14,
     },
@@ -656,7 +656,7 @@ cckbas_params = {
     "sigma": 0.3,
     "ref_dvdt": 2.5,   # AP duration
     "refactory": 15.0,  # refactory for threshold
-    "Iext": 1.0,
+    "Iext": 0.0,
     "N": 400,
     "dts": 0.5,
 
@@ -664,7 +664,7 @@ cckbas_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 5,
+        "freq": 8.0,
         "mean_spike_rate": 20.0,
         "phase": -1.5707963267948966,
     },
@@ -681,7 +681,7 @@ bis_params = {
     "sigma": 0.3,
     "ref_dvdt": 2.5,   # AP duration
     "refactory": 15.0,  # refactory for threshold
-    "Iext": 1.0,
+    "Iext": 0.0,
     "N": 400,
     "dts": 0.5,
 
@@ -690,7 +690,7 @@ bis_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 5,
+        "freq": 8.0,
         "mean_spike_rate": 20.0,
         "phase": 3.141592653589793,
     },
@@ -707,7 +707,7 @@ aac_params = {
     "sigma": 0.3,
     "ref_dvdt": 2.5,   # AP duration
     "refactory": 15.0,  # refactory for threshold
-    "Iext": 1.0,
+    "Iext": 0.0,
     "N": 400,
     "dts": 0.5,
 
@@ -715,7 +715,7 @@ aac_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 5,
+        "freq": 8.0,
         "mean_spike_rate": 20.0,
         "phase": 0.0,
     },
@@ -732,7 +732,7 @@ ivy_params = {
     "sigma": 0.3,
     "ref_dvdt": 2.5,   # AP duration
     "refactory": 15.0,  # refactory for threshold
-    "Iext": 1.0,
+    "Iext": 0.0,
     "N": 400,
     "dts": 0.5,
 
@@ -740,7 +740,7 @@ ivy_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 5,
+        "freq": 8.0,
         "mean_spike_rate": 20.0,
         "phase": -1.5707963267948966,
     },
@@ -757,7 +757,7 @@ ngf_params = {
     "sigma": 0.3,
     "ref_dvdt": 2.5,   # AP duration
     "refactory": 15.0,  # refactory for threshold
-    "Iext": 1.0,
+    "Iext": 0.0,
     "N": 400,
     "dts": 0.5,
 
@@ -765,7 +765,7 @@ ngf_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 5,
+        "freq": 8.0,
         "mean_spike_rate": 20.0,
         "phase": 0.0,
     },
@@ -776,7 +776,7 @@ ngf_params = {
 ca3pyr_params = {
     "name" : "ca3pyr",
     "R": 0.3,
-    "freq": 5,
+    "freq": 8.0,
     "mean_spike_rate": 5,
     "phase": 1.58,
 }
@@ -784,7 +784,7 @@ ca3pyr_params = {
 ca1pyr_params = {
     "name" : "ca1pyr",
     "R": 0.2,
-    "freq": 5,
+    "freq": 8.0,
     "mean_spike_rate": 5,
     "phase": 3.14,
 }
@@ -792,7 +792,7 @@ ca1pyr_params = {
 ec3_params = {
     "name" : "ec3",
     "R": 0.2,
-    "freq": 5,
+    "freq": 8.0,
     "mean_spike_rate": 5,
     "phase": -1.57,
 }
@@ -800,8 +800,10 @@ ec3_params = {
 ########################################
 ##### block of synapses params #########
 params_net = {
-#"params_neurons" : [pvbas_params, olm_params, cckbas_params, bis_params, aac_params, ivy_params, ngf_params],
-"params_neurons" : [pvbas_params, olm_params],
-"params_generators" : [],  # [ca3pyr_params, ca1pyr_params, ec3_params],
+"params_neurons" : [pvbas_params, olm_params, cckbas_params, bis_params, aac_params, ivy_params, ngf_params],
+#"params_neurons" : [pvbas_params, cckbas_params],
+"params_generators" : [ca3pyr_params, ca1pyr_params, ec3_params],
 "params_synapses" : [ca3pyr2aac, ca1pyr2aac, ec32aac, pvbas2aac, cckbas2aac, ngf2aac, olm2aac, bis2aac, ivy2aac, ca3pyr2pvbas, ca1pyr2pvbas, ec32pvbas, pvbas2pvbas, cckbas2pvbas, ngf2pvbas, olm2pvbas, bis2pvbas, ivy2pvbas, ca3pyr2cckbas, ca1pyr2cckbas, ec32cckbas, pvbas2cckbas, cckbas2cckbas, ngf2cckbas, olm2cckbas, bis2cckbas, ivy2cckbas, ec32ngf, ngf2ngf, olm2ngf, ca3pyr2olm, ca1pyr2olm, bis2olm, ivy2olm, ca3pyr2bis, ca1pyr2bis, pvbas2bis, cckbas2bis, bis2bis, ivy2bis, ca3pyr2ivy, ca1pyr2ivy, pvbas2ivy, cckbas2ivy, bis2ivy, ivy2ivy, ec32ivy, ca3pyr2ngf, ivy2ngf, ],
+#"params_synapses" : [ca3pyr2pvbas, pvbas2cckbas],
+
 }

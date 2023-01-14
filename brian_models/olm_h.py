@@ -5,7 +5,7 @@ defaultclock.dt = 0.1*ms
 
 Cm = 1*uF # /cm**2
 #ext = 0.2*uA
-gL = 0.3*msiemens
+gL = 0.3*mS
 EL = -54.4*mV
 ENa = 50*mV
 EK = -77*mV
@@ -13,7 +13,7 @@ EH = -20*mV
 
 gNa = 120*msiemens
 gK = 36*msiemens
-gNap = 2.5 * msiemens
+gNap = 2.5*mS #2.5 * msiemens
 gH = 1.5 * msiemens
 sigma = 0.2*mV
 

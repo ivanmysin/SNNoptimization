@@ -221,29 +221,76 @@ class Kdr_channelPyrChizhovGraham(ctfeq.BaseChannel):
     #
     #     return x_inf
 
+######################################################################################
+class Kdr_channelOLM_Saraga(ctfeq.BaseChannel):
+    def __init__(self, params, N, dt=0.1):
+        super(Kdr_channelOLM_Saraga, self).__init__(params, N, dt=dt)
 
+    def get_x_inf_and_tau_x(self, V):
+        n_inf, tau_n = self.__get_n_inf_and_tau_n(V)
+        return n_inf, tau_n
+    def __get_n_inf_and_tau_n(self, V):
+        alpha_n = 0.018 * (V - 25 ) / (1 - exp( (V - 25) / -25) )
+        beta_n = 0.0036 * ( (V - 35) ) / (exp( (V - 35) / 12) - 1)
+        tau_n = 1 / (alpha_n + beta_n)
+        n_inf = alpha_n * tau_n
+        return n_inf, tau_n
 
+class KA_channelOLM_Saraga(ctfeq.BaseChannel):
+    def __init__(self, params, N, dt=0.1):
+        super(KA_channelOLM_Saraga, self).__init__(params, N, dt=dt)
+        self.list4vars_update = [self.__get_a_inf_and_tau_a, self.__get_b_inf_and_tau_b]
+    def get_x_inf_and_tau_x(self, V):
+        x_inf = []
+        tau_x = []
+        for func in self.list4vars_update:
+            x_inf_, tau_x_ = func(V)
+            x_inf.append(x_inf_)
+            tau_x.append(tau_x_)
+        x_inf = tf.stack(x_inf)
+        tau_x = tf.stack(tau_x)
 
-# import matplotlib.pyplot as plt
-# V = tf.linspace(-100, 80, 200)
-#
-# ka_channel = {
-#     "channel_class" : KA_channel,
-#
-#     "gmax" : 0.0, #10.0,
-#     "Erev" : -90.0,
-#
-#     "degrees" : [1, 1],
-#     "x_reset" : [0.31, -0.05],
-# }
-# ch = KA_channel(ka_channel, 400, 0.1)
-# x_inf, tau_x = ch.get_x_inf_and_tau_x(V)
-#
-# x_inf = tf.reshape(x_inf, shape=(2, -1))
-#
-# plt.plot(V, x_inf[0, :], label="a")
-# plt.plot(V, x_inf[1, :], label="b")
-# # plt.plot(V, x_inf2**4, label="int")
-# # #plt.plot(V, tau_x)
-# # plt.legend(loc = "upper right")
-# plt.show()
+        return x_inf, tau_x
+
+    def __get_a_inf_and_tau_a(self, V):
+        a_inf = 1 / (1 + exp( (V + 14) / -16 ))
+        tau_a = tf.zeros_like(V) + 5
+        return a_inf, tau_a
+    def __get_b_inf_and_tau_b(self, V):
+        b_inf = 1 / (1 + exp( (V + 71) / 7.3 ))
+        tau_b = 1 / (0.000009 / (exp((V - 26) / 18.5) + 0.014 / (0.2 + exp((V + 70) / -11 ))))
+        return b_inf, tau_b
+
+    def reset(self, dxdt, x4reset):
+        dxdt = tf.reshape(dxdt, shape=(self.n_gate_vars, self.N))
+
+        xr = tf.zeros((self.n_gate_vars, self.ref_dvdt_idx), dtype=tf.float64)
+        dxdt = tf.concat([xr, dxdt[:, self.ref_dvdt_idx:]], axis=1)
+        #dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt)))
+        dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt), ))
+
+        dxdt_reset = tf.zeros(self.n_gate_vars, dtype=tf.float64)
+        xres = (x4reset[1] + self.x_reset[1]) / self.dt
+        dxdt_reset = tf.tensor_scatter_nd_update(dxdt_reset, [[1]], [xres, ])
+        return dxdt, dxdt_reset
+
+    def get_y0(self, V):
+        x_inf, _ = self.get_x_inf_and_tau_x(V)
+        xr1 = tf.zeros((1, self.ref_dvdt_idx), dtype=tf.float64) + self.x_reset[0]
+        xr2 = tf.zeros((1, self.ref_dvdt_idx), dtype=tf.float64) + 1.0 #!!!! x_inf[1, 0]
+        xr = tf.concat([xr1, xr2], axis=0)
+        x_inf = tf.concat([xr, x_inf[:, self.ref_dvdt_idx:]], axis=1)
+        x_inf = tf.reshape(x_inf, shape=(tf.size(x_inf)))
+
+        return x_inf
+
+class H_channelOLM_Saraga(ctfeq.BaseChannel):
+    def __init__(self, params, N, dt=0.1):
+        super(H_channelOLM_Saraga, self).__init__(params, N, dt=dt)
+
+    def __get_x_inf(self, V):
+        r_inf = 1 / (1 + exp( (V + 84) / 10.2) )
+        return r_inf
+    def __get_tau_x(self, V):
+        tau_r = 1 / (exp(-14.59 - 0.086 * V) + exp(-1.87 + 0.0701 * V))
+        return tau_r

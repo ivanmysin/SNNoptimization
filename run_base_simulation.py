@@ -15,7 +15,7 @@ Targets_spikes_rates = generators4targets(tf.reshape(t, shape=(-1, 1)))
 net = cbrd_tfdiffeq.Network(params_net)
 net.set_optimizator(Optimizer)
 #net.load_trained_variables('/media/reseacher/3baf6c7e-8a20-4236-b3c9-a0ae7bed9266/Data/SSN_simulated/HH/solution_003.hdf5')
-net.load_trained_variables('/media/reseacher/8f91cdcb-03d4-4fce-b560-a5796564d923/home/reseacher/Data/snn3/solution_500.hdf5')
+#net.load_trained_variables('/media/reseacher/8f91cdcb-03d4-4fce-b560-a5796564d923/home/reseacher/Data/snn3/solution_500.hdf5')
 """
 y0 = net.get_y0()
 solution = net.run_simulation(t, y0)

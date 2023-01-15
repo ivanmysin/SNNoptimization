@@ -142,12 +142,63 @@ common_int_params = {
     },
 }
 
+###############################################################################
+kdr_channel_OLM_saraga = {
+    "channel_class" : Chs.Kdr_channelOLM_Saraga,
+    "gmax" : 23.0,
+    "Erev" : -100.0,
+    "degrees" : [4, ],
+    "x_reset" : [0.67, ],
+}
 
+ka_channel_OLM_saraga = {
+    "channel_class" : Chs.KA_channelOLM_Saraga,
+    "gmax" : 16.0,
+    "Erev" : -100.0,
+    "degrees" : [1, 1],
+    "x_reset" : [0.25, 0.0],
+}
+
+h_channel_OLM_saraga = {
+    "channel_class" : Chs.H_channelOLM_Saraga,
+    "gmax" : 8.0,
+    "Erev" : -32.0,
+    "degrees" : [1,],
+    "x_reset" : [0.0001, ],
+}
+
+olm_saraga_params = {
+    "name": "olm",
+    "Vreset": -40.0,
+    "Vt": -61.0,
+    "gl": 0.05,
+    "El": -70.0,
+    "C": 1.3,  #
+    "sigma": 0.3,
+    "ref_dvdt": 2.0,  # AP duration
+    "refactory": 15.0,  # refactory for threshold
+    "Iext": -0.5,
+    "N": 400,
+    "dts": 0.5,
+
+    "channels_params": [kdr_channel_OLM_saraga, ka_channel_OLM_saraga, h_channel_OLM_saraga],
+
+    "target": {
+        "R": 0.3,
+        "freq": 5,
+        "mean_spike_rate": 20.0,
+        "phase": 1.5707963267948966,
+    },
+
+}
+
+###############################################################################
 
 
 #population = ctfeq.HH_Neuron(olm_params, dt=0.1)
 # population = ctfeq.HH_Neuron(ngf_params, dt=0.1)
-population = ctfeq.HH_Neuron(common_int_params, dt=0.1)
+#population = ctfeq.HH_Neuron(common_int_params, dt=0.1)
+population = ctfeq.HH_Neuron(olm_saraga_params, dt=0.1)
 y0 = population.get_y0()
 t = tf.range(0.0, 150.0, 0.1, dtype=tf.float64)
 # dydt = population(t[0], y0)

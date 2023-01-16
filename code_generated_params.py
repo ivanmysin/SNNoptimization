@@ -774,6 +774,7 @@ h_channel_OLM_saraga = {
 
 olm_params = {
     "name": "olm",
+    "neuron_class": ctfeq.HH_Neuron,
     "Vreset": -40.0,
     "Vt": -61.0,
     "gl": 0.05,

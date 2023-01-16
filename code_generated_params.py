@@ -620,31 +620,6 @@ pvbas_params = {
     },
 }
 
-olm_params = {
-    "name" : "olm",
-    "neuron_class" : ctfeq.HH_Neuron,
-    "Vreset": -40.0,
-    "Vt": -55.0, 
-    "gl": 0.3,
-    "El": -54.4,
-    "C": 1.0,
-    "sigma": 0.3,
-    "ref_dvdt": 2.0,   # AP duration
-    "refactory": 15.0,  # refactory for threshold
-    "Iext": -1.5,
-    "N": 400,
-    "dts": 0.5,
-
-    "channels_params"  : [kdr_channel4olm, na_persis_channel, h_channel4OLM],
-
-    "target" : {
-        "R": 0.3,
-        "freq": 8.0,
-        "mean_spike_rate": 20.0,
-        "phase": 3.14,
-    },
-}
-
 cckbas_params = {
     "name" : "cckbas",
     "neuron_class" : ctfeq.HH_Neuron,
@@ -769,6 +744,57 @@ ngf_params = {
         "mean_spike_rate": 20.0,
         "phase": 0.0,
     },
+}
+
+
+###############################################################################
+kdr_channel_OLM_saraga = {
+    "channel_class" : Chs.Kdr_channelOLM_Saraga,
+    "gmax" : 23.0,
+    "Erev" : -100.0,
+    "degrees" : [4, ],
+    "x_reset" : [0.67, ],
+}
+
+ka_channel_OLM_saraga = {
+    "channel_class" : Chs.KA_channelOLM_Saraga,
+    "gmax" : 16.0,
+    "Erev" : -100.0,
+    "degrees" : [1, 1],
+    "x_reset" : [0.25, 0.0],
+}
+
+h_channel_OLM_saraga = {
+    "channel_class" : Chs.H_channelOLM_Saraga,
+    "gmax" : 8.0,
+    "Erev" : -32.0,
+    "degrees" : [1,],
+    "x_reset" : [0.0001, ],
+}
+
+olm_params = {
+    "name": "olm",
+    "Vreset": -40.0,
+    "Vt": -61.0,
+    "gl": 0.05,
+    "El": -70.0,
+    "C": 1.3,  #
+    "sigma": 0.3,
+    "ref_dvdt": 2.0,  # AP duration
+    "refactory": 15.0,  # refactory for threshold
+    "Iext": -0.5,
+    "N": 400,
+    "dts": 0.5,
+
+    "channels_params": [kdr_channel_OLM_saraga, ka_channel_OLM_saraga, h_channel_OLM_saraga],
+
+    "target": {
+        "R": 0.3,
+        "freq": 8.0,
+        "mean_spike_rate": 20.0,
+        "phase": 3.14,
+    },
+
 }
 
 ##########################################

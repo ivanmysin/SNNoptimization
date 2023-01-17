@@ -50,7 +50,7 @@ alpha_b = 0.0016 * exp( (-13*mV - V) / (18*mV) ) /ms : Hz
 beta_b = 0.05 / (1 + exp( (10.1*mV - V)/(5*mV) ) ) /ms : Hz
 '''
 
-neuron = NeuronGroup(N, eqs, method='exponential_euler', namespace={"Iext" : 1.5*uA})
+neuron = NeuronGroup(N, eqs, method='exponential_euler', namespace={"Iext" : 0.0*uA})
 neuron.V = -90*mV
 neuron.n = 0.09
 neuron.h = 1.0
@@ -81,7 +81,7 @@ dVT/dt = (-60*mV - VT)/(4*ms) : volt
 
 reduced_neuron = NeuronGroup(N, reduced_eqs, threshold='V > VT', \
                     reset='V =-40*mV;n = 0.45; VT=-20*mV; a=0.31;b=b-0.05', \
-                    refractory=2.5*ms, method='exponential_euler', namespace={"Iext" : 1.5*uA})
+                    refractory=2.5*ms, method='exponential_euler', namespace={"Iext" : 0.0*uA})
 
 reduced_neuron.V = -90*mV
 reduced_neuron.VT = -60*mV

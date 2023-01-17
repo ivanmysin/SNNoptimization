@@ -266,7 +266,6 @@ class KA_channelOLM_Saraga(ctfeq.BaseChannel):
 
         xr = tf.zeros((self.n_gate_vars, self.ref_dvdt_idx), dtype=tf.float64)
         dxdt = tf.concat([xr, dxdt[:, self.ref_dvdt_idx:]], axis=1)
-        #dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt)))
         dxdt = tf.reshape(dxdt, shape=(tf.size(dxdt), ))
 
         dxdt_reset = tf.zeros(self.n_gate_vars, dtype=tf.float64)
@@ -277,7 +276,7 @@ class KA_channelOLM_Saraga(ctfeq.BaseChannel):
     def get_y0(self, V):
         x_inf, _ = self.get_x_inf_and_tau_x(V)
         xr1 = tf.zeros((1, self.ref_dvdt_idx), dtype=tf.float64) + self.x_reset[0]
-        xr2 = tf.zeros((1, self.ref_dvdt_idx), dtype=tf.float64) + 1.0 #!!!! x_inf[1, 0]
+        xr2 = tf.zeros((1, self.ref_dvdt_idx), dtype=tf.float64) + 0.1 #!!!! x_inf[1, 0]
         xr = tf.concat([xr1, xr2], axis=0)
         x_inf = tf.concat([xr, x_inf[:, self.ref_dvdt_idx:]], axis=1)
         x_inf = tf.reshape(x_inf, shape=(tf.size(x_inf)))

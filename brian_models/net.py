@@ -1,10 +1,11 @@
+import numpy as np
 from brian2 import *
 from code_generated_params import params_net
 import net_lib
-METHOD = 'exponential_euler'
+METHOD = 'heun'  #'exponential_euler'
 
 def get_int_A_group(params_groups):
-    N = 1
+    N = 100
     params = {
         "Iext": params_groups["Iext"] * uA,
         "Cm" : params_groups["C"] * uF,  # /cm**2
@@ -21,7 +22,7 @@ def get_int_A_group(params_groups):
 
     # Interneuron Model with A-current
     eqs = '''
-    dV/dt = (INa + IKdr + IL + IA + Iext + Isyn)/Cm : volt
+    dV/dt = (INa + IKdr + IL + IA + Iext + Isyn)/Cm + sigma*xi/ms**0.5 : volt
     IL = gL*(EL - V)           : ampere
     INa = gNa*m**3*h*(ENa - V) : ampere
     IKdr = gK*n**4*(EK - V) : ampere
@@ -94,33 +95,74 @@ def get_connection_object(pre_pop, post_pop, syn_params):
     return synobj
 
 
+def filtrate_params_net(params_net):
+    params_net_filtared = {
+        "params_neurons": params_net["params_neurons"],
+        "params_generators": params_net["params_generators"],
+        "params_synapses": [],
+    }
+
+    neurons_names = [neuron["name"] for neuron in params_net["params_neurons"]]
+    generators_names = [neuron["name"] for neuron in params_net["params_generators"]]
+
+    for synapse in params_net["params_synapses"]:
+        if (synapse["pre_name"] in neurons_names) and (synapse["post_name"] in neurons_names):
+            params_net_filtared["params_synapses"].append(synapse)
+
+        if (synapse["pre_name"] in generators_names) and (synapse["post_name"] in neurons_names):
+            params_net_filtared["params_synapses"].append(synapse)
+
+
+
+    return params_net_filtared
+###################################################################################################
+params_net = filtrate_params_net(params_net)
 
 Net = Network()
-for neural_population_idx, params_neurons in enumerate(params_net["params_neurons"]):
-    if params_neurons["name"] in ["pvbas", "cckbas", "aac", "ivy", "bis"]:
-        neuron_group = get_int_A_group(params_neurons)
-        M_full_V = StateMonitor(neuron_group, 'V', record=0)
-    Net.add(neuron_group, M_full_V)
+SpkMons = []
 
+for generator_idx, params_generator in enumerate(params_net["params_generators"]):
+    N = 1000
+    rates = net_lib.get_generator_rates(N, params_generator)
+    generator_group = PoissonGroup(N, rates=rates, name=params_generator["name"])
 
-for pre_pop in Net.sorted_objects:
-    for post_pop in Net.sorted_objects:
-        for syn_params in params_net["params_synapses"]:
-            if pre_pop.name == syn_params["pre_name"] and post_pop.name == syn_params["post_name"]:
-                print(pre_pop.name, post_pop.name)
-                synapses = get_connection_object(pre_pop, post_pop, syn_params)
-                Net.add(synapses)
+    SpkMon = SpikeMonitor(generator_group)
+    SpkMons.append(SpkMon)
+    Net.add(generator_group, SpkMon)
 
+# for neural_population_idx, params_neurons in enumerate(params_net["params_neurons"]):
+#     if params_neurons["name"] in ["pvbas", "cckbas", "aac", "ivy", "bis"]:
+#         neuron_group = get_int_A_group(params_neurons)
+#
+#     SpkMon = SpikeMonitor(neuron_group)
+#     SpkMons.append(SpkMon)
+#     Net.add(neuron_group, SpkMon)
+#
+#
+# for pre_pop in Net.sorted_objects:
+#     for post_pop in Net.sorted_objects:
+#         for syn_params in params_net["params_synapses"]:
+#             if pre_pop.name == syn_params["pre_name"] and post_pop.name == syn_params["post_name"]:
+#                 print(pre_pop.name, post_pop.name)
+#                 synapses = get_connection_object(pre_pop, post_pop, syn_params)
+#                 Net.add(synapses)
+#
 
 
 
 
 Net.run(200*ms, report='text')
 
-fig, axes = plt.subplots(nrows=1, sharex=True)
+fig, axes = plt.subplots(nrows=len(SpkMons), sharex=True)
+for pops_idx, SpkMon in enumerate(SpkMons):
+    #print( np.asarray(SpkMon.t).size / 0.2)
 
-axes.plot(M_full_V.t/ms, M_full_V[0].V/mV)
+    axes[pops_idx].scatter(SpkMon.t/ms, SpkMon.i)
+
+
+
+#axes.plot(M_full_V.t/ms, M_full_V[0].V/mV)
 plt.show()
 
 
-#print(pvbas_params)
+

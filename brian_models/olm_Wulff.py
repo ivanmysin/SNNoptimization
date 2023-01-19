@@ -1,6 +1,6 @@
 from brian2 import *
 # import h5py
-defaultclock.dt = 0.1*ms
+defaultclock.dt = 0.01*ms
 
 
 Cm = 1.3*uF # /cm**2
@@ -23,7 +23,7 @@ N = 1
 
 # OLM Model
 eqs = '''
-dV/dt = (INa + IKdr + IL + IKA + IH + Iext)/Cm : volt
+dV/dt = (INa + IKdr + IL + IKA + IH + Iext)/Cm + sigma*xi/ms**0.5 : volt
 IL = gL*(EL - V)           : ampere
 INa = gNa*m**3*h*(ENa - V) : ampere
 IKdr = gK*n**4*(EK - V) : ampere
@@ -55,7 +55,7 @@ tau_r = 1 / (exp(-14.59 - 0.086*V/mV) + exp(-1.87 + 0.0701*V/mV) ) * ms: second
 
 
 
-neuron = NeuronGroup(N, eqs, method='exponential_euler', namespace={"Iext" : -0.5*uA})
+neuron = NeuronGroup(N, eqs, method='heun', namespace={"Iext" : -0.5*uA})
 neuron.V = -90*mV
 neuron.n = 0.09
 neuron.h = 1.0

@@ -21,33 +21,33 @@ sigma = 0.3*mV
 
 N = 5000
 
-# # Interneuron Model without A-current
-# full_eqs = '''
-# dV/dt = (INa + IKdr + IL + Iext)/Cm : volt
-# IL = gL*(EL - V)           : ampere
-# INa = gNa*m**3*h*(ENa - V) : ampere
-# IKdr = gK*n**4*(EK - V) : ampere
-#
-# m = alpha_m/(alpha_m+beta_m) : 1
-# alpha_m = 1.0 / exprel(-(V+40*mV)/(10*mV))/ms : Hz
-# beta_m = 4*exp(-(V+65*mV)/(18*mV))/ms : Hz
-# dh/dt = (alpha_h*(1-h)-beta_h*h) : 1
-# alpha_h = 0.07*exp(-(V+65*mV)/(20*mV))/ms : Hz
-# beta_h = 1./(exp(-0.1/mV*(V+35*mV))+1)/ms : Hz
-# #dn/dt = (alpha_n*(1-n)-beta_n*n) : 1
-# #alpha_n = 0.1 / exprel(-(V+55*mV)/(10*mV))/ms : Hz
-# #beta_n = 0.125*exp(-(V+65*mV)/(80*mV))/ms : Hz
-#
-# dn/dt = (n_inf - n) / tau_n : 1
-# tau_n = 0.5*ms + 2.0*ms/(1 + exp(0.045/mV * (V - 50*mV))) : second
-# n_inf = 1.0 / (1.0 + exp(-0.045 * (V/mV + 10))) : 1
-#
-# '''
-#
-# full_neuron = NeuronGroup(N, full_eqs, method='exponential_euler', namespace={"Iext" : 0.5*uA})
-# full_neuron.V = -60*mV
-# full_neuron.n = 0.09
-# full_neuron.h = 1.0
+# Interneuron Model without A-current
+full_eqs = '''
+dV/dt = (INa + IKdr + IL + Iext)/Cm : volt
+IL = gL*(EL - V)           : ampere
+INa = gNa*m**3*h*(ENa - V) : ampere
+IKdr = gK*n**4*(EK - V) : ampere
+
+m = alpha_m/(alpha_m+beta_m) : 1
+alpha_m = 1.0 / exprel(-(V+40*mV)/(10*mV))/ms : Hz
+beta_m = 4*exp(-(V+65*mV)/(18*mV))/ms : Hz
+dh/dt = (alpha_h*(1-h)-beta_h*h) : 1
+alpha_h = 0.07*exp(-(V+65*mV)/(20*mV))/ms : Hz
+beta_h = 1./(exp(-0.1/mV*(V+35*mV))+1)/ms : Hz
+#dn/dt = (alpha_n*(1-n)-beta_n*n) : 1
+#alpha_n = 0.1 / exprel(-(V+55*mV)/(10*mV))/ms : Hz
+#beta_n = 0.125*exp(-(V+65*mV)/(80*mV))/ms : Hz
+
+dn/dt = (n_inf - n) / tau_n : 1
+tau_n = 0.5*ms + 2.0*ms/(1 + exp(0.045/mV * (V - 50*mV))) : second
+n_inf = 1.0 / (1.0 + exp(-0.045 * (V/mV + 10))) : 1
+
+'''
+
+full_neuron = NeuronGroup(N, full_eqs, method='exponential_euler', namespace={"Iext" : 0.5*uA})
+full_neuron.V = -60*mV
+full_neuron.n = 0.09
+full_neuron.h = 1.0
 
 
 tau = 0.1 * ms

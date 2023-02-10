@@ -351,7 +351,7 @@ ca1pyr2olm = {
     "tau_r": 202.0650489,
     "tau_d": 2.947716244,
     "Uinc": 0.089607609,
-    "gbarS": 1.699075536,
+    "gbarS": 10 * 1.699075536,
     "Erev": 0.0,
 }
 bis2olm = {
@@ -766,7 +766,7 @@ ka_channel_OLM_saraga = {
 
 h_channel_OLM_saraga = {
     "channel_class" : Chs.H_channelOLM_Saraga,
-    "gmax" : 8.0,
+    "gmax" : 8.0, #!!!! 8.0,
     "Erev" : -32.0,
     "degrees" : [1,],
     "x_reset" : [0.0001, ],
@@ -827,10 +827,11 @@ ec3_params = {
 ########################################
 ##### block of synapses params #########
 params_net = {
-"params_neurons" : [pvbas_params, olm_params, cckbas_params, bis_params, aac_params, ivy_params, ngf_params],
-#"params_neurons" : [pvbas_params, olm_params, ], # cckbas_params, ngf_params
-"params_generators" : [ca3pyr_params, ca1pyr_params, ec3_params],
-"params_synapses" : [ca3pyr2aac, ca1pyr2aac, ec32aac, pvbas2aac, cckbas2aac, ngf2aac, olm2aac, bis2aac, ivy2aac, ca3pyr2pvbas, ca1pyr2pvbas, ec32pvbas, pvbas2pvbas, cckbas2pvbas, ngf2pvbas, olm2pvbas, bis2pvbas, ivy2pvbas, ca3pyr2cckbas, ca1pyr2cckbas, ec32cckbas, pvbas2cckbas, cckbas2cckbas, ngf2cckbas, olm2cckbas, bis2cckbas, ivy2cckbas, ec32ngf, ngf2ngf, olm2ngf, ca3pyr2olm, ca1pyr2olm, bis2olm, ivy2olm, ca3pyr2bis, ca1pyr2bis, pvbas2bis, cckbas2bis, bis2bis, ivy2bis, ca3pyr2ivy, ca1pyr2ivy, pvbas2ivy, cckbas2ivy, bis2ivy, ivy2ivy, ec32ivy, ca3pyr2ngf, ivy2ngf, ],
-#"params_synapses" : [ca3pyr2pvbas, pvbas2cckbas],
+#"params_neurons" : [pvbas_params, olm_params, cckbas_params, bis_params, aac_params, ivy_params, ngf_params],
+"params_neurons" : [olm_params, ], # cckbas_params, ngf_params
+#"params_generators" : [ca3pyr_params, ca1pyr_params, ec3_params],
+"params_generators" : [ca1pyr_params, ],
+#"params_synapses" : [ca3pyr2aac, ca1pyr2aac, ec32aac, pvbas2aac, cckbas2aac, ngf2aac, olm2aac, bis2aac, ivy2aac, ca3pyr2pvbas, ca1pyr2pvbas, ec32pvbas, pvbas2pvbas, cckbas2pvbas, ngf2pvbas, olm2pvbas, bis2pvbas, ivy2pvbas, ca3pyr2cckbas, ca1pyr2cckbas, ec32cckbas, pvbas2cckbas, cckbas2cckbas, ngf2cckbas, olm2cckbas, bis2cckbas, ivy2cckbas, ec32ngf, ngf2ngf, olm2ngf, ca3pyr2olm, ca1pyr2olm, bis2olm, ivy2olm, ca3pyr2bis, ca1pyr2bis, pvbas2bis, cckbas2bis, bis2bis, ivy2bis, ca3pyr2ivy, ca1pyr2ivy, pvbas2ivy, cckbas2ivy, bis2ivy, ivy2ivy, ec32ivy, ca3pyr2ngf, ivy2ngf, ],
+"params_synapses" : [ca1pyr2olm, ],
 
 }

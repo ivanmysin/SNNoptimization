@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.special import i0 as bessel
+from copy import deepcopy
 
 RNG = np.random.default_rng()
 
@@ -31,19 +32,25 @@ def get_generator_rates(N, params_generator):
     rates = rates_template.format(mean_rate=mean_rate, kappa=kappa, omega=params_generator["freq"], phi0=params_generator["phase"])
     return rates
 
-def get_str4Isyn(post_name, params_synapses):
+def get_str4Isyn(post_params, params_synapses, NNP, PCONN):
+    post_name = post_params["name"]
+
     Isyn_str = ""
 
     Isyn_sum = []
 
     isyn_template = """
-    Isyn_{pre_name}2{post_name} = g_{pre_name}2{post_name}*({Erev}*mV - V) : ampere
+    Isyn_{pre_name}2{post_name} = {gbarS} * g_{pre_name}2{post_name}*({Erev}*mV - V) : ampere
     dg_{pre_name}2{post_name}/dt = -g_{pre_name}2{post_name}/tau_d_{pre_name}2{post_name} : siemens
     tau_d_{pre_name}2{post_name} = {tau_d}*ms : second
     """
 
     for conn_param in params_synapses:
         if post_name != conn_param["post_name"]: continue
+
+        Wconn = conn_param['w'] * conn_param['gbarS'] / NNP / PCONN
+        #gbar_str = "gbarS_{pre_name}2{post_name}".format(**conn_param)
+        conn_param["gbarS"] = Wconn
 
         isyn = isyn_template.format(**conn_param)
         Isyn_str += isyn

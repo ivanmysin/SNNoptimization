@@ -1,7 +1,15 @@
 from brian2 import *
 import sympy
-
+import numpy as np
+import matplotlib.pyplot as plt
 seed(11922)  # to get identical figures for repeated runs
+params = {'legend.fontsize': 'x-large',
+          'figure.figsize': (15, 5),
+         'axes.labelsize': 'xx-large',
+         'axes.titlesize':'xx-large',
+         'xtick.labelsize':'xx-large',
+         'ytick.labelsize':'xx-large'}
+plt.rcParams.update(params)
 
 ################################################################################
 # Model parameters
@@ -50,7 +58,7 @@ neurons = NeuronGroup(N_e + N_i, model=neuron_eqs,
                       threshold='v>V_th', reset='v=V_r',
                       refractory='tau_r', method='euler')
 # Random initial membrane potential values and conductances
-neurons.v = 'E_l + rand()*(V_th-E_l)'
+neurons.v = 'E_l + randn()*(V_th-E_l)'
 neurons.g_e = 'rand()*w_e'
 neurons.g_i = 'rand()*w_i'
 exc_neurons = neurons[:N_e]
@@ -96,7 +104,8 @@ SpM = SpikeMonitor(neurons)
 # ### We record some additional data from a single excitatory neuron
 # ni = 50
 # # Record conductances and membrane potential of neuron ni
-# state_mon = StateMonitor(exc_neurons, ['v', 'g_e', 'g_i'], record=ni)
+state_mon1 = StateMonitor(exc_neurons, ['v', 'g_i'], record=np.arange(200))
+state_mon2 = StateMonitor(inh_neurons, ['v', 'g_i'], record=np.arange(200))
 # # We make sure to monitor synaptic variables after synapse are updated in order
 # # to use simple recurrence relations to reconstruct them. Record all synapses
 # # originating from neuron ni
@@ -110,10 +119,18 @@ SpM = SpikeMonitor(neurons)
 # ##############################################################################
 run(duration, report='text')
 
+mean_con1 = np.sum( (state_mon1.g_i / mS), axis=0)
+mean_con2 = np.sum( (state_mon2.g_i / mS), axis=0)
 
-figure(figsize=(14, 4))
-plot(SpM.t / ms, SpM.i, '.r')
-xlabel('Time (ms)')
-ylabel('Neuron index')
+fig, axes = plt.subplots(nrows=3, figsize=(15, 8), sharex=True)
+axes[0].scatter(SpM.t / ms, SpM.i, s=5, color="green")
+axes[0].set_ylabel('Neuron index')
 
+axes[1].plot(state_mon1.t/ms, mean_con1, linewidth=5, color="blue")
+axes[1].set_ylabel('Mean synaptic \n conductance, mS')
+axes[2].plot(state_mon2.t/ms, mean_con2, linewidth=5, color="blue")
+axes[2].set_ylabel('Mean synaptic \n conductance, mS')
+axes[2].set_xlabel('Time (ms)')
+
+fig.savefig('/home/ivan/Документы/Тезисы/Fig_2Pop.png')
 show()

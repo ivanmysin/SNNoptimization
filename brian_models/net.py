@@ -63,7 +63,7 @@ def get_int_A_group(params_groups):
 
     {isyn_str}
     '''
-    Isyn_str = net_lib.get_str4Isyn(params_groups["name"], params_net["params_synapses"])
+    Isyn_str = net_lib.get_str4Isyn(params_groups, params_net["params_synapses"], NNP, PCONN)
     eqs = eqs.format(isyn_str = Isyn_str)
 
 
@@ -111,7 +111,7 @@ def get_ngf_group(params_groups):
 
     {isyn_str}
     '''
-    Isyn_str = net_lib.get_str4Isyn(params_groups["name"], params_net["params_synapses"])
+    Isyn_str = net_lib.get_str4Isyn(params_groups, params_net["params_synapses"], NNP, PCONN)
     eqs = eqs.format(isyn_str = Isyn_str)
 
 
@@ -172,7 +172,7 @@ def get_olm_group(params_groups):
 
     {isyn_str}
     '''
-    Isyn_str = net_lib.get_str4Isyn(params_groups["name"], params_net["params_synapses"])
+    Isyn_str = net_lib.get_str4Isyn(params_groups, params_net["params_synapses"], NNP, PCONN)
     eqs = eqs.format(isyn_str=Isyn_str)
 
     neuron = NeuronGroup(N, eqs, method=METHOD, namespace=params, name=params_groups["name"], threshold='V > -20*mV')
@@ -196,7 +196,7 @@ def get_connection_object(pre_pop, post_pop, syn_params):
     u_S += U_0 * (1 - u_S)
     r_S = u_S * x_S
     x_S -= r_S
-    g_{pre_name}2{post_name}_post += gbarS*r_S
+    g_{pre_name}2{post_name}_post += W_inp*r_S
     '''
 
     synapses_eqs = synapses_eqs_template.format(**syn_params)
@@ -205,10 +205,10 @@ def get_connection_object(pre_pop, post_pop, syn_params):
     # print(synapses_eqs)
     # print(synapses_action)
     # print("#############################")
-    Wconn = 50*syn_params['w'] * syn_params['gbarS'] / NNP / PCONN
+
 
     synobj = Synapses(pre_pop, post_pop,  model=synapses_eqs,
-                       on_pre=synapses_action, namespace={"U_0": syn_params["Uinc"], "gbarS":Wconn*mS})
+                       on_pre=synapses_action, namespace={"U_0": syn_params["Uinc"], "W_inp":1*nS})
     synobj.connect(p=PCONN) #set w !!!!
     synobj.x_S = 1
 
@@ -237,9 +237,11 @@ def filtrate_params_net(params_net):
 
     return params_net_filtared
 ###################################################################################################
-#params_net = filtrate_params_net(params_net)
+#
 with open('/home/ivan/Data/Opt_res/params_net.pickle', 'rb') as file:
     params_net = pickle.load(file)
+#params_net = filtrate_params_net(params_net)
+
 
 Net = Network()
 SpkMons = []

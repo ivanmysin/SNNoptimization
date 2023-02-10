@@ -227,9 +227,9 @@ class Kdr_channelOLM_Saraga(ctfeq.BaseChannel):
         super(Kdr_channelOLM_Saraga, self).__init__(params, N, dt=dt)
 
     def get_x_inf_and_tau_x(self, V):
-        n_inf, tau_n = self.__get_n_inf_and_tau_n(V)
+        n_inf, tau_n = self._get_n_inf_and_tau_n(V)
         return n_inf, tau_n
-    def __get_n_inf_and_tau_n(self, V):
+    def _get_n_inf_and_tau_n(self, V):
         alpha_n = 0.018 * (V - 25 ) / (1 - exp( (V - 25) / -25) )
         beta_n = 0.0036 * ( (V - 35) ) / (exp( (V - 35) / 12) - 1)
         tau_n = 1 / (alpha_n + beta_n)
@@ -286,10 +286,13 @@ class KA_channelOLM_Saraga(ctfeq.BaseChannel):
 class H_channelOLM_Saraga(ctfeq.BaseChannel):
     def __init__(self, params, N, dt=0.1):
         super(H_channelOLM_Saraga, self).__init__(params, N, dt=dt)
-
-    def __get_x_inf(self, V):
+    def get_x_inf_and_tau_x(self, V):
+        x_inf = self._get_x_inf(V)
+        tau_x = self._get_tau_x(V)
+        return x_inf, tau_x
+    def _get_x_inf(self, V):
         r_inf = 1 / (1 + exp( (V + 84) / 10.2) )
         return r_inf
-    def __get_tau_x(self, V):
+    def _get_tau_x(self, V):
         tau_r = 1 / (exp(-14.59 - 0.086 * V) + exp(-1.87 + 0.0701 * V))
         return tau_r

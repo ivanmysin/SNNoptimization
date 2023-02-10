@@ -660,7 +660,7 @@ class Network(tf.keras.Model):
             dy_dt.append(dsyn_dt)
 
         for neuron_idx, neuron in enumerate(self.neurons):
-            y4neuron = y[ neuron.start_idx:neuron.end_idx ]
+            #y4neuron = y[ neuron.start_idx:neuron.end_idx ]
             Vpost = y[neuron.V_start_idx:neuron.V_end_idx] # 4neuron for LIF
 
             gsyn_full = 0.0

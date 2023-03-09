@@ -22,7 +22,7 @@ with h5py.File(optimized_results, "r") as h5file:
     for syn_idx, synapse_params in enumerate(params_net["params_synapses"]):
         if synapse_params["pre_name"] in ['ca1pyr', 'ca3pyr']:
             print(synapse_params["pre_name"])
-            synapse_params["w"] = 2 * h5file["Wplasticsyns:0"][syn_idx]
+            synapse_params["w"] = 4 * h5file["Wplasticsyns:0"][syn_idx]
         elif synapse_params["pre_name"] in ['ec3']:
             synapse_params["w"] = 3.3 * h5file["Wplasticsyns:0"][syn_idx]
         else:

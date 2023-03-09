@@ -160,8 +160,7 @@ spike_rate_2 = spike_rate_2 / (0.001 * N_2 * dbins)
 # fig, axes = plt.subplots(nrows=2, constrained_layout=True, figsize=(15, 10))
 # axes[0].plot(state_mon1.V[10]/mV)
 # axes[1].plot(state_mon2.V[10]/mV)
-
-plt.show()
+#plt.show()
 
 gridspec_kw = {
     "width_ratios" : [0.3, 0.5, 0.1],

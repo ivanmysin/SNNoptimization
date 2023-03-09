@@ -9,7 +9,7 @@ generators4targets = cbrd_tfdiffeq.VonMissesGenerators(params_net["params_neuron
 
 
 path = '/home/ivan/Data/phase_relations/com.hdf5'
-#path = '/media/reseacher/8f91cdcb-03d4-4fce-b560-a5796564d923/home/reseacher/Data/snn3/solution_500.hdf5'
+
 
 hf = h5py.File(path, 'r')
 dset_solution = hf['solution']

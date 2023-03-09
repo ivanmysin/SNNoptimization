@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from tfdiffeq import odeint, odeint_adjoint
+#from tfdiffeq import odeint, odeint_adjoint
 import h5py
 import matplotlib.pyplot as plt
 
@@ -19,6 +19,22 @@ argmax = tf.math.argmax
 SQRT_FROM_2 = np.sqrt(2)
 SQRT_FROM_2_PI = 0.7978845608028654
 PI = np.pi
+
+
+@tf.function
+def odeint(func, y0, t, rtol=1e-7, atol=1e-9, method=None, options=None):
+    y = y0
+    solution = tf.TensorArray(tf.float64, size=tf.size(t))
+    solution = solution.write(0, y)
+    for idx in range(1, tf.size(t)):
+        dt = t[idx] - t[idx - 1]
+        dy = func(t[idx], y)
+        y = y + dt * dy
+        solution = solution.write(idx, y)
+    solution = solution.stack()
+    return solution
+
+odeint_adjoint = odeint
 
 class BaseNeuron(tf.keras.Model):
 
@@ -582,7 +598,7 @@ class Network(tf.keras.Model):
         params_neurons = params["params_neurons"]
 
         self.synapses = []
-        params_synapses =  self._set_connections(params_neurons, params["params_generators"], params["params_synapses"])
+        params_synapses = self._set_connections(params_neurons, params["params_generators"], params["params_synapses"])
         Syn = PlasticSynapse(params_synapses, dt=dt)
         self.synapses.append(Syn)
         # for idx, param_synapse in enumerate(params_synapses):
@@ -742,7 +758,7 @@ class Network(tf.keras.Model):
             y0 = solution[-1, :]
 
             trainable_variables = tuple(neuron.Iext for neuron in self.neurons)
-            trainable_variables = trainable_variables + self.synapses[0].trainable_variables
+            trainable_variables = trainable_variables + trainable_variables # (self.synapses[0].gbarS, ) # !!!!!!!!!!!!!!!!!!
 
             #trainable_variables = self.synapses[0].trainable_variables
             grad_over_simulation = [0] * len(trainable_variables)
@@ -783,7 +799,7 @@ class Network(tf.keras.Model):
                         loss += tf.reduce_sum(-0.001 * tf.math.log(100 * val))
 
                     loss += tf.reduce_sum(-0.001 * tf.math.log(100 * (1.0 - self.synapses[0].Uinc) ))
-                    loss += tf.reduce_sum(-0.001 * tf.math.log(100 * (1.0 - self.synapses[0].W) ))
+                    #loss += tf.reduce_sum(-0.001 * tf.math.log(100 * (1.0 - self.synapses[0].W) ))
                     
                     # for neuron in self.neurons:
                     #     loss += tf.reduce_sum(-0.1 * tf.math.log(1.5 - neuron.Iext))

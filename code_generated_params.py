@@ -614,7 +614,7 @@ pvbas_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 8.0,
+        "freq": 6.0,
         "mean_spike_rate": 24, #20.0,
         "phase": 1.5707963267948966,
     },
@@ -639,7 +639,7 @@ cckbas_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 8.0,
+        "freq": 6.0,
         "mean_spike_rate": 9.0, # 20.0,
         "phase": -1.5707963267948966,
     },
@@ -665,7 +665,7 @@ bis_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 8.0,
+        "freq": 6.0,
         "mean_spike_rate": 27.0, # 20.0,
         "phase": 3.141592653589793,
     },
@@ -690,7 +690,7 @@ aac_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 8.0,
+        "freq": 6.0,
         "mean_spike_rate": 29.0, # 20.0,
         "phase": 0.0,
     },
@@ -715,7 +715,7 @@ ivy_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 8.0,
+        "freq": 6.0,
         "mean_spike_rate": 4.0, # 20.0,
         "phase": -1.5707963267948966,
     },
@@ -740,7 +740,7 @@ ngf_params = {
 
     "target" : {
         "R": 0.3,
-        "freq": 8.0,
+        "freq": 6.0,
         "mean_spike_rate": 8.0, #20.0,
         "phase": 0.0,
     },
@@ -791,7 +791,7 @@ olm_params = {
 
     "target": {
         "R": 0.3,
-        "freq": 8.0,
+        "freq": 6.0,
         "mean_spike_rate": 30, #20.0,
         "phase": 3.14,
     },
@@ -803,7 +803,7 @@ olm_params = {
 ca3pyr_params = {
     "name" : "ca3pyr",
     "R": 0.3,
-    "freq": 8.0,
+    "freq": 6.0,
     "mean_spike_rate": 0.5, # 5,
     "phase": 1.58,
 }
@@ -811,7 +811,7 @@ ca3pyr_params = {
 ca1pyr_params = {
     "name" : "ca1pyr",
     "R": 0.2,
-    "freq": 8.0,
+    "freq": 6.0,
     "mean_spike_rate": 0.5, # 5,
     "phase": 3.14,
 }
@@ -819,7 +819,7 @@ ca1pyr_params = {
 ec3_params = {
     "name" : "ec3",
     "R": 0.2,
-    "freq": 8.0,
+    "freq": 6.0,
     "mean_spike_rate": 1.5, # 5,
     "phase": -1.57,
 }

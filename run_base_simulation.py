@@ -6,7 +6,7 @@ from code_generated_params import params_net
 import h5py
 from time import time
 
-optimized_results = '/media/LD/Data/SSN_simulated/HHolmx10/solution_168.hdf5'
+optimized_results = '/media/LD/Data/SSN_simulated/HHolmx10/solution_642.hdf5'
 #'/media/reseacher/8f91cdcb-03d4-4fce-b560-a5796564d923/home/reseacher/Data/snn3/solution_500.hdf5'
 #"/media/reseacher/3baf6c7e-8a20-4236-b3c9-a0ae7bed9266/Data/SSN_simulated/HH/solution_199.hdf5" #"/media/bigdisk/Data/SSN_simulated/HH/solution_201.hdf5"
 
@@ -20,6 +20,7 @@ with h5py.File(optimized_results, "r") as h5file:
             neuron_params["Iext"] = sol_dset.attrs[iext_attr_name]
 
     for syn_idx, synapse_params in enumerate(params_net["params_synapses"]):
+        """
         if synapse_params["pre_name"] in ['ca1pyr', 'ca3pyr']:
             print(synapse_params["pre_name"])
             synapse_params["w"] = 4 * h5file["Wplasticsyns:0"][syn_idx]
@@ -32,7 +33,7 @@ with h5py.File(optimized_results, "r") as h5file:
                     break
                     
             synapse_params["w"] = coeff_tmp *  h5file["Wplasticsyns:0"][syn_idx]
-        
+        """
         gbarS = h5file["SynapticConductance:0"][syn_idx]
         synapse_params["tau_f"] = h5file["tau_f:0"][syn_idx]
         synapse_params["tau_r"] = h5file["tau_r:0"][syn_idx]
@@ -59,7 +60,7 @@ path = path4savingresults_template.format(0)
 net.save_simulation_data(path, solution, Targets_spikes_rates)
 
 """
-number_of_simulation_0 = 168
+number_of_simulation_0 = 642
 for idx in range(500):
     timer = time()
     number_of_simulation = number_of_simulation_0 + idx + 1

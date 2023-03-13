@@ -18,20 +18,10 @@ with h5py.File(optimized_results, "r") as h5file:
         neuron_params["Iext"] = sol_dset.attrs[iext_attr_name]
 
     for syn_idx, synapse_params in enumerate(params_net["params_synapses"]):
-        # if synapse_params["pre_name"] in ['ca1pyr', 'ca3pyr']:
-        #     print(synapse_params["pre_name"])
-        #     synapse_params["w"] = 4 * h5file["Wplasticsyns:0"][syn_idx]
-        # elif synapse_params["pre_name"] in ['ec3']:
-        #     synapse_params["w"] = 3.3 * h5file["Wplasticsyns:0"][syn_idx]
-        # else:
-        #     for neuron_params in params_net["params_neurons"]:
-        #         if synapse_params["pre_name"] == neuron_params["name"]:
-        #             coeff_tmp = 20.0 / neuron_params["target"]["mean_spike_rate"]
-        #             break
-                    
+        gbarS = h5file["SynapticConductance:0"][syn_idx]
         synapse_params["w"] = h5file["Wplasticsyns:0"][syn_idx]
         
-        gbarS = h5file["SynapticConductance:0"][syn_idx]
+
         synapse_params["tau_f"] = h5file["tau_f:0"][syn_idx]
         synapse_params["tau_r"] = h5file["tau_r:0"][syn_idx]
         synapse_params["tau_d"] = h5file["tau_d:0"][syn_idx]

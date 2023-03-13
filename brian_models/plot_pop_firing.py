@@ -15,7 +15,8 @@ for dset_name, dset in datafile.items():
     name = dset_name.split('_')[0]
     firings = dset[:]
     spike_rate, bins = np.histogram(firings, bins=duration, density=False, range=[0, duration])
-    spike_rate = spike_rate / (1000*N*dt)
+    dbins = bins[1] - bins[0]
+    spike_rate = spike_rate / (0.001*N*dbins)
     spike_rates.append({"name":name, 'spike_rate':spike_rate})
 datafile.close()
 

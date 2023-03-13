@@ -758,7 +758,7 @@ class Network(tf.keras.Model):
             y0 = solution[-1, :]
 
             trainable_variables = tuple(neuron.Iext for neuron in self.neurons)
-            trainable_variables = trainable_variables + trainable_variables # (self.synapses[0].gbarS, ) # !!!!!!!!!!!!!!!!!!
+            trainable_variables = trainable_variables + self.synapses[0].trainable_variables # (self.synapses[0].gbarS, ) # !!!!!!!!!!!!!!!!!!
 
             #trainable_variables = self.synapses[0].trainable_variables
             grad_over_simulation = [0] * len(trainable_variables)

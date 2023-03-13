@@ -6,7 +6,7 @@ from code_generated_params import params_net
 import h5py
 from time import time
 
-optimized_results = '/media/LD/Data/SSN_simulated/HHolmx10/solution_168.hdf5'
+optimized_results = '/media/LD/Data/SSN_simulated/HHolmx10/solution_150.hdf5'
 
 with h5py.File(optimized_results, "r") as h5file:
     sol_dset = h5file["solution"]
@@ -39,7 +39,7 @@ Targets_spikes_rates = generators4targets(tf.reshape(t, shape=(-1, 1)))
 net = cbrd_tfdiffeq.Network(params_net)
 net.set_optimizator(Optimizer)
 
-number_of_simulation_0 = 168
+number_of_simulation_0 = 150
 for idx in range(500):
     timer = time()
     number_of_simulation = number_of_simulation_0 + idx + 1

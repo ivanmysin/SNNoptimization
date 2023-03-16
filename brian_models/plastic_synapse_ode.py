@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+import h5py
 exp = np.exp
 
 class Synapse:
@@ -25,9 +25,9 @@ class Synapse:
         x_ = 1 + (X - 1 + self.tau1r * Y) * exp(-self.dt / self.tau_r) - self.tau1r * Y
 
         u_ = U * exp(-self.dt / self.tau_f)
-        u0 = u_ + self.Uinc * (1 - u_) * Spre_normed #/ self.dt
-        y0 = y_ + u0 * x_ * Spre_normed #/ self.dt
-        x0 = x_ - u0 * x_ * Spre_normed #/ self.dt
+        u0 = u_ + self.Uinc * (1 - u_) * Spre_normed
+        y0 = y_ + u0 * x_ * Spre_normed
+        x0 = x_ - u0 * x_ * Spre_normed
 
         dXdt = (x0 - X) / self.dt
         dYdt = (y0 - Y) / self.dt
@@ -62,11 +62,34 @@ synapse = Synapse(params)
 y0 = np.asarray([1.0, 0.0, 0.0])
 t = np.arange(0, 500, 0.1)
 SRpre = np.zeros_like(t)
-SRpre[1::500] = 1
+#SRpre[1::500] = 1
+
+with h5py.File("/home/ivan/Data/phase_relations/tmp.hdf5", mode='r') as file:
+    SRpre[ (file["input"][:] / t[1]).astype(np.int32) ] = 1
+
+    Ab = file["A_S"][:]
+    Rb = file["R_S"][:]
+    Ub = file["U_S"][:]
+
+
+
 
 solution = synapse.integrate(t, y0, SRpre)
 
-fig, axes = plt.subplots()
-axes.plot(t, solution)
+
+
+
+fig, axes = plt.subplots(nrows=3)
+axes[0].plot(t, solution[:, 0], label="R")
+axes[0].plot(t, Rb, label="Rb")
+
+axes[1].plot(t, solution[:, 1], label="A")
+axes[1].plot(t, Ab, label="Ab")
+
+axes[2].plot(t, solution[:, 2], label="U")
+axes[2].plot(t, Ub, label="Ub")
+
+for ax in axes:
+    ax.legend(loc="upper right")
 
 plt.show()

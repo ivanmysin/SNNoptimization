@@ -27,7 +27,7 @@ ec32ngf = {
 }
 
 duration = 500 * ms
-N = 1
+N = 1000
 
 poisson_input = PoissonGroup(N, rates=net_lib.get_generator_rates(generator_params))
 poisson_SkM = SpikeMonitor(poisson_input)
@@ -78,7 +78,7 @@ dR_S/dt = (1 - R_S - A_S) / tau_r : 1
 dA_S/dt = -A_S/tau_d : 1
 '''
 
-full_neuron = NeuronGroup(1, full_eqs, method='exponential_euler', namespace={"Iext" : 0.0*uA}, threshold='V>-10*mV')
+full_neuron = NeuronGroup(1, full_eqs, method='rk4', namespace={"Iext" : 0.0*uA}, threshold='V>-10*mV')
 full_neuron.V = -60*mV
 full_neuron.n = 0.09
 full_neuron.h = 1.0
@@ -87,9 +87,9 @@ full_neuron.R_S = 1.0
 neuron_mon = StateMonitor(full_neuron, variables=["A_S", "U_S", "R_S", "V"], record=0)
 
 on_pre = """
-U_S_post += 0.218766637*(1 - U_S)
-R_S_post -= U_S_post*R_S_post 
-A_S_post += U_S_post*R_S_post 
+U_S_post += 0.001*0.203836307*(1 - U_S)
+R_S_post -= 0.001*U_S_post*R_S_post 
+A_S_post += 0.001*U_S_post*R_S_post 
 """
 synapse = Synapses(poisson_input, full_neuron, on_pre=on_pre)
 synapse.connect()
@@ -101,9 +101,17 @@ run(duration)
 synapse = Synapse(ec32ngf)
 y0 = np.asarray([1.0, 0.0, 0.0])
 t = np.arange(0, 500, 0.05)
-SRpre = np.zeros_like(t)
 
-SRpre[ (poisson_SkM.t/ms / t[1]).astype(np.int32) ] = 1
+#SRpre = np.zeros_like(t)
+#SRpre[ (poisson_SkM.t/ms / t[1]).astype(np.int32) ] = 1
+
+SRpre, bins = np.histogram(poisson_SkM.t/ms, bins=t)
+SRpre = SRpre / 1000 # (0.001 * 0.05) /
+SRpre = np.append(SRpre, 0)
+
+plt.plot(t, SRpre)
+plt.show()
+
 solution = synapse.integrate(t, y0, SRpre)
 
 
@@ -112,14 +120,15 @@ fig, axes = plt.subplots(nrows=4)
 #axes.scatter(poisson_SkM.t/ms, poisson_SkM.i)
 axes[0].plot(neuron_mon.t/ms, neuron_mon.V[0]/mV)
 
-axes[1].plot(neuron_mon.t/ms, neuron_mon.A_S[0])
-axes[1].plot(t, solution[:, 1])
+axes[1].plot(t, solution[:, 1], linewidth=5)
+axes[1].plot(neuron_mon.t/ms, neuron_mon.A_S[0], linewidth=2)
 
-axes[2].plot(neuron_mon.t/ms, neuron_mon.R_S[0])
-axes[2].plot(t, solution[:, 0])
+axes[2].plot(t, solution[:, 0], linewidth=5)
+axes[2].plot(neuron_mon.t/ms, neuron_mon.R_S[0], linewidth=2)
 
-axes[3].plot(neuron_mon.t/ms, neuron_mon.U_S[0])
-axes[3].plot(t, solution[:, 2])
+axes[3].plot(t, solution[:, 2], linewidth=5)
+axes[3].plot(neuron_mon.t/ms, neuron_mon.U_S[0], linewidth=2)
+
 
 plt.show()
 

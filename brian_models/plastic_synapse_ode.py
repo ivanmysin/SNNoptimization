@@ -46,50 +46,51 @@ class Synapse:
         solution = np.stack(solution)
         return solution
 ####################################################################
-params = {
-    "W": 0.5,
-    "pre_name": "ca1pyr",
-    "post_name": "aac",
-    "tau_f": 68.64285237,
-    "tau_r": 295.4773937,
-    "tau_d": 3.28320237,
-    "Uinc": 0.203744416,
-    "gbarS": 1.494119161,
-    "Erev": 0.0,
-}
+if __name__ == '__main__':
+    params = {
+        "W": 0.5,
+        "pre_name": "ca1pyr",
+        "post_name": "aac",
+        "tau_f": 68.64285237,
+        "tau_r": 295.4773937,
+        "tau_d": 3.28320237,
+        "Uinc": 0.203744416,
+        "gbarS": 1.494119161,
+        "Erev": 0.0,
+    }
 
-synapse = Synapse(params)
-y0 = np.asarray([1.0, 0.0, 0.0])
-t = np.arange(0, 500, 0.1)
-SRpre = np.zeros_like(t)
-#SRpre[1::500] = 1
+    synapse = Synapse(params)
+    y0 = np.asarray([1.0, 0.0, 0.0])
+    t = np.arange(0, 500, 0.1)
+    SRpre = np.zeros_like(t)
+    #SRpre[1::500] = 1
 
-with h5py.File("/home/ivan/Data/phase_relations/tmp.hdf5", mode='r') as file:
-    SRpre[ (file["input"][:] / t[1]).astype(np.int32) ] = 1
+    with h5py.File("/home/ivan/Data/phase_relations/tmp.hdf5", mode='r') as file:
+        SRpre[ (file["input"][:] / t[1]).astype(np.int32) ] = 1
 
-    Ab = file["A_S"][:]
-    Rb = file["R_S"][:]
-    Ub = file["U_S"][:]
-
-
-
-
-solution = synapse.integrate(t, y0, SRpre)
+        Ab = file["A_S"][:]
+        Rb = file["R_S"][:]
+        Ub = file["U_S"][:]
 
 
 
 
-fig, axes = plt.subplots(nrows=3)
-axes[0].plot(t, solution[:, 0], label="R")
-axes[0].plot(t, Rb, label="Rb")
+    solution = synapse.integrate(t, y0, SRpre)
 
-axes[1].plot(t, solution[:, 1], label="A")
-axes[1].plot(t, Ab, label="Ab")
 
-axes[2].plot(t, solution[:, 2], label="U")
-axes[2].plot(t, Ub, label="Ub")
 
-for ax in axes:
-    ax.legend(loc="upper right")
 
-plt.show()
+    fig, axes = plt.subplots(nrows=3)
+    axes[0].plot(t, solution[:, 0], label="R")
+    axes[0].plot(t, Rb, label="Rb")
+
+    axes[1].plot(t, solution[:, 1], label="A")
+    axes[1].plot(t, Ab, label="Ab")
+
+    axes[2].plot(t, solution[:, 2], label="U")
+    axes[2].plot(t, Ub, label="Ub")
+
+    for ax in axes:
+        ax.legend(loc="upper right")
+
+    plt.show()

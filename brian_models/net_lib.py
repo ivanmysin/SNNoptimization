@@ -42,17 +42,23 @@ def get_str4Isyn(post_params, params_synapses, NNP, PCONN):
     Isyn_sum = []
 
     isyn_template = """
-    Isyn_{pre_name}2{post_name} = {gbarS} * g_{pre_name}2{post_name}*({Erev}*mV - V) : ampere
-    dg_{pre_name}2{post_name}/dt = -g_{pre_name}2{post_name}/tau_d_{pre_name}2{post_name} : siemens
+    Isyn_{pre_name}2{post_name} = g_syn_{pre_name}2{post_name} * ({Erev}*mV - V) : ampere
+    g_syn_{pre_name}2{post_name} = {gbarS} * A_S_{pre_name}2{post_name} : siemens
+    dA_S_{pre_name}2{post_name}/dt = -A_S_{pre_name}2{post_name}/tau_d_{pre_name}2{post_name} : 1
+    dU_S_{pre_name}2{post_name}/dt = -U_S_{pre_name}2{post_name}/tau_f_{pre_name}2{post_name} : 1
+    dR_S_{pre_name}2{post_name}/dt = (1 - R_S_{pre_name}2{post_name} - A_S_{pre_name}2{post_name}) / tau_r_{pre_name}2{post_name} : 1
+    
     tau_d_{pre_name}2{post_name} = {tau_d}*ms : second
+    tau_r_{pre_name}2{post_name} = {tau_r}*ms : second
+    tau_f_{pre_name}2{post_name} = {tau_f}*ms : second
     """
 
     for conn_param in params_synapses:
         if post_name != conn_param["post_name"]: continue
 
-        Wconn = conn_param['w'] * conn_param['gbarS'] / NNP / PCONN
-        #gbar_str = "gbarS_{pre_name}2{post_name}".format(**conn_param)
-        conn_param["gbarS"] = Wconn
+        # Wconn = conn_param['w'] * conn_param['gbarS'] / NNP / PCONN
+        # #gbar_str = "gbarS_{pre_name}2{post_name}".format(**conn_param)
+        # conn_param["gbarS"] = Wconn
 
         isyn = isyn_template.format(**conn_param)
         Isyn_str += isyn

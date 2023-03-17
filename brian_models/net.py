@@ -64,6 +64,7 @@ def get_int_A_group(params_groups):
     {isyn_str}
     '''
     Isyn_str = net_lib.get_str4Isyn(params_groups, params_net["params_synapses"], NNP, PCONN)
+
     eqs = eqs.format(isyn_str=Isyn_str)
 
     neuron = NeuronGroup(N, eqs, method=METHOD, namespace=params, name=params_groups["name"], threshold='V > -20*mV')
@@ -177,39 +178,39 @@ def get_olm_group(params_groups):
     neuron.V = -90 * mV
     neuron.n = 0.09
     neuron.h = 1.0
+    for syn in params_net["params_synapses"]:
+        rs_val_name = "R_S_{pre_name}2{post_name}".format(pre_name=syn["pre_name"], post_name=syn["post_name"])
+        if hasattr(neuron, rs_val_name):
+            setattr(neuron, rs_val_name, 1.0)
 
     return neuron
 
 
 def get_connection_object(pre_pop, post_pop, syn_params):
     # U_0, tau_r, tau_f, w, gbarS
-    synapses_eqs_template = '''
-    # Usage of releasable neurotransmitter per single action potential:
-    du_S/dt = - u_S / tau_f    : 1 (event-driven)
-    # Fraction of synaptic neurotransmitter resources available:
-    dx_S/dt = (1 - x_S) / tau_r : 1 (event-driven)
-    tau_r = {tau_r}*ms : second
-    tau_f = {tau_f}*ms : second
-    '''
 
     synapses_action_template = '''
-    u_S += U_0 * (1 - u_S)
-    r_S = u_S * x_S
-    x_S -= r_S
-    g_{pre_name}2{post_name}_post += W_inp*r_S
+    # u_S += U_0 * (1 - u_S)
+    # r_S = u_S * x_S
+    # x_S -= r_S
+
+    U_S_{pre_name}2{post_name}_post += W_inp*Uinc*(1 - U_S)
+    R_S_{pre_name}2{post_name}_post -= W_inp*U_S_post*R_S_post 
+    A_S_{pre_name}2{post_name}_post += W_inp*U_S_post*R_S_post 
     '''
 
-    synapses_eqs = synapses_eqs_template.format(**syn_params)
+    #synapses_eqs = synapses_eqs_template.format(**syn_params)
     synapses_action = synapses_action_template.format(**syn_params)
 
     # print(synapses_eqs)
     # print(synapses_action)
     # print("#############################")
+    W_inp = syn_params["w"] / (NNP * PCONN)
 
-    synobj = Synapses(pre_pop, post_pop, model=synapses_eqs,
-                      on_pre=synapses_action, namespace={"U_0": syn_params["Uinc"], "W_inp": 1 * nS})
+    synobj = Synapses(pre_pop, post_pop,
+                      on_pre=synapses_action, namespace={"U_0": syn_params["Uinc"], "W_inp": W_inp  })
     synobj.connect(p=PCONN)  # set w !!!!
-    synobj.x_S = 1
+
 
     return synobj
 
@@ -246,7 +247,7 @@ SpkMons = []
 
 for generator_idx, params_generator in enumerate(params_net["params_generators"]):
     N = NNP
-    rates = net_lib.get_generator_rates(N, params_generator)
+    rates = net_lib.get_generator_rates(params_generator)
     generator_group = PoissonGroup(N, rates=rates, name=params_generator["name"])
 
     SpkMon = SpikeMonitor(generator_group)
@@ -260,6 +261,7 @@ for neural_population_idx, params_neurons in enumerate(params_net["params_neuron
         neuron_group = get_ngf_group(params_neurons)
     if params_neurons["name"] in ["olm", ]:
         neuron_group = get_olm_group(params_neurons)
+
 
     SpkMon = SpikeMonitor(neuron_group)
     SpkMons.append(SpkMon)
@@ -276,17 +278,17 @@ for pre_pop in Net.sorted_objects:
 Net.run(1800 * ms, report='text')
 
 resfile = h5py.File('/home/ivan/Data/interneurons_theta/Monte_Carlo.hdf5', "w")
-# fig, axes = plt.subplots(nrows=len(SpkMons), sharex=True)
+fig, axes = plt.subplots(nrows=len(SpkMons), sharex=True)
 for pops_idx, SpkMon in enumerate(SpkMons):
     # print( np.asarray(SpkMon.t).size / 0.2)
     # print(SpkMon.source.name)
-    # axes[pops_idx].scatter(SpkMon.t/ms, SpkMon.i)
-    # axes[pops_idx].set_title(SpkMon.source.name)
+    axes[pops_idx].scatter(SpkMon.t/ms, SpkMon.i)
+    axes[pops_idx].set_title(SpkMon.source.name)
     resfile.create_dataset(SpkMon.source.name + "_times", data=SpkMon.t / ms)
     resfile.create_dataset(SpkMon.source.name + "_indexes", data=SpkMon.i)
 
 resfile.close()
-# axes.plot(M_full_V.t/ms, M_full_V[0].V/mV)
-# plt.show()
+#axes.plot(M_full_V.t/ms, M_full_V[0].V/mV)
+plt.show()
 
 

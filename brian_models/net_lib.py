@@ -23,13 +23,15 @@ def r2kappa(R):
     return kappa, I0
 
 
-def get_generator_rates(N, params_generator):
-    rates_template = """{mean_rate} * exp({kappa} * cos(2*pi*{omega}*Hz*t - ({phi0}) ) )*Hz"""
+def get_generator_rates(generator_params):
+    rates_template = '{fr} * Hz * exp({kappa} * cos(2*pi*{freq}*Hz*t - {phase}) )'
 
-    kappa, I0 = r2kappa(params_generator["R"])
-    mean_rate = params_generator["mean_spike_rate"] / I0 / N * 1000
+    kappa, IO = r2kappa(generator_params["R"])
+    generator_params["kappa"] = kappa
+    generator_params["fr"] = generator_params["mean_spike_rate"] / IO
 
-    rates = rates_template.format(mean_rate=mean_rate, kappa=kappa, omega=params_generator["freq"], phi0=params_generator["phase"])
+    rates = rates_template.format(**generator_params)
+
     return rates
 
 def get_str4Isyn(post_params, params_synapses, NNP, PCONN):

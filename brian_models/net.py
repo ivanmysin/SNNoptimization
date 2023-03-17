@@ -11,7 +11,7 @@ import net_lib
 import h5py
 
 METHOD = 'heun'  # 'exponential_euler'
-NNP = 200  # 2000
+NNP = 1000  # 2000
 PCONN = 0.5
 
 
@@ -67,7 +67,7 @@ def get_int_A_group(params_groups):
 
     eqs = eqs.format(isyn_str=Isyn_str)
 
-    neuron = NeuronGroup(N, eqs, method=METHOD, namespace=params, name=params_groups["name"], threshold='V > -20*mV')
+    neuron = NeuronGroup(N, eqs, method=METHOD, namespace=params, name=params_groups["name"], threshold='V > -10*mV', refractory="5*ms")
     neuron.V = -90 * mV
 
     return neuron
@@ -113,7 +113,7 @@ def get_ngf_group(params_groups):
     Isyn_str = net_lib.get_str4Isyn(params_groups, params_net["params_synapses"], NNP, PCONN)
     eqs = eqs.format(isyn_str=Isyn_str)
 
-    neuron = NeuronGroup(N, eqs, method=METHOD, namespace=params, name=params_groups["name"], threshold='V > -20*mV')
+    neuron = NeuronGroup(N, eqs, method=METHOD, namespace=params, name=params_groups["name"], threshold='V > -20*mV', refractory="5*ms")
     neuron.V = -90 * mV
 
     return neuron
@@ -138,7 +138,7 @@ def get_olm_group(params_groups):
 
     # OLM Model
     eqs = '''
-    dV/dt = (INa + IKdr + IL + IKA + IH + Iext)/Cm + sigma*xi/ms**0.5 : volt 
+    dV/dt = (INa + IKdr + IL + IKA + IH + Iext + Isyn)/Cm + sigma*xi/ms**0.5 : volt 
     IL = gL*(EL - V)           : ampere
     INa = gNa*m**3*h*(ENa - V) : ampere
     IKdr = gK*n**4*(EK - V) : ampere
@@ -174,7 +174,7 @@ def get_olm_group(params_groups):
     Isyn_str = net_lib.get_str4Isyn(params_groups, params_net["params_synapses"], NNP, PCONN)
     eqs = eqs.format(isyn_str=Isyn_str)
 
-    neuron = NeuronGroup(N, eqs, method=METHOD, namespace=params, name=params_groups["name"], threshold='V > -20*mV')
+    neuron = NeuronGroup(N, eqs, method=METHOD, namespace=params, name=params_groups["name"], threshold='V > -20*mV', refractory="5*ms")
     neuron.V = -90 * mV
     neuron.n = 0.09
     neuron.h = 1.0
@@ -187,16 +187,12 @@ def get_olm_group(params_groups):
 
 
 def get_connection_object(pre_pop, post_pop, syn_params):
-    # U_0, tau_r, tau_f, w, gbarS
+    # Uinc, tau_r, tau_f, w, gbarS
 
     synapses_action_template = '''
-    # u_S += U_0 * (1 - u_S)
-    # r_S = u_S * x_S
-    # x_S -= r_S
-
-    U_S_{pre_name}2{post_name}_post += W_inp*Uinc*(1 - U_S)
-    R_S_{pre_name}2{post_name}_post -= W_inp*U_S_post*R_S_post 
-    A_S_{pre_name}2{post_name}_post += W_inp*U_S_post*R_S_post 
+    U_S_{pre_name}2{post_name}_post += W_inp * Uinc * (1 - U_S_{pre_name}2{post_name}_post)
+    R_S_{pre_name}2{post_name}_post -= W_inp * U_S_{pre_name}2{post_name}_post * R_S_{pre_name}2{post_name}_post 
+    A_S_{pre_name}2{post_name}_post += W_inp * U_S_{pre_name}2{post_name}_post * R_S_{pre_name}2{post_name}_post 
     '''
 
     #synapses_eqs = synapses_eqs_template.format(**syn_params)
@@ -208,8 +204,8 @@ def get_connection_object(pre_pop, post_pop, syn_params):
     W_inp = syn_params["w"] / (NNP * PCONN)
 
     synobj = Synapses(pre_pop, post_pop,
-                      on_pre=synapses_action, namespace={"U_0": syn_params["Uinc"], "W_inp": W_inp  })
-    synobj.connect(p=PCONN)  # set w !!!!
+                      on_pre=synapses_action, namespace={"Uinc": syn_params["Uinc"], "W_inp": W_inp  })
+    synobj.connect(p=PCONN)
 
 
     return synobj

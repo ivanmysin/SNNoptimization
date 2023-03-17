@@ -87,32 +87,32 @@ full_neuron.R_S = 1.0
 neuron_mon = StateMonitor(full_neuron, variables=["A_S", "U_S", "R_S", "V"], record=0)
 
 on_pre = """
-U_S_post += 0.001*0.203836307*(1 - U_S)
+U_S_post += 0.001*Uinc*(1 - U_S)
 R_S_post -= 0.001*U_S_post*R_S_post 
 A_S_post += 0.001*U_S_post*R_S_post 
 """
-synapse = Synapses(poisson_input, full_neuron, on_pre=on_pre)
+synapse = Synapses(poisson_input, full_neuron, on_pre=on_pre, namespace=ec32ngf)
 synapse.connect()
 
 run(duration)
 
 
 ################################
-synapse = Synapse(ec32ngf)
-y0 = np.asarray([1.0, 0.0, 0.0])
-t = np.arange(0, 500, 0.05)
-
-#SRpre = np.zeros_like(t)
-#SRpre[ (poisson_SkM.t/ms / t[1]).astype(np.int32) ] = 1
-
-SRpre, bins = np.histogram(poisson_SkM.t/ms, bins=t)
-SRpre = SRpre / 1000 # (0.001 * 0.05) /
-SRpre = np.append(SRpre, 0)
-
-plt.plot(t, SRpre)
-plt.show()
-
-solution = synapse.integrate(t, y0, SRpre)
+# synapse = Synapse(ec32ngf)
+# y0 = np.asarray([1.0, 0.0, 0.0])
+# t = np.arange(0, 500, 0.05)
+#
+# #SRpre = np.zeros_like(t)
+# #SRpre[ (poisson_SkM.t/ms / t[1]).astype(np.int32) ] = 1
+#
+# SRpre, bins = np.histogram(poisson_SkM.t/ms, bins=t)
+# SRpre = SRpre / 1000 # (0.001 * 0.05) /
+# SRpre = np.append(SRpre, 0)
+#
+# plt.plot(t, SRpre)
+# plt.show()
+#
+# solution = synapse.integrate(t, y0, SRpre)
 
 
 fig, axes = plt.subplots(nrows=4)

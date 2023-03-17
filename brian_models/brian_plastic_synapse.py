@@ -98,21 +98,19 @@ run(duration)
 
 
 ################################
-# synapse = Synapse(ec32ngf)
-# y0 = np.asarray([1.0, 0.0, 0.0])
-# t = np.arange(0, 500, 0.05)
-#
+synapse = Synapse(ec32ngf)
+y0 = np.asarray([1.0, 0.0, 0.0])
+t = np.arange(0, 500, 0.05)
+
 # #SRpre = np.zeros_like(t)
 # #SRpre[ (poisson_SkM.t/ms / t[1]).astype(np.int32) ] = 1
 #
-# SRpre, bins = np.histogram(poisson_SkM.t/ms, bins=t)
-# SRpre = SRpre / 1000 # (0.001 * 0.05) /
-# SRpre = np.append(SRpre, 0)
-#
-# plt.plot(t, SRpre)
-# plt.show()
-#
-# solution = synapse.integrate(t, y0, SRpre)
+SRpre, bins = np.histogram(poisson_SkM.t/ms, bins=t)
+SRpre = SRpre / 1000 # (0.001 * 0.05) /
+SRpre = np.append(SRpre, 0)
+
+
+solution = synapse.integrate(t, y0, SRpre)
 
 
 fig, axes = plt.subplots(nrows=4)

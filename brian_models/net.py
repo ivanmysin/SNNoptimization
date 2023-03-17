@@ -11,7 +11,7 @@ import net_lib
 import h5py
 
 METHOD = 'heun'  # 'exponential_euler'
-NNP = 1000  # 2000
+NNP = 2000  # 2000
 PCONN = 0.5
 
 
@@ -21,7 +21,7 @@ def get_int_A_group(params_groups):
         "Iext": params_groups["Iext"] * uA,
         "Cm": params_groups["C"] * uF,  # /cm**2
         "gL": params_groups["gl"] * mS,
-        "EL": params_groups["El"] * mV,
+        "EL": params_groups["El"] * mV, # -65*mV, #
         "ENa": 55 * mV,
         "EK": params_groups["channels_params"][0]["Erev"] * mV,
         "gNa": 50 * mS,
@@ -79,7 +79,7 @@ def get_ngf_group(params_groups):
         "Iext": params_groups["Iext"] * uA,
         "Cm": params_groups["C"] * uF,  # /cm**2
         "gL": params_groups["gl"] * mS,
-        "EL": params_groups["El"] * mV,
+        "EL": params_groups["El"] * mV, # -65*mV, #
         "ENa": 55 * mV,
         "EK": params_groups["channels_params"][0]["Erev"] * mV,
         "gNa": 50 * mS,
@@ -139,6 +139,7 @@ def get_olm_group(params_groups):
     # OLM Model
     eqs = '''
     dV/dt = (INa + IKdr + IL + IKA + IH + Iext + Isyn)/Cm + sigma*xi/ms**0.5 : volt 
+
     IL = gL*(EL - V)           : ampere
     INa = gNa*m**3*h*(ENa - V) : ampere
     IKdr = gK*n**4*(EK - V) : ampere
@@ -167,14 +168,17 @@ def get_olm_group(params_groups):
 
     drH/dt = (rH_inf - rH) / tau_rH : 1
     rH_inf =  1 / (1 + exp( (V + 84*mV) / (10.2*mV) ) ) : 1
-    tau_rH = 1 / (exp(-14.59 - 0.086*V/mV) + exp(-1.87 + 0.0701*V/mV) ) * ms : second
+    #tau_rH = 1 / (exp(-14.59 - 0.086*V/mV) + exp(-1.87 + 0.0701*V/mV) ) * ms : second
+    tau_rH = 1*ms  /  (exp(-17.9 - 0.116*V/mV) + exp(-1.84 + 0.09*V/mV) ) + 100 * ms : second
 
     {isyn_str}
     '''
     Isyn_str = net_lib.get_str4Isyn(params_groups, params_net["params_synapses"], NNP, PCONN)
     eqs = eqs.format(isyn_str=Isyn_str)
 
-    neuron = NeuronGroup(N, eqs, method=METHOD, namespace=params, name=params_groups["name"], threshold='V > -20*mV', refractory="5*ms")
+    #print(eqs)
+
+    neuron = NeuronGroup(N, eqs, method=METHOD, namespace=params, name=params_groups["name"], threshold='V > -10*mV', refractory="5*ms")
     neuron.V = -90 * mV
     neuron.n = 0.09
     neuron.h = 1.0
@@ -201,7 +205,7 @@ def get_connection_object(pre_pop, post_pop, syn_params):
     # print(synapses_eqs)
     # print(synapses_action)
     # print("#############################")
-    W_inp = syn_params["w"] / (NNP * PCONN)
+    W_inp = 20*syn_params["w"] / (NNP * PCONN)
 
     synobj = Synapses(pre_pop, post_pop,
                       on_pre=synapses_action, namespace={"Uinc": syn_params["Uinc"], "W_inp": W_inp  })
@@ -232,7 +236,6 @@ def filtrate_params_net(params_net):
 
 
 ###################################################################################################
-#
 with open('/home/ivan/Data/Opt_res/params_net.pickle', 'rb') as file:
     params_net = pickle.load(file)
 # params_net = filtrate_params_net(params_net)
@@ -255,6 +258,7 @@ for neural_population_idx, params_neurons in enumerate(params_net["params_neuron
         neuron_group = get_int_A_group(params_neurons)
     if params_neurons["name"] in ["ngf", ]:
         neuron_group = get_ngf_group(params_neurons)
+
     if params_neurons["name"] in ["olm", ]:
         neuron_group = get_olm_group(params_neurons)
 
@@ -267,7 +271,7 @@ for pre_pop in Net.sorted_objects:
     for post_pop in Net.sorted_objects:
         for syn_params in params_net["params_synapses"]:
             if pre_pop.name == syn_params["pre_name"] and post_pop.name == syn_params["post_name"]:
-                print(pre_pop.name, post_pop.name)
+                #print(pre_pop.name, post_pop.name)
                 synapses = get_connection_object(pre_pop, post_pop, syn_params)
                 Net.add(synapses)
 

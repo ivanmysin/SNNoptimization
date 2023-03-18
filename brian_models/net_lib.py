@@ -44,9 +44,9 @@ def get_str4Isyn(post_params, params_synapses, NNP, PCONN):
     isyn_template = """
     Isyn_{pre_name}2{post_name} = g_syn_{pre_name}2{post_name} * ({Erev}*mV - V) : ampere
     g_syn_{pre_name}2{post_name} = {gbarS}*mS * A_S_{pre_name}2{post_name} : siemens
-    dA_S_{pre_name}2{post_name}/dt = -A_S_{pre_name}2{post_name}/tau_d_{pre_name}2{post_name} : 1
-    dU_S_{pre_name}2{post_name}/dt = -U_S_{pre_name}2{post_name}/tau_f_{pre_name}2{post_name} : 1
-    dR_S_{pre_name}2{post_name}/dt = (1 - R_S_{pre_name}2{post_name} - A_S_{pre_name}2{post_name}) / tau_r_{pre_name}2{post_name} : 1
+    dA_S_{pre_name}2{post_name}/dt = -A_S_{pre_name}2{post_name}/tau_d_{pre_name}2{post_name} : 1 
+    dU_S_{pre_name}2{post_name}/dt = -U_S_{pre_name}2{post_name}/tau_f_{pre_name}2{post_name} : 1  
+    dR_S_{pre_name}2{post_name}/dt = (1 - R_S_{pre_name}2{post_name} - A_S_{pre_name}2{post_name}) / tau_r_{pre_name}2{post_name} : 1  
     
     tau_d_{pre_name}2{post_name} = {tau_d}*ms : second
     tau_r_{pre_name}2{post_name} = {tau_r}*ms : second

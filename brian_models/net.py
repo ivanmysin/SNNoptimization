@@ -194,9 +194,9 @@ def get_connection_object(pre_pop, post_pop, syn_params):
     # Uinc, tau_r, tau_f, w, gbarS
 
     synapses_action_template = '''
-    U_S_{pre_name}2{post_name}_post += W_inp * Uinc * (1 - U_S_{pre_name}2{post_name}_post)
+    U_S_{pre_name}2{post_name}_post += W_inp * Uinc * (1 - U_S_{pre_name}2{post_name}_post) 
     R_S_{pre_name}2{post_name}_post -= W_inp * U_S_{pre_name}2{post_name}_post * R_S_{pre_name}2{post_name}_post 
-    A_S_{pre_name}2{post_name}_post += W_inp * U_S_{pre_name}2{post_name}_post * R_S_{pre_name}2{post_name}_post 
+    A_S_{pre_name}2{post_name}_post += W_inp * U_S_{pre_name}2{post_name}_post * R_S_{pre_name}2{post_name}_post
     '''
 
     #synapses_eqs = synapses_eqs_template.format(**syn_params)
@@ -205,10 +205,10 @@ def get_connection_object(pre_pop, post_pop, syn_params):
     # print(synapses_eqs)
     # print(synapses_action)
     # print("#############################")
-    W_inp = 20*syn_params["w"] / (NNP * PCONN)
+    W_inp = syn_params["w"] / (NNP * PCONN)
 
     synobj = Synapses(pre_pop, post_pop,
-                      on_pre=synapses_action, namespace={"Uinc": syn_params["Uinc"], "W_inp": W_inp  })
+                      on_pre=synapses_action, namespace={"Uinc": syn_params["Uinc"], "W_inp": W_inp})
     synobj.connect(p=PCONN)
 
 
@@ -236,10 +236,10 @@ def filtrate_params_net(params_net):
 
 
 ###################################################################################################
-with open('/home/ivan/Data/Opt_res/params_net.pickle', 'rb') as file:
+with open('/home/ivan/Data/Opt_res/test_params_net.pickle', 'rb') as file:
     params_net = pickle.load(file)
 # params_net = filtrate_params_net(params_net)
-
+#params_net["params_neurons"][0]["El"] = -70.0
 
 Net = Network()
 SpkMons = []
@@ -267,6 +267,9 @@ for neural_population_idx, params_neurons in enumerate(params_net["params_neuron
     SpkMons.append(SpkMon)
     Net.add(neuron_group, SpkMon)
 
+    StMom = StateMonitor(neuron_group, "A_S_ca3pyr2pvbas", record=np.arange(NNP))
+    Net.add(StMom)
+
 for pre_pop in Net.sorted_objects:
     for post_pop in Net.sorted_objects:
         for syn_params in params_net["params_synapses"]:
@@ -275,17 +278,38 @@ for pre_pop in Net.sorted_objects:
                 synapses = get_connection_object(pre_pop, post_pop, syn_params)
                 Net.add(synapses)
 
-Net.run(1800 * ms, report='text')
+Net.run(800 * ms, report='text')
+
+
+hf = h5py.File('/home/ivan/Data/interneurons_theta/com.hdf5', 'r')
+cbrd_pop_freq = 1000*hf['solution'][:, 3]
+cbrd_A_S = hf['solution'][:, 1]
+hf.close()
 
 resfile = h5py.File('/home/ivan/Data/interneurons_theta/Monte_Carlo.hdf5', "w")
-fig, axes = plt.subplots(nrows=len(SpkMons), sharex=True)
+fig, axes = plt.subplots(nrows=len(SpkMons)+1, sharex=True)
 for pops_idx, SpkMon in enumerate(SpkMons):
     # print( np.asarray(SpkMon.t).size / 0.2)
     # print(SpkMon.source.name)
-    axes[pops_idx].scatter(SpkMon.t/ms, SpkMon.i)
+    pop_freq, bins = np.histogram(SpkMon.t/ms, range=[0, 800], bins=8001)
+    dbins = bins[1] - bins[0]
+    pop_freq = pop_freq / NNP / (0.001*dbins)
+    axes[pops_idx].plot(bins[:-1], pop_freq)
+
+    if pops_idx > 0:
+        t_4bcrd = np.linspace(0, 800, cbrd_pop_freq.size)
+        axes[pops_idx].plot(t_4bcrd, cbrd_pop_freq)
+
+    #axes[pops_idx].scatter(SpkMon.t/ms, SpkMon.i)
     axes[pops_idx].set_title(SpkMon.source.name)
+
     resfile.create_dataset(SpkMon.source.name + "_times", data=SpkMon.t / ms)
     resfile.create_dataset(SpkMon.source.name + "_indexes", data=SpkMon.i)
+
+mean_as = np.mean(StMom.A_S_ca3pyr2pvbas, axis=0)
+axes[pops_idx+1].plot(StMom.t/ms, mean_as)
+axes[pops_idx+1].plot(t_4bcrd, cbrd_A_S)
+
 
 resfile.close()
 #axes.plot(M_full_V.t/ms, M_full_V[0].V/mV)

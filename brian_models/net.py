@@ -11,8 +11,8 @@ import net_lib
 import h5py
 
 METHOD = 'heun'  # 'exponential_euler'
-NNP = 2000  # 2000
-PCONN = 0.5
+NNP = 10000  # 2000
+PCONN = 1.0
 
 
 def get_int_A_group(params_groups):
@@ -192,22 +192,29 @@ def get_olm_group(params_groups):
 
 def get_connection_object(pre_pop, post_pop, syn_params):
     # Uinc, tau_r, tau_f, w, gbarS
-
+    #  U_S_{pre_name}2{post_name}_post += W_inp * Uinc * (1 - U_S_{pre_name}2{post_name}_post)
     synapses_action_template = '''
-    U_S_{pre_name}2{post_name}_post += W_inp * Uinc * (1 - U_S_{pre_name}2{post_name}_post) 
-    R_S_{pre_name}2{post_name}_post -= W_inp * U_S_{pre_name}2{post_name}_post * R_S_{pre_name}2{post_name}_post 
-    A_S_{pre_name}2{post_name}_post += W_inp * U_S_{pre_name}2{post_name}_post * R_S_{pre_name}2{post_name}_post
+    U_plus = U_S_{pre_name}2{post_name}_post + W_inp * Uinc * (1 - U_S_{pre_name}2{post_name}_post)
+    U_S_{pre_name}2{post_name}_post = U_plus
+   
+    R_S_{pre_name}2{post_name}_post -= W_inp * U_plus * R_S_{pre_name}2{post_name}_post 
+    A_S_{pre_name}2{post_name}_post += W_inp * U_plus * R_S_{pre_name}2{post_name}_post
     '''
 
     #synapses_eqs = synapses_eqs_template.format(**syn_params)
+    # synapses_eqs = """
+    #                 Uinc : 1
+    #                 W_inp : 1
+    #                 U_plus : 1
+    #                 """
     synapses_action = synapses_action_template.format(**syn_params)
 
     # print(synapses_eqs)
     # print(synapses_action)
-    # print("#############################")
-    W_inp = syn_params["w"] / (NNP * PCONN)
+    # print("#############################") model=synapses_eqs,
+    W_inp = syn_params["w"] / (NNP * PCONN) / 0.5
 
-    synobj = Synapses(pre_pop, post_pop,
+    synobj = Synapses(pre_pop, post_pop,  \
                       on_pre=synapses_action, namespace={"Uinc": syn_params["Uinc"], "W_inp": W_inp})
     synobj.connect(p=PCONN)
 
@@ -296,6 +303,13 @@ for pops_idx, SpkMon in enumerate(SpkMons):
     pop_freq = pop_freq / NNP / (0.001*dbins)
     axes[pops_idx].plot(bins[:-1], pop_freq)
 
+    if pops_idx == 0:
+        t4gen, dt4gen = np.linspace(0, 0.8, 1000, retstep=True)
+        omega = 6
+        kappa, I0 = net_lib.r2kappa(0.2)
+        gener = 0.5 / I0 * np.exp(kappa * np.cos(2*np.pi*omega*t4gen - 0.5*np.pi) ) # * 0.001
+        axes[pops_idx].plot(1000*t4gen, gener)
+
     if pops_idx > 0:
         t_4bcrd = np.linspace(0, 800, cbrd_pop_freq.size)
         axes[pops_idx].plot(t_4bcrd, cbrd_pop_freq)
@@ -306,7 +320,7 @@ for pops_idx, SpkMon in enumerate(SpkMons):
     resfile.create_dataset(SpkMon.source.name + "_times", data=SpkMon.t / ms)
     resfile.create_dataset(SpkMon.source.name + "_indexes", data=SpkMon.i)
 
-mean_as = np.mean(StMom.A_S_ca3pyr2pvbas, axis=0)
+mean_as = np.mean(StMom.A_S_ca3pyr2pvbas, axis=0) # StMom.A_S_ca3pyr2pvbas[0, :] #
 axes[pops_idx+1].plot(StMom.t/ms, mean_as)
 axes[pops_idx+1].plot(t_4bcrd, cbrd_A_S)
 

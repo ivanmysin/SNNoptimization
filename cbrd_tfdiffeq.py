@@ -796,9 +796,9 @@ class Network(tf.keras.Model):
                     loss = clear_loss
                     for val in self.synapses[0].trainable_variables:
                         #loss += tf.reduce_sum(10e6 * tf.nn.relu(0.005 - val))
-                        loss += tf.reduce_sum(-0.001 * tf.math.log(100 * val))
+                        loss += tf.reduce_sum(-0.0001 * tf.math.log(100 * val))
 
-                    loss += tf.reduce_sum(-0.001 * tf.math.log(100 * (1.0 - self.synapses[0].Uinc) ))
+                    loss += tf.reduce_sum(-0.0001 * tf.math.log(100 * (1.0 - self.synapses[0].Uinc) ))
                     #loss += tf.reduce_sum(-0.001 * tf.math.log(100 * (1.0 - self.synapses[0].W) ))
                     
                     # for neuron in self.neurons:

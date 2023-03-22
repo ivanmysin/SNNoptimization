@@ -823,6 +823,57 @@ class Network(tf.keras.Model):
         solution = odeint(self, y0, t, method="euler")
         return solution
 
+    def get_gradients4sensivityanalysis(self, t, path4saving=None, win4_start=2000, win4grad=500):
+        n_points_of_simulation = int(tf.size(t))
+        n_loops = int((n_points_of_simulation - win4_start) / win4grad)
+        print(n_loops)
 
+        y0_main = self.get_y0()
+        solutions_full = []
 
+        time_start_idx = 0
+        time_end_idx = win4_start
+
+        solution = odeint(self, y0_main, t[time_start_idx:time_end_idx], method="euler")
+        solutions_full.append(solution)
+
+        y0 = solution[-1, :]
+
+        trainable_variables = tuple(neuron.Iext for neuron in self.neurons)
+        trainable_variables = trainable_variables + self.synapses[0].trainable_variables  # (self.synapses[0].gbarS, ) # !!!!!!!!!!!!!!!!!!
+
+        for idx in range(n_loops):
+            time_start_idx = win4_start + win4grad * idx - 1
+            time_end_idx = time_start_idx + win4grad + 1
+            
+            t_slice = t[time_start_idx: time_end_idx]
+
+            with tf.GradientTape(watch_accessed_variables=False) as tape:
+                tape.watch(trainable_variables[8])
+                
+                solution = odeint_adjoint(self, y0, t_slice, method="euler")
+                solutions_full.append(solution[1:])
+
+                firings = tf.gather(solution, self.ro_0_indexes, axis=1)
+
+                grad = tape.gradient(firings[:, 0], trainable_variables[8])
+                print(tf.shape(grad))
+
+                y0 = solution[-1, :]
+
+        solution = tf.concat(solutions_full, axis=0)
+        if not (path4saving is None):
+            hf = h5py.File(path4saving, 'w')
+            solution_dset = hf.create_dataset('solution', data=solution.numpy())
+
+            for val in self.synapses[0].trainable_variables:
+                hf.create_dataset(val.name, data=val.numpy())
+
+            for neurons_idx, neuron in enumerate(self.neurons):
+                solution_dset.attrs[neuron.population_name] = self.ro_0_indexes[neurons_idx]
+                solution_dset.attrs[neuron.population_name + "_Iext"] = neuron.Iext.numpy()
+
+            hf.close()
+
+        return
 

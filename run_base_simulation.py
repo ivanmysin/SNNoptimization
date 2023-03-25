@@ -2,19 +2,16 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam, Adadelta, Adagrad, RMSprop
 import cbrd_tfdiffeq
-from code_generated_params import params_net
+from lif_net_params import params_net
 import h5py
 from time import time
 
-optimized_results = '/media/LD/Data/SSN_simulated/HHolmx10/solution_714.hdf5'
+optimized_results = '/media/LD/Data/SSN_simulated/LIF/solution_500.hdf5'
 
 with h5py.File(optimized_results, "r") as h5file:
     sol_dset = h5file["solution"]
     for neuron_params in params_net["params_neurons"]:
         iext_attr_name = neuron_params["name"] + "_Iext"
-        # if neuron_params["name"] == 'olm___':
-        #     neuron_params["Iext"] = 0.0
-        # else:
         neuron_params["Iext"] = sol_dset.attrs[iext_attr_name]
 
     for syn_idx, synapse_params in enumerate(params_net["params_synapses"]):
@@ -29,7 +26,7 @@ with h5py.File(optimized_results, "r") as h5file:
         synapse_params["gbarS"] = gbarS
 
 
-path4savingresults_template = '/media/LD/Data/SSN_simulated/HHolmx10/solution_{:03}.hdf5'  
+path4savingresults_template = '/media/LD/Data/SSN_simulated/LIF_SR/solution_{:03}.hdf5'
 
 Optimizer = Adam(learning_rate=0.001) # Adagrad #Adadelta
 t = tf.range(0.0, 1800.0, 0.1, dtype=tf.float64)
@@ -39,7 +36,7 @@ Targets_spikes_rates = generators4targets(tf.reshape(t, shape=(-1, 1)))
 net = cbrd_tfdiffeq.Network(params_net)
 net.set_optimizator(Optimizer)
 
-number_of_simulation_0 = 714
+number_of_simulation_0 = 0
 for idx in range(1000):
     timer = time()
     number_of_simulation = number_of_simulation_0 + idx + 1

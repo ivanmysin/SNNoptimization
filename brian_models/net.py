@@ -25,7 +25,7 @@ def get_int_A_group(params_groups, params_net):
         "EL": params_groups["El"] * mV, # -65*mV, #
         "ENa": 55 * mV,
         "EK": params_groups["channels_params"][0]["Erev"] * mV,
-        "gNa": 15 * mS, # 50 * mS,
+        "gNa": 25 * mS, # 50 * mS,
         "gK": params_groups["channels_params"][0]["gmax"] * mS,
         "gKA": params_groups["channels_params"][1]["gmax"] * mS,
         "sigma": 0.3 * mV,
@@ -35,16 +35,21 @@ def get_int_A_group(params_groups, params_net):
     eqs = '''
     dV/dt = (INa + IKdr + IL + IA + Iext + Isyn)/Cm + sigma*xi/ms**0.5 : volt
     IL = gL*(EL - V)           : ampere
-    INa = gNa*(m**3)*h*(ENa - V) : ampere
+    INa = gNa*(m_inf**3)*h*(ENa - V) : ampere
     IKdr = gK*(n**4)*(EK - V) : ampere
     IA = gKA * a * b * (EK - V) :  ampere
 
-    m = alpha_m/(alpha_m+beta_m) : 1
+    m_inf = alpha_m/(alpha_m+beta_m) : 1
     alpha_m = 1.0 / exprel(-(V+40*mV)/(10*mV))/ms : Hz
     beta_m = 4*exp(-(V+65*mV)/(18*mV))/ms : Hz
     dh/dt = (alpha_h*(1-h)-beta_h*h) : 1
     alpha_h = 0.07*exp(-(V+65*mV)/(20*mV))/ms : Hz
     beta_h = 1./(exp(-0.1/mV*(V+35*mV))+1)/ms : Hz
+    # m_inf = 1 / (1 + exp( -0.08*(V/mV + 26)) ) : 1
+    # dh/dt = (h_inf - h) / tau_h : 1
+    # h_inf = 1.0 / (1.0 + exp(0.13/mV * (V + 38*mV))) : 1
+    # tau_h = 0.6*ms / (1.0 + exp(-0.12/mV*(V + 67*mV)))   : second
+    
     # dn/dt = (alpha_n*(1-n)-beta_n*n) : 1
     # alpha_n = 0.1 / exprel(-(V+55*mV)/(10*mV))/ms : Hz
     # beta_n = 0.125*exp(-(V+65*mV)/(80*mV))/ms : Hz
@@ -56,7 +61,6 @@ def get_int_A_group(params_groups, params_net):
     da/dt = (alpha_a*(1-a)-beta_a*a) : 1
     alpha_a = 0.2 / exprel( (13.1*mV - V)/(10*mV))/ms : Hz
     beta_a = 0.175 / exprel( (V - 40.1*mV)/(10*mV))/ms : Hz
-
 
     db/dt = (alpha_b*(1-b)-beta_b*b) : 1
     alpha_b = 0.0016 * exp( (-13*mV - V) / (18*mV) ) /ms : Hz

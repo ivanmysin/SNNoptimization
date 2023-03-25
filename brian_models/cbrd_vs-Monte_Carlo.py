@@ -43,7 +43,7 @@ pvbas_params = {
     "Vreset": -40.0,
     "Vt": -55.0,
     "gl": 0.18,
-    "El": -60.0,
+    "El": -65.0,
     "C": 1.0, #
     "sigma": 0.3,
     "ref_dvdt": 2.5,   # AP duration
@@ -64,9 +64,9 @@ pvbas_params = {
 ##### block of generators params #########
 ca3pyr_params = {
     "name" : "ca3pyr",
-    "R": 0.3,
+    "R": 0.2,
     "freq": 7.0,
-    "mean_spike_rate": 0.5, # 5,
+    "mean_spike_rate": 0.5, # 0.5,
     "phase": 1.58,
 }
 
@@ -90,7 +90,7 @@ params_net = {
 ############################################################################
 #### run simulation ########################################################
 delta_t = 0.1
-duration = 200.0
+duration = 600.0
 t = tf.range(0.0, duration, delta_t, dtype=tf.float64)
 cbrd_net = ctfeq.Network(params_net)
 y0 = cbrd_net.get_y0()
@@ -102,10 +102,15 @@ solution_dset = hf.create_dataset('solution', data=solution.numpy() )
 hf.close()
 
 
-#params_net["params_neurons"][0]["Iext"] = -0.5
+params_net["params_synapses"][0]["gbarS"] *= 5
+params_net["params_synapses"][0]["w"] = 0.1
+params_net["params_generators"][0]["mean_spike_rate"] = 15.5
+
 mc_net, SpMtrs = MCnet.get_net_with_params_net(params_net)
 mc_net.run(duration * ms, report='text')
 
+mc_pop_freq_input, _ = np.histogram(SpMtrs[0].t/ms, bins = t.numpy(), range=[0, duration])
+mc_pop_freq_input = mc_pop_freq_input / 2000 / delta_t
 
 mc_pop_freq, _ = np.histogram(SpMtrs[1].t/ms, bins = t.numpy(), range=[0, duration])
 mc_pop_freq = mc_pop_freq / 2000 / delta_t
@@ -119,7 +124,8 @@ axes[0].plot(t, gsyn, label="gsyn")
 axes[1].plot(t, solution[:, 3], label="CBRD pop freq")
 axes[1].plot(t[:-1], mc_pop_freq, label="Monte-Carlo pop freq")
 
-axes[2].plot(t, solution[:, 802], label="CBRD Vm") # 1602
+#axes[2].plot(t, solution[:, 802], label="CBRD Vm") # 1602
+axes[2].plot(t[:-1], mc_pop_freq_input, label="CA3") # 1602
 
 for ax in axes:
     ax.legend(loc='upper right')

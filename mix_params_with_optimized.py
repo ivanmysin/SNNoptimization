@@ -1,8 +1,10 @@
-from code_generated_params import params_net
+#from code_generated_params import params_net
+from lif_net_params import params_net
 import h5py
 import pickle
 
-optimized_results = "/home/ivan/Data/Opt_res/HH_solution_345!!!.hdf5" #"/home/ivan/Data/Opt_res/LIF_solution_500.hdf5" #"
+#optimized_results = "/home/ivan/Data/Opt_res/HH_solution_345!!!.hdf5" #"/home/ivan/Data/Opt_res/LIF_solution_500.hdf5" #"
+optimized_results = "/home/ivan/Data/Opt_res/LIF_solution_500.hdf5"
 
 with h5py.File(optimized_results, "r") as h5file:
     sol_dset = h5file["solution"]
@@ -18,5 +20,5 @@ with h5py.File(optimized_results, "r") as h5file:
         synapse_params["Uinc"] = h5file["Uinc:0"][syn_idx]
         synapse_params["gbarS"] = h5file["SynapticConductance:0"][syn_idx]
 
-with open('/home/ivan/Data/Opt_res/params_net.pickle', 'wb') as file:
+with open('/home/ivan/Data/Opt_res/LIF_params_net.pickle', 'wb') as file:
     pickle.dump(params_net, file)

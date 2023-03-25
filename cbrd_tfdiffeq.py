@@ -211,8 +211,8 @@ class HH_Neuron(BaseNeuron):
         ro = y[self.ro_start_idx : self.ro_end_idx]
         V = y[self.V_start_idx : self.V_end_idx]
 
-        gch = 0.0
-        Ichs = 0.0
+        gch = tf.constant(0.0, dtype=tf.float64)
+        Ichs = tf.constant(0.0, dtype=tf.float64)
         for chann in self.channels:
             gch_tmp, Ichs_tmp = chann.get_gch_and_Ich(y)
             gch = gch + gch_tmp

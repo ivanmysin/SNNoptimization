@@ -725,7 +725,7 @@ ca3pyr_params = {
     "name" : "ca3pyr",
     "R": 0.3,
     "freq": 7.0,
-    "mean_spike_rate": 5, # 0.5, #
+    "mean_spike_rate": 0.5, # 5, #
     "phase": 1.58,
 }
 
@@ -733,7 +733,7 @@ ca1pyr_params = {
     "name" : "ca1pyr",
     "R": 0.2,
     "freq": 7.0,
-    "mean_spike_rate": 5, # 0.5, #
+    "mean_spike_rate": 0.5, # 5, #
     "phase": 3.14,
 }
 
@@ -741,7 +741,7 @@ ec3_params = {
     "name" : "ec3",
     "R": 0.2,
     "freq": 7.0,
-    "mean_spike_rate":  5, # 1.5, #
+    "mean_spike_rate":  1.5, # 5, #
     "phase": -1.57,
 }
 

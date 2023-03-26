@@ -6,17 +6,24 @@ from lif_net_params import params_net
 import h5py
 from time import time
 
-optimized_results = '/media/LD/Data/SSN_simulated/LIF/solution_500.hdf5'
+optimized_results = '/media/LD/Data/SSN_simulated/solution_500.hdf5'
 
 with h5py.File(optimized_results, "r") as h5file:
     sol_dset = h5file["solution"]
     for neuron_params in params_net["params_neurons"]:
         iext_attr_name = neuron_params["name"] + "_Iext"
         neuron_params["Iext"] = sol_dset.attrs[iext_attr_name]
-
+    
+    w_coeff = 1
     for syn_idx, synapse_params in enumerate(params_net["params_synapses"]):
+        if synapse_params["pre_name"] in ["ca3pyr", "ca1pyr"]:
+            w_coeff = 10
+        if synapse_params["pre_name"] in ["ec3", ]:
+            w_coeff = 3.33
+            
+        
         gbarS = h5file["SynapticConductance:0"][syn_idx]
-        synapse_params["w"] = h5file["Wplasticsyns:0"][syn_idx]
+        synapse_params["w"] = w_coeff * h5file["Wplasticsyns:0"][syn_idx]
         
 
         synapse_params["tau_f"] = h5file["tau_f:0"][syn_idx]
@@ -24,9 +31,10 @@ with h5py.File(optimized_results, "r") as h5file:
         synapse_params["tau_d"] = h5file["tau_d:0"][syn_idx]
         synapse_params["Uinc"] = h5file["Uinc:0"][syn_idx]
         synapse_params["gbarS"] = gbarS
+        w_coeff = 1
 
 
-path4savingresults_template = '/media/LD/Data/SSN_simulated/LIF_SR/solution_{:03}.hdf5'
+path4savingresults_template = '/media/LD/Data/SSN_simulated/LIF/solution_{:03}.hdf5'
 
 Optimizer = Adam(learning_rate=0.001) # Adagrad #Adadelta
 t = tf.range(0.0, 1800.0, 0.1, dtype=tf.float64)

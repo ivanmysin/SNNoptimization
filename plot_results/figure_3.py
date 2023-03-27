@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from plotting_params import plotting_colors
+from scipy.signal.windows import parzen
 import h5py
 params = {'legend.fontsize': 'x-large',
           'figure.figsize': (15, 5),
@@ -11,6 +12,9 @@ params = {'legend.fontsize': 'x-large',
           }
 plt.rcParams.update(params)
 TEXTFONTSIZE = 'xx-large'
+
+Parzen = parzen(111)
+Parzen = Parzen / np.sum(Parzen)
 
 path = '/home/ivan/Data/phase_relations/!!!LIF_solution_310.hdf5'
 
@@ -23,6 +27,7 @@ try:
 except KeyError:
     targets = np.zeros_like(dset_solution.shape)
 
+montecarlofile = h5py.File('/home/ivan/Data/interneurons_theta/Monte_Carlo.hdf5', "r")
 
 t = np.linspace(0, 1800, dset_solution.shape[0])
 sine = 0.5 * (np.cos(2 * np.pi * 0.001*t * 7.0) + 1)
@@ -65,7 +70,16 @@ for neuron_idx, (neuron_name, neuron_idx_in_sol) in enumerate(sorted(pop_indxes_
     ax.plot(t, sine_ampls, linestyle="--", label = "cos", color='black')
     ax.plot(t, target, label = "target", color='green')
 
-    ax.set_ylim(0, 1.2*np.max(firings[10000:]) )
+    neurons_indexes = montecarlofile[neuron_name + "_indexes"][:]
+    neurons_times = montecarlofile[neuron_name + "_times"][:]
+    montecarlofirings, _ = np.histogram(neurons_times, bins=t)
+    montecarlofirings = montecarlofirings / np.max(neurons_indexes + 1)
+    montecarlofirings = montecarlofirings / (0.001 * (t[1] - t[0]))
+    montecarlofirings = np.convolve(montecarlofirings, Parzen, mode='same')
+
+    ax.plot(t[:-1], montecarlofirings, linestyle="--", color=plotting_colors["neuron_colors"][neuron_name])
+
+    ax.set_ylim(0, 3.8*np.max(firings[10000:]) )
 
 
     if neuron_idx == 0:
@@ -76,4 +90,5 @@ for neuron_idx, (neuron_name, neuron_idx_in_sol) in enumerate(sorted(pop_indxes_
 
 fig.savefig('/home/ivan/Data/phase_relations/figures/Fig_3.png')
 hf.close()
+montecarlofile.close()
 plt.show()

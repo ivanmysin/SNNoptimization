@@ -4,7 +4,7 @@ import h5py
 import pickle
 
 #optimized_results = "/home/ivan/Data/Opt_res/HH_solution_345!!!.hdf5" #"/home/ivan/Data/Opt_res/LIF_solution_500.hdf5" #"
-optimized_results = "/home/ivan/Data/Opt_res/LIF_solution_500.hdf5"
+optimized_results = "/home/ivan/Data/Opt_res/!!!LIF_solution_310.hdf5"
 
 with h5py.File(optimized_results, "r") as h5file:
     sol_dset = h5file["solution"]

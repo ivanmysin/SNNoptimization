@@ -11,7 +11,7 @@ import h5py
 from scipy.signal.windows import parzen
 
 METHOD = 'heun'  # 'exponential_euler'
-NNP = 2000
+NNP = 4000
 PCONN = 0.5
 
 
@@ -106,7 +106,6 @@ def get_net_with_params_net(params_net):
     Net = Network()
     SpkMons = []
     for generator_idx, params_generator in enumerate(params_net["params_generators"]):
-        # params_generator['freq'] = 6
         rates = net_lib.get_generator_rates(params_generator)
         generator_group = PoissonGroup(NNP, rates=rates, name=params_generator["name"])
 
@@ -160,7 +159,7 @@ def main():
         # print( np.asarray(SpkMon.t).size / 0.2)
         # print(SpkMon.source.name)
         pop_freq, bins = np.histogram(SpkMon.t / ms, range=[0, 1800], bins=18001)
-        win = parzen(11)
+        win = parzen(111)
         win = win / np.sum(win)
         pop_freq = np.convolve(pop_freq, win, mode='same')
 

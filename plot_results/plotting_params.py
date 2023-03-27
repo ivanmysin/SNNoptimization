@@ -20,7 +20,6 @@ plotting_colors = {
         "msach": (0.8, 0.2, 0.0), #
     },
 
-    "neurons_order" : ["pvbas", "olm", "aac", "cckbas", "ivy", "ngf", "bis"],
-
+    "neurons_order" : ["pvbas", "olm", "cckbas", "bis", "aac",  "ivy", "ngf"],
     "generators_order" : ["ec3", "ca3pyr", "ca1pyr"],
 }

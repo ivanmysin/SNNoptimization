@@ -103,19 +103,23 @@ for ax1 in axes:
         ax.set_xlim(1000, 1284)
 
 lines = []
-labels = []
+labels = ['sum exc', 'sum inh', "ec3", "ca3pyr", "ca1pyr", 'pvbas', 'olm', "cckbas", "bis", "ivy", "ngf", 'cos']
 
-for ax in fig.axes:
-    Line, Label = ax.get_legend_handles_labels()
-    #print(Label)
-    lines.extend(Line)
-    labels.extend(Label)
 
-indexes = [labels.index(x) for x in set(labels)]
-lines = [lines[idx] for idx in indexes]
-labels = [labels[idx] for idx in indexes]
+for label in labels:
+    for ax in fig.axes:
+        Line, Label = ax.get_legend_handles_labels()
+        try:
+            line_idx = Label.index(label)
+            lines.append(Line[line_idx])
+            print(label)
+            break
+        except ValueError:
+            continue
 
-fig.legend(lines, labels,  ncol=15, loc='lower left', bbox_to_anchor =(0.15, 0.1), )  #
+print(len(labels), len(lines))
+
+fig.legend(lines, labels,  ncol=15, loc='lower left', bbox_to_anchor =(0.15, 0.1), )
 
 
 ax0 = axes[0, 0]

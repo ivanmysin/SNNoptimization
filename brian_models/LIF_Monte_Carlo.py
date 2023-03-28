@@ -135,10 +135,14 @@ def get_net_with_params_net(params_net):
     return Net, SpkMons
 
 
-def main():
+def main(theta_freq=None, file2saving=None):
     with open('/home/ivan/Data/Opt_res/LIF_params_net.pickle', 'rb') as file:
         params_net = pickle.load(file)
-    # params_net = filtrate_params_net(params_net)
+
+    if not(theta_freq is None):
+        for generator_params in params_net["params_generators"]:
+            generator_params["freq"] = theta_freq
+
     for syn_idx, synapse in enumerate(params_net['params_synapses']):
         synapse["w"] = synapse["w"] / float(defaultclock.dt / ms)  # dt
 
@@ -152,8 +156,12 @@ def main():
     # cbrd_U_S = hf['solution'][:, 2*len(params_net['params_synapses']) + synapse_INDEX]
     # cbrd_R_S = hf['solution'][:, synapse_INDEX]
     # hf.close()
+    if (file2saving is None):
+        resfile = h5py.File('/home/ivan/Data/interneurons_theta/LIF_Monte_Carlo.hdf5', "w")
+    else:
+        resfile = h5py.File(file2saving, "w")
 
-    resfile = h5py.File('/home/ivan/Data/interneurons_theta/LIF_Monte_Carlo.hdf5', "w")
+
     fig, axes = plt.subplots(nrows=len(SpkMons), sharex=True)
     for pops_idx, SpkMon in enumerate(SpkMons):
         # print( np.asarray(SpkMon.t).size / 0.2)
@@ -197,9 +205,17 @@ def main():
 
     resfile.close()
     # axes.plot(M_full_V.t/ms, M_full_V[0].V/mV)
-    plt.show()
+    plt.show(block=False)
+    plt.close('all')
+    device.delete(code=False)
 
 
 ########################################################
 if __name__ == '__main__':
-    main()
+    #main()
+    path = '/home/ivan/Data/phase_relations/MC_theta_freq/'
+    theta_freqs = np.arange(10, 13, 1)
+    for freq in theta_freqs:
+        file2save = path + str(freq) + '.hdf5'
+        main(theta_freq=freq, file2saving=file2save)
+

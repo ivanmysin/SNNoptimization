@@ -28,13 +28,14 @@ for neuron_name in plotting_colors["neurons_order"]:
 hf.close()
 
 path2files = '/home/ivan/Data/phase_relations/theta_freqs/'
+path2mcfiles = '/home/ivan/Data/phase_relations/MC_theta_freq/'
 files = os.listdir(path2files)
 theta_freqs = [float(f.split(".")[0]) for f in files]
 theta_phases4plots = np.linspace(-np.pi, np.pi, 100)
 sine = 0.5 * (np.cos(theta_phases4plots) + 1)
 
 fig, axes = plt.subplots(nrows=len(plotting_colors["neurons_order"]), ncols=len(theta_freqs)+1, \
-                        constrained_layout=True, figsize=(15, 15)  )
+                        constrained_layout=True, figsize=(15, 10)  )
 
 for freq_idx, (freq, file) in enumerate(sorted(zip(theta_freqs, files), key=lambda pair: pair[0])):
     if file.find('hdf5') == -1: continue
@@ -45,6 +46,9 @@ for freq_idx, (freq, file) in enumerate(sorted(zip(theta_freqs, files), key=lamb
     t = np.linspace(0, 1800, dset_solution.shape[0])[T_st_idx:]
     theta_phases = (2 * np.pi * 0.001 * t * freq)%(2 * np.pi)
     theta_phases[theta_phases > np.pi] -= 2 * np.pi
+
+    mcfilepath = path2mcfiles + str(int(freq)) + '.hdf5'
+    montecarlofile = h5py.File(mcfilepath, mode='r')
 
     for neuron_idx, neuron_name in enumerate(plotting_colors["neurons_order"]):
         neuron_idx_in_sol = neuron_idx_in_sols[neuron_idx]
@@ -71,21 +75,24 @@ for freq_idx, (freq, file) in enumerate(sorted(zip(theta_freqs, files), key=lamb
         firings_bins = 0.5*(firings_bins[:-1] + firings_bins[1:])
         ax.plot(firings_bins, firings_hist, color=plotting_colors["neuron_colors"][neuron_name], linewidth=2, label="CBRD")
 
-        # neurons_indexes = montecarlofile[neuron_name + "_indexes"][:]
-        # neurons_times = montecarlofile[neuron_name + "_times"][:]
-        # montecarlofirings, _ = np.histogram(neurons_times, bins=t)
-        # montecarlofirings = montecarlofirings / np.max(neurons_indexes + 1)
-        # montecarlofirings = montecarlofirings / (0.001 * (t[1] - t[0]))
-        # montecarlofirings = np.convolve(montecarlofirings, Parzen, mode='same')
-
-        # ax.plot(t[:-1], montecarlofirings, linestyle="--", color=plotting_colors["neuron_colors"][neuron_name],
-        #         label="Monte-Carlo")
+        #montecarloneurons_indexes = montecarlofile[neuron_name + "_indexes"][:]
+        try:
+            montecarloneurons_times = montecarlofile[neuron_name + "_times"][:]
+            montecarlophases = (2 * np.pi * 0.001 * montecarloneurons_times * freq)%(2 * np.pi)
+            montecarlophases[montecarlophases > np.pi] -= 2*np.pi
+            montecarlofirings_hist, montecarlofirings_bins = np.histogram(montecarlophases, bins=20, density=True, range=[-np.pi, np.pi])
+            montecarlofirings_bins = 0.5 * (montecarlofirings_bins[:-1] + montecarlofirings_bins[1:])
+            ax.plot(montecarlofirings_bins, montecarlofirings_hist, color=plotting_colors["neuron_colors"][neuron_name], linewidth=1,
+                    label="Monte-Carlo", linestyle="--")
+        except KeyError:
+            print(neuron_name + "_times")
         sine_ampls = sine * 0.7 * np.max(firings_hist)
         ax.plot(theta_phases4plots, sine_ampls, linestyle="--", label="cos", color='black')
         ax.set_ylim(0, 0.45)
         ax.set_xlim(-np.pi, np.pi)
 
     hf.close()
+    montecarlofile.close()
 
 for ax2, neuron_name in zip(axes[:, 0], plotting_colors["neurons_order"]):
     ax2.axis("off")
@@ -93,5 +100,5 @@ for ax2, neuron_name in zip(axes[:, 0], plotting_colors["neurons_order"]):
     ax2.set_ylim(0, 1)
     ax2.text(0.0, 0.5, neuron_name, fontsize=TEXTFONTSIZE)
 
-fig.savefig('/home/ivan/Data/phase_relations/figures/Fig_4.png', dpi=250)
+fig.savefig('/home/ivan/Data/phase_relations/figures/Fig_4.png', dpi=500)
 plt.show()

@@ -16,14 +16,15 @@ for theta_freq in theta_freqs:
     for generator_params in params_net["params_generators"]:
         generator_params["freq"] = theta_freq
 
-    t = tf.range(0.0, 1800.0, 0.1, dtype=tf.float64)
-    net = cbrd_tfdiffeq.Network(params_net)
-    y0 = net.get_y0()
-
-    solution = net.run_simulation(t, y0)
-
-    path = savingpath_template.format(omega=theta_freq)
-    hf = h5py.File(path, 'w')
-    solution_dset = hf.create_dataset('solution', data=solution.numpy() )
-    hf.close()
-    print(theta_freq, " is simulated!")
+    print(params_net)
+    # t = tf.range(0.0, 1800.0, 0.1, dtype=tf.float64)
+    # net = cbrd_tfdiffeq.Network(params_net)
+    # y0 = net.get_y0()
+    #
+    # solution = net.run_simulation(t, y0)
+    #
+    # path = savingpath_template.format(omega=theta_freq)
+    # hf = h5py.File(path, 'w')
+    # solution_dset = hf.create_dataset('solution', data=solution.numpy() )
+    # hf.close()
+    # print(theta_freq, " is simulated!")

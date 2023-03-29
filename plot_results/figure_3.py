@@ -60,8 +60,8 @@ for neuron_idx, (neuron_name, neuron_idx_in_sol) in enumerate(sorted(pop_indxes_
     axes[0, plot_idx].set_title(neuron_name)
 
     if neuron_idx == 0:
-        axes[0, plot_idx].set_ylabel("nS")
-        axes[1, plot_idx].set_ylabel("nS")
+        axes[0, plot_idx].set_ylabel(r"$\mu S$")
+        axes[1, plot_idx].set_ylabel(r"$\mu S$")
     axes[1, plot_idx].set_xlabel("Time (ms)")
     axes[0, plot_idx].xaxis.set_ticklabels([])
 
@@ -85,6 +85,9 @@ for neuron_idx, (neuron_name, neuron_idx_in_sol) in enumerate(sorted(pop_indxes_
         color = plotting_colors["neuron_colors"][syn["pre_name"]]
         ax.plot(t, g_syn, linestyle="-", label=syn["pre_name"], color=color)
 
+    mean_reletion = np.mean(exc_g[10000:] / inh_g[10000:])
+    std_reletion = np.std(exc_g[10000:] / inh_g[10000:])
+    print(neuron_name, mean_reletion, std_reletion)
 
     axes[0, plot_idx].plot(t, exc_g, linestyle=(0, (1, 1)), label="sum exc", color='orange', linewidth=2)
     axes[1, plot_idx].plot(t, inh_g, linestyle=(0, (1, 1)), label="sum inh", color='magenta', linewidth=2)
@@ -117,7 +120,7 @@ for label in labels:
         except ValueError:
             continue
 
-print(len(labels), len(lines))
+#print(len(labels), len(lines))
 
 fig.legend(lines, labels,  ncol=15, loc='lower left', bbox_to_anchor =(0.15, 0.1), )
 

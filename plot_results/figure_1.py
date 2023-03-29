@@ -32,6 +32,6 @@ def plot_connection_graph(ax):
 fig, axes = plt.subplots(constrained_layout=True, figsize=(10, 10))
 plot_connection_graph(axes)
 
-fig.savefig('/home/ivan/Data/phase_relations/figures/Fig_2.png')
+fig.savefig('/home/ivan/Data/phase_relations/figures/Fig_1.png')
 plt.show()
 

@@ -59,10 +59,12 @@ for neuron_idx, (neuron_name, neuron_idx_in_sol) in enumerate(sorted(pop_indxes_
         ax.set_title("Population frequency")
     if neuron_idx == len(plotting_colors["neurons_order"]) - 1:
         ax.set_xlabel("Time (ms)")
-    if neuron_idx == int(len(plotting_colors["neurons_order"])//2):
-        ax.set_ylabel("sp/sec")
     else:
         ax.xaxis.set_ticklabels([])
+
+    if neuron_idx == int(len(plotting_colors["neurons_order"])//2):
+        ax.set_ylabel("sp/sec")
+
 
 
     firings = 1000 * dset_solution[:, neuron_idx_in_sol]

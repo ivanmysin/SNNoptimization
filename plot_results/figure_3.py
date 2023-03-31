@@ -40,30 +40,42 @@ Y = dset_solution[:, start_R_idx : end_R_idx]
 t = np.linspace(0, 1800, dset_solution.shape[0])
 sine = 0.5 * (np.cos(2 * np.pi * 0.001*t * 7.0) + 1)
 
+
+neurons_order = plotting_colors["neurons_order"]
 gridspec_kw = {
-    "width_ratios" : [0.15, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    "width_ratios" : [0.15, ].extend([0.1 for _ in range(len(neurons_order))]),
 }
-fig, axes = plt.subplots(nrows=2, ncols=len(plotting_colors["neurons_order"])+1, figsize=(30, 5), gridspec_kw=gridspec_kw)
+fig, axes = plt.subplots(nrows=4, ncols=5, figsize=(20, 15), gridspec_kw=gridspec_kw)
 
 
-neuron_idxs_in_sol = np.asarray([dset_solution.attrs[neuron_name] for neuron_name in plotting_colors["neurons_order"]])
+neuron_idxs_in_sol = np.asarray([dset_solution.attrs[neuron_name] for neuron_name in neurons_order])
 sourse_neurons_idxes = np.argsort(neuron_idxs_in_sol)
 
 pop_indxes_keys = {}
-for neuron_name in plotting_colors["neurons_order"]:
+for neuron_name in neurons_order:
     pop_indxes_keys[neuron_name] = dset_solution.attrs[neuron_name]
 
 for neuron_idx, (neuron_name, neuron_idx_in_sol) in enumerate(sorted(pop_indxes_keys.items(), key=lambda item: item[1])):
 
-    plot_idx = neuron_idx + 1
 
-    axes[0, plot_idx].set_title(neuron_name)
 
-    if neuron_idx == 0:
-        axes[0, plot_idx].set_ylabel(r"$\mu S$")
-        axes[1, plot_idx].set_ylabel(r"$\mu S$")
-    axes[1, plot_idx].set_xlabel("Time (ms)")
-    axes[0, plot_idx].xaxis.set_ticklabels([])
+    if neuron_idx < 4:
+        row_idx = 0
+        plot_idx = neuron_idx + 1
+    else:
+        row_idx = 2
+        plot_idx = neuron_idx + 1 - 4
+
+    axes[row_idx, plot_idx].set_title(neuron_name)
+
+    if neuron_idx == 0 or neuron_idx == 4:
+        axes[row_idx, plot_idx].set_ylabel(r"$\mu S$")
+        axes[row_idx+1, plot_idx].set_ylabel(r"$\mu S$")
+
+    if row_idx == 2 or plot_idx == 4:
+        axes[row_idx+1, plot_idx].set_xlabel("Time (ms)")
+    else:
+        axes[row_idx+1, plot_idx].xaxis.set_ticklabels([])
 
     exc_g = 0
     inh_g = 0
@@ -75,10 +87,10 @@ for neuron_idx, (neuron_name, neuron_idx_in_sol) in enumerate(sorted(pop_indxes_
         g_syn = Y[:, idx] * 1000 * dset_gbarS[idx]
         if syn["Erev"] == 0.0:
             exc_g += g_syn
-            ax = axes[0, plot_idx]
+            ax = axes[row_idx, plot_idx]
         elif syn["Erev"] == -75.0:
             inh_g += g_syn
-            ax = axes[1, plot_idx]
+            ax = axes[row_idx+1, plot_idx]
         else:
             ax = None
 
@@ -89,17 +101,17 @@ for neuron_idx, (neuron_name, neuron_idx_in_sol) in enumerate(sorted(pop_indxes_
     std_reletion = np.std(exc_g[10000:] / inh_g[10000:])
     print(neuron_name, mean_reletion, std_reletion)
 
-    axes[0, plot_idx].plot(t, exc_g, linestyle=(0, (1, 1)), label="sum exc", color='orange', linewidth=2)
-    axes[1, plot_idx].plot(t, inh_g, linestyle=(0, (1, 1)), label="sum inh", color='magenta', linewidth=2)
+    axes[row_idx, plot_idx].plot(t, exc_g, linestyle=(0, (1, 1)), label="sum exc", color='orange', linewidth=2)
+    axes[row_idx+1, plot_idx].plot(t, inh_g, linestyle=(0, (1, 1)), label="sum inh", color='magenta', linewidth=2)
 
     sine_amples_exc = 0.7*np.max(exc_g[10000:]) * sine
-    axes[0, plot_idx].plot(t, sine_amples_exc, linestyle='--', label="cos", color='black')
+    axes[row_idx, plot_idx].plot(t, sine_amples_exc, linestyle='--', label="cos", color='black')
 
     sine_amples_inh = 0.7*np.max(inh_g[10000:]) * sine
-    axes[1, plot_idx].plot(t, sine_amples_inh, linestyle="--", label="cos", color='black')
+    axes[row_idx+1, plot_idx].plot(t, sine_amples_inh, linestyle="--", label="cos", color='black')
 
-    axes[0, plot_idx].set_ylim(0.0, 1.1*np.max(exc_g[10000:]))
-    axes[1, plot_idx].set_ylim(0.0, 1.1*np.max(inh_g[10000:]))
+    axes[row_idx, plot_idx].set_ylim(0.0, 1.1*np.max(exc_g[10000:]))
+    axes[row_idx+1, plot_idx].set_ylim(0.0, 1.1*np.max(inh_g[10000:]))
 
 for ax1 in axes:
     for ax in ax1:
@@ -120,9 +132,11 @@ for label in labels:
         except ValueError:
             continue
 
-#print(len(labels), len(lines))
+axes[2, -1].axis("off")
+axes[3, -1].axis("off")
 
-fig.legend(lines, labels,  ncol=15, loc='lower left', bbox_to_anchor =(0.15, 0.1), )
+
+axes[3, -1].legend(lines, labels,  ncol=2, loc='lower left') # , bbox_to_anchor =(0.15, 0.1),
 
 
 ax0 = axes[0, 0]
@@ -137,7 +151,19 @@ ax0.set_xlim(0, 1)
 ax0.set_ylim(0, 1)
 ax0.text(0.0, 0.5, " Conductivity of \n inhibitory inputs", fontsize=TEXTFONTSIZE)
 
-fig.subplots_adjust(bottom=0.4, wspace=0.4, hspace=0.4, left=0.05, right=0.95)
+ax0 = axes[2, 0]
+ax0.axis("off")
+ax0.set_xlim(0, 1)
+ax0.set_ylim(0, 1)
+ax0.text(0.0, 0.5, " Conductivity of \n exciting inputs", fontsize=TEXTFONTSIZE)
+
+ax0 = axes[3, 0]
+ax0.axis("off")
+ax0.set_xlim(0, 1)
+ax0.set_ylim(0, 1)
+ax0.text(0.0, 0.5, " Conductivity of \n inhibitory inputs", fontsize=TEXTFONTSIZE)
+
+fig.subplots_adjust(bottom=0.1, wspace=0.5, hspace=0.5, left=0.05, right=0.9)
 #fig.tight_layout()
 
 fig.savefig('/home/ivan/Data/phase_relations/figures/Fig_3.png', dpi=500)

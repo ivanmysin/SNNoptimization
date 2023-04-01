@@ -17,23 +17,28 @@ for syn_param in syn_params:
     table = pd.DataFrame(columns=neurons_names, index=names)
 
     for syn in params_net["params_synapses"]:
-        table[syn['post_name']].loc[syn['pre_name']] = syn[syn_param]
+        table[syn['post_name']].loc[syn['pre_name']] = np.around(syn[syn_param], 2)
     table = table.replace(np.nan, "-")
     print(table)
 
-    filepath = path2saving + syn_param + '.csv'
-    table.to_csv(filepath, index_label="presynaptic", header=True, encoding='utf-8')
+    # filepath = path2saving + syn_param + '.csv'
+    # table.to_csv(filepath, index_label="presynaptic", header=True, encoding='utf-8')
+
+    filepath = path2saving + syn_param + '.tex'
+    table.to_latex(filepath, header=True, encoding='utf-8',caption=syn_param)
 
 
 table = pd.DataFrame(columns=neurons_names, index=["Iext", ])
 for neuron in params_net["params_neurons"]:
 
-    table[neuron['name']].loc["Iext"] = neuron['Iext']
+    table[neuron['name']].loc["Iext"] = np.around(neuron['Iext'], 2)
 
 print(table)
 
-filepath = path2saving + 'Iext.csv'
-table.to_csv(filepath, header=True, encoding='utf-8')
+# filepath = path2saving + 'Iext.csv'
+# table.to_csv(filepath, header=True, encoding='utf-8')
+filepath = path2saving + 'Iext.tex'
+table.to_latex(filepath, header=True, encoding='utf-8',caption="Iext")
 
 target_params = list(params_net["params_neurons"][0]["target"].keys())
 table = pd.DataFrame(columns=target_params, index=names)

@@ -483,19 +483,14 @@ class PlasticSynapse(SimlestSinapse):
         gsyn_tmp = tf.where(self.post_indxes == neuron_post_idx, Rofsyn, 0.0)
 
         gsyn = self.gbarS * gsyn_tmp
-        #Erev = tf.reshape(self.Erev, shape=(-1, 1))
         gsyn = tf.reshape(gsyn, shape=(-1, 1))
         if tf.math.equal(tf.size(gsyn), 0):
             return tf.zeros_like(Vpost), tf.zeros_like(Vpost)
         else:
             Vdiff = self.Erev - tf.reshape(Vpost, shape=(1, -1))
             Itmp = gsyn * Vdiff
-            #tf.debugging.assert_equal( tf.shape(Itmp)[1], tf.size(Vpost), message="First")
-            #tf.debugging.assert_equal( tf.shape(Itmp)[0], tf.size(Vpost), message="Second")
             Isyn = tf.reduce_sum(Itmp, axis=0)
-            
-            #tf.debugging.assert_equal( tf.size(Isyn), tf.size(Vpost), message="First")
-           
+
         return gsyn, Isyn
 
 

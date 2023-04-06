@@ -18,11 +18,11 @@ class TwoExpSynapse(cbrd_tfdiffeq.SimlestSinapse):
         pre_indxes = []
         post_indxes = []
         for p in params:
-            tau_rises.append(p["tau_rises"])
-            tau_decays.append(p["tau_decays"])
+            tau_rises.append(p["tau_rise"])
+            tau_decays.append(p["tau_decay"])
             gbarSs.append(p["gbarS"])
             Erevs.append(p["Erev"])
-            pconns.append(p["pconns"])
+            pconns.append(p["pconn"])
 
             pre_indxes.append(p["pre"])
             post_indxes.append(p["post"])
@@ -40,18 +40,19 @@ class TwoExpSynapse(cbrd_tfdiffeq.SimlestSinapse):
         self.post_indxes = tf.convert_to_tensor(post_indxes, dtype=tf.int32)
 
         self.num_synapses = len(params)
-        self.num_dynamic_vars = 1  # g
+        self.num_dynamic_vars = 2  # g and dgdt
         self.start_idx = start_idx
         self.end_idx = self.start_idx + self.num_dynamic_vars * self.num_synapses
 
-        # self.start_rise_idx = 0
-        # self.end_rise_idx = self.num_synapses
-        #
-        # self.start_decay_idx = self.end_decay_idx
-        # self.end_decay_idx = self.start_decay_idx + self.num_synapses
+
+        self.start_g_idx = 0
+        self.end_g_idx = self.num_synapses
+
+        self.start_dgdt_idx = self.end_g_idx
+        self.end_dgdt_idx = self.start_dgdt_idx + self.num_synapses
 
     def get_G_Isyn(self, y, Vpost, neuron_post_idx):
-        gsyns = y[self.start_idx:self.end_idx]
+        gsyns = y[self.start_idx + self.start_g_idx:self.start_idx + self.end_g_idx]
         gsyn_tmp = tf.where(self.post_indxes == neuron_post_idx, gsyns, 0.0)
 
         gsyn = self.gbarS * gsyn_tmp
@@ -68,12 +69,12 @@ class TwoExpSynapse(cbrd_tfdiffeq.SimlestSinapse):
     @tf.function
     def __call__(self, t, y, SRpre=0):
         Spre_normed = SRpre * self.pconn
-        gsyns = y[self.start_idx:self.end_idx] + Spre_normed
-        gsyns_new = gsyns * (self.tau_rise * self.tau_decay) / (self.tau_decay - self.tau_rise) * \
-                    (exp(-self.dt/self.tau_decay ) - exp(-self.dt/self.tau_rise))
-        dy_dt = (gsyns_new - gsyns) / self.dt
+        g = y[ self.start_g_idx : self.end_g_idx]
+        dgdt = y[ self.start_dgdt_idx : self.end_dgdt_idx]
+        d2gdt2 = (Spre_normed - g - (self.tau_rise+self.tau_decay)*dgdt ) / (self.tau_rise*self.tau_decay)
+        dy_dt =  tf.concat([dgdt, d2gdt2], axis=0)
         return dy_dt
 
     def get_y0(self):
-        gsyn0 = tf.zeros(self.num_synapses, dtype=tf.float64)
+        gsyn0 = tf.zeros(self.num_dynamic_vars*self.num_synapses, dtype=tf.float64)
         return gsyn0

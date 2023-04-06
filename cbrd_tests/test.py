@@ -1,19 +1,29 @@
-import tensorflow as tf
-@tf.function
-def func (a, b):
-    a = tf.reshape(a, (-1, 1))
-    b = tf.reshape(b, (1, -1))
-    prod = a@b
-    c = tf.math.reduce_sum(prod, axis=0)
-    return c
-    
+import h5py
 
+path = '/home/ivan/Data/phase_relations/MC_theta_freq/4.hdf5'
 
-a = tf.ones([100, 2], dtype=tf.float64)
-b = tf.ones([10, ], dtype=tf.float64)
+file = h5py.File(path, mode='r')
+print(file.keys())
 
-c = func (a, b)
-print(c.numpy())
+pvbas_times = file['pvbas_times'][:]
+print(pvbas_times[:5])
+file.close()
+# import tensorflow as tf
+# @tf.function
+# def func (a, b):
+#     a = tf.reshape(a, (-1, 1))
+#     b = tf.reshape(b, (1, -1))
+#     prod = a@b
+#     c = tf.math.reduce_sum(prod, axis=0)
+#     return c
+#
+#
+#
+# a = tf.ones([100, 2], dtype=tf.float64)
+# b = tf.ones([10, ], dtype=tf.float64)
+#
+# c = func (a, b)
+# print(c.numpy())
 
 
 """

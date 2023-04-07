@@ -9,7 +9,8 @@ generators4targets = cbrd_tfdiffeq.VonMissesGenerators(params_net["params_neuron
 
 
 
-path = '/home/ivan/Data/phase_relations/com.hdf5'
+#path = '/home/ivan/Data/phase_relations/com.hdf5'
+path = '/home/ivan/Data/interneurons_theta/non_plastic/solution_001.hdf5'
 
 
 hf = h5py.File(path, 'r')
@@ -18,8 +19,8 @@ dset_targets = hf['targets']
 solution = dset_solution[:]
 targets = dset_targets[:]
 
-t = np.linspace(0, 1.8, dset_solution.shape[0])
-sine = 0.5 * (np.cos(2 * np.pi * t * 8.0) + 1)
+t = np.linspace(0, 0.8, dset_solution.shape[0])
+sine = 0.5 * (np.cos(2 * np.pi * t * 7.0) + 1)
 
 pop_indxes_keys = {}
 for key, value in dset_solution.attrs.items(): #  :
@@ -45,7 +46,7 @@ for idx, (neuron_name, neuron_idx) in enumerate(sorted(pop_indxes_keys.items(),k
     #ax.plot(t, target, label = "target", linewidth=1, color='green')
     ax.legend(loc = "upper right")
 
-    ax.set_ylim(0, np.max(target))
+    #ax.set_ylim(0, np.max(target))
 
 hf.close()
 plt.show()

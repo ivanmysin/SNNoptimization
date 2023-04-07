@@ -147,8 +147,17 @@ class Network_non_plastic(cbrd_tfdiffeq.Network):
 #         synapse_params["gbarS"] = gbarS
 #         w_coeff = 1
 
-#path4savingresults_template = '/media/LD/Data/SSN_simulated/LIF_nonplastic_synapses/solution_{:03}.hdf5'
-path4savingresults_template = '/home/ivan/Data/interneurons_theta/non_plastic/solution_{:03}.hdf5'
+for syn_idx, synapse_params in enumerate(params_net["params_synapses"]):
+    if synapse_params["pre_name"] in ["ca3pyr", "ca1pyr"]:
+        synapse_params['pconn'] = 5
+        synapse_params['gbarS'] *= 10
+    if synapse_params["pre_name"] in ["ec3", ]:
+        synapse_params['pconn'] = 2.5
+        synapse_params['gbarS'] *= 10
+
+
+path4savingresults_template = '/media/LD/Data/SSN_simulated/LIF_nonplastic_synapses/solution_{:03}.hdf5'
+#path4savingresults_template = '/home/ivan/Data/interneurons_theta/non_plastic/solution_{:03}.hdf5'
 
 Optimizer = Adam(learning_rate=0.001)  # Adagrad #Adadelta
 t = tf.range(0.0, 1800.0, 0.1, dtype=tf.float64)
@@ -171,6 +180,5 @@ for idx in range(1000):
     print("Прогон № ", str(number_of_simulation), ", Clear Loss = ", float(clearloss), ", Full Loss = ",
           float(fullloss), ", time = ", str((time() - timer) / 60), " mins")
 
-    break
 
 

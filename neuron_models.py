@@ -26,7 +26,8 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
 
         self.is_sim_rho = params["is_sim_rho"]
         self.connected_compartments = []
-        self.connection_strength = tf.tensor([], dtype=tf.float64)
+        #self.connection_strength = tf.constant([], dtype=tf.float64)
+        self.connection_strength = tf.zeros(shape=(0,), dtype=tf.float64)
 
         if not self.is_sim_rho:
             self.n_dynamic_vars = 1
@@ -39,7 +40,7 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
 
     def add_compartment(self, compartment, connection_strength):
         self.connected_compartments.append(compartment)
-        self.connection_strength = tf.concat(self.connection_strength, connection_strength)
+        self.connection_strength = tf.concat([self.connection_strength, connection_strength], axis=0)
 
     def set_indexes(self, start_idx):
         self.start_idx = start_idx
@@ -67,7 +68,7 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
         return V
 
     @tf.function
-    def __call__(self, t, y, gsyn=tf.Variable([0.0, ], dtype=tf.float64), Isyn=tf.Variable([0.0, ], dtype=tf.float64)):
+    def __call__(self, t, y, argmax_ro_H = None, gsyn=tf.Variable([0.0, ], dtype=tf.float64), Isyn=tf.Variable([0.0, ], dtype=tf.float64)):
         if self.is_sim_rho:
             ro = y[self.ro_start_idx: self.ro_end_idx]
 
@@ -82,7 +83,7 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
 
         I_comps = tf.constant(0.0, dtype=tf.float64)
         for comp_idx, compartment in  enumerate(self.connected_compartments):
-            I_comps = self.connection_strength[comp_idx] * (compartment.get_V_by_y(y) - V)
+            I_comps = I_comps + self.connection_strength[comp_idx] * (compartment.get_V_by_y(y) - V)
 
         dVdt = (self.gl * (self.El - V) + Ichs + self.Iext + Isyn + I_comps) / self.C  # !!!!!![self.ref_dvdt_idx: ]
         tau_m = self.C / (self.gl + tf.reduce_sum(gsyn) + tf.reduce_sum(gch))
@@ -104,6 +105,8 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
 
             dro_dt = self.update_z(ro, self.dts, sourse4Pts)
 
+        # else:
+        #     argmax_ro_H = argmax_ro_H
 
         dV_dt = self.reset(dVdt, V, argmax_ro_H)
 
@@ -120,8 +123,6 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
             for idx_x_var in range(chann.n_gate_vars):
                 x = y[start_x_idx: end_x_idx]
                 dx_dt = self.update_z(x, self.dts, -dxdt[idx_x_var, :])
-                # print(tf.shape(dxdt_reset))
-                # print(dxdt_reset[idx_x_var])
                 dx_dt = tf.tensor_scatter_nd_update(dx_dt, [[0], [self.N - 1]],
                                                     [dxdt_reset[idx_x_var], dxdt[idx_x_var, -1]])
                 # dx_dt_list.append(dx_dt)
@@ -142,7 +143,10 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
                 dy_dt = tf.concat([dro_dt, dV_dt], axis=0)
             else:
                 dy_dt = tf.concat([dV_dt], axis=0)
-        return dy_dt
+
+        if not self.is_sim_rho:
+            argmax_ro_H = None
+        return dy_dt, argmax_ro_H
 
     def get_y0(self):
         V1 = tf.zeros(self.ref_dvdt_idx, dtype=tf.float64) + self.Vreset
@@ -173,9 +177,10 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
         dV_dt = tf.concat([tf.zeros(self.ref_dvdt_idx, dtype=tf.float64), dVdt[self.ref_dvdt_idx:]], axis=0)
         return dV_dt
 
+
 class Soma(LIFCompartment):
     def get_y0(self):
-        Vsp = tf.zeros(self.ref_dvdt_idx-1, dtype=tf.float64) + 20.0 #!!!
+        Vsp = tf.zeros(self.ref_dvdt_idx-1, dtype=tf.float64) - 20.0 #!!!
         Vres = tf.zeros(1, dtype=tf.float64) + self.Vreset
         V2 = tf.zeros(self.N-self.ref_dvdt_idx, dtype=tf.float64) + self.El  # - 90.0 #
         V = tf.concat([Vsp, Vres, V2], axis=0)
@@ -204,5 +209,6 @@ class Soma(LIFCompartment):
 class Dendrite(LIFCompartment):
     def reset(self, dVdt, V, argmax_ro_H=0):
         dVdt_reset = (V[argmax_ro_H] - V[0]) / self.dt
+        dVdt_reset = tf.reshape(dVdt_reset, shape=(1, ))
         dV_dt = tf.concat([dVdt_reset, dVdt[1:]], axis=0)
         return dV_dt

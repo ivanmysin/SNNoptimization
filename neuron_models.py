@@ -72,7 +72,7 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
         if self.is_sim_rho:
             ro = y[self.ro_start_idx: self.ro_end_idx]
 
-        V = y[self.V_start_idx: self.V_end_idx]
+        V = y[self.V_start_idx : self.V_end_idx]
 
         gch = tf.constant(0.0, dtype=tf.float64)
         Ichs = tf.constant(0.0, dtype=tf.float64)
@@ -112,6 +112,7 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
 
         dV_dt = self.update_z(V, self.dts, -dV_dt)
         dV_dt = tf.tensor_scatter_nd_update(dV_dt, [[0], [tf.size(dV_dt) - 1]], [0, dVdt[-1]])
+        #dV_dt = tf.tensor_scatter_nd_update(dV_dt, [[tf.size(dV_dt) - 1], ], [dVdt[-1], ])
 
         dx_dt_list = tf.TensorArray(tf.float64, size=0, dynamic_size=True)  # = []
         dx_dt_list_idx = 0
@@ -180,7 +181,7 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
 
 class Soma(LIFCompartment):
     def get_y0(self):
-        Vsp = tf.zeros(self.ref_dvdt_idx-1, dtype=tf.float64) - 20.0 #!!!
+        Vsp = tf.zeros(self.ref_dvdt_idx-1, dtype=tf.float64) + self.Vreset #  - 20.0 #!!!
         Vres = tf.zeros(1, dtype=tf.float64) + self.Vreset
         V2 = tf.zeros(self.N-self.ref_dvdt_idx, dtype=tf.float64) + self.El  # - 90.0 #
         V = tf.concat([Vsp, Vres, V2], axis=0)

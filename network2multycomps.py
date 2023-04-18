@@ -19,9 +19,50 @@ SQRT_FROM_2_PI = 0.7978845608028654
 PI = np.pi
 
 class Networkmcomps(cbrd_tfdiffeq.Network):
+    def __init__(self, params, dt=0.1):
+        super(cbrd_tfdiffeq.Network, self).__init__(name="Network", dtype=tf.float64)
 
-    def set_compartmets(self):
-        pass
+        params_neurons = params["params_neurons"]
+
+        self.synapses = []
+        params_synapses = self._set_connections(params_neurons, params["params_generators"], params["params_synapses"])
+        Syn = cbrd_tfdiffeq.PlasticSynapse(params_synapses, dt=dt)
+        self.synapses.append(Syn)
+        # for idx, param_synapse in enumerate(params_synapses):
+        #     Syn = PlasticSynapse(param_synapse)
+        #     Syn.start_idx = idx * 3 # 3 - число динамических переменных для синапса
+        #     Syn.end_idx = Syn.start_idx + 3
+        #     self.synapses.append(Syn)
+
+        start_idx4_neurons = self.synapses[-1].end_idx
+        self.neurons = []
+
+        ro_0_indexes = []
+        start_idx = start_idx4_neurons
+        for idx, param_neuron in enumerate(params_neurons):
+            Pop = param_neuron["neuron_class"](param_neuron, dt=dt)
+            end_idx = Pop.set_indexes(start_idx)
+            # start_idx = start_idx4_neurons + idx * Pop.n_dynamic_vars * Pop.N
+            # Pop.start_idx = start_idx
+            # Pop.end_idx = start_idx + Pop.n_dynamic_vars * Pop.N
+            #if param_neuron["is_sim_rho"]:
+            ro_0_indexes.append(start_idx)
+
+            start_idx = end_idx
+            self.neurons.append(Pop)
+
+        self.ro_0_indexes = tf.convert_to_tensor(ro_0_indexes, dtype=tf.int32)
+
+        self.generators = []
+        generator = cbrd_tfdiffeq.VonMissesGenerators(params["params_generators"])
+
+        self.generators.append(generator)
+
+    def set_compartmets(self, ntwocomps, strength):
+        for neuron_idx in range(0, ntwocomps//2, 2):
+            self.neurons[neuron_idx].add_compartment(self.neurons[neuron_idx + 1], strength[neuron_idx])
+            self.neurons[neuron_idx+1].add_compartment(self.neurons[neuron_idx], strength[neuron_idx+1])
+
 
     @tf.function(input_signature=[tf.TensorSpec(shape=(), dtype=tf.float64), tf.TensorSpec(shape=(None,), dtype=tf.float64)])
     def __call__(self, t, y):
@@ -59,6 +100,7 @@ class Networkmcomps(cbrd_tfdiffeq.Network):
                 gsyn_full = tf.zeros(neuron.N, dtype=tf.float64)
 
             dneur_dt, argmax_rho_H_ = neuron(t, y, argmax_rho_H, gsyn=gsyn_full, Isyn=Isyn_full)  # for LIF y4neuron
+
             if argmax_rho_H_ !=  None:
                 argmax_rho_H = argmax_rho_H_
 

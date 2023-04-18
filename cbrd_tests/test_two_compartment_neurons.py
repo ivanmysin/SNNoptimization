@@ -54,8 +54,10 @@ dend_params = {
     },
 }
 dt = 0.1
-t = tf.range(0, 1500, dt, dtype=tf.float64)
+t = tf.range(0, 500, dt, dtype=tf.float64)
 soma = neuron_models.Soma(soma_params, dt)
+#soma = neuron_models.LIFCompartment(soma_params, dt)
+
 dend = neuron_models.Dendrite(dend_params, dt)
 
 end_idx = soma.set_indexes(0)

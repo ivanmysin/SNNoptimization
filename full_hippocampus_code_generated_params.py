@@ -618,8 +618,8 @@ CA3_olm_params = {
 }
 ###################################################################
 ### CA1 neurons
-CA1_pyr_soma_params = {
-    "name": "CA1_pyr_soma",
+CA1_pyr_soma_background_params = {
+    "name": "CA1_pyr_soma_background",
     "neuron_class": neuron_models.Soma,
     "is_sim_rho": True,
     "Vreset": -90.0,
@@ -638,8 +638,204 @@ CA1_pyr_soma_params = {
     "target": {},
 }
 
-CA1_pyr_dend_params = {
-    "name": "CA1_pyr_dend",
+CA1_pyr_dend_background_params = {
+    "name": "CA1_pyr_dend_background",
+    "neuron_class": neuron_models.Dendrite,
+    "is_sim_rho": False,
+    "Vreset": -90.0,
+    "Vt": -50.0,
+    "gl": 0.1,
+    "El": -60.0,
+    "C": 1.0,  #
+    "sigma": 0.3,
+    "ref_dvdt": 0.0,  # AP duration
+    "refactory": 0.0,  # refactory for threshold
+    "Iext": 0.0,
+    "N": 400,
+    "dts": 0.5,
+    "channels_params": [],
+    "target": {},
+}
+
+
+CA1_pyr_soma_active1_params = {
+    "name": "CA1_pyr_soma_active1",
+    "neuron_class": neuron_models.Soma,
+    "is_sim_rho": True,
+    "Vreset": -90.0,
+    "Vt": -50.0,
+    "gl": 0.1,
+    "El": -60.0,
+    "C": 1.0,  #
+    "sigma": 0.3,
+    "ref_dvdt": 3.0,  # AP duration
+    "refactory": 3.0,  # refactory for threshold
+    "Iext": 1.0,
+    "N": 400,
+    "dts": 0.5,
+
+    "channels_params": [],
+    "target": {},
+}
+
+CA1_pyr_dend_active1_params = {
+    "name": "CA1_pyr_dend_active1",
+    "neuron_class": neuron_models.Dendrite,
+    "is_sim_rho": False,
+    "Vreset": -90.0,
+    "Vt": -50.0,
+    "gl": 0.1,
+    "El": -60.0,
+    "C": 1.0,  #
+    "sigma": 0.3,
+    "ref_dvdt": 0.0,  # AP duration
+    "refactory": 0.0,  # refactory for threshold
+    "Iext": 0.0,
+    "N": 400,
+    "dts": 0.5,
+    "channels_params": [],
+    "target": {},
+}
+
+CA1_pyr_soma_active2_params = {
+    "name": "CA1_pyr_soma_active2",
+    "neuron_class": neuron_models.Soma,
+    "is_sim_rho": True,
+    "Vreset": -90.0,
+    "Vt": -50.0,
+    "gl": 0.1,
+    "El": -60.0,
+    "C": 1.0,  #
+    "sigma": 0.3,
+    "ref_dvdt": 3.0,  # AP duration
+    "refactory": 3.0,  # refactory for threshold
+    "Iext": 1.0,
+    "N": 400,
+    "dts": 0.5,
+
+    "channels_params": [],
+    "target": {},
+}
+
+CA1_pyr_dend_active2_params = {
+    "name": "CA1_pyr_dend_active2",
+    "neuron_class": neuron_models.Dendrite,
+    "is_sim_rho": False,
+    "Vreset": -90.0,
+    "Vt": -50.0,
+    "gl": 0.1,
+    "El": -60.0,
+    "C": 1.0,  #
+    "sigma": 0.3,
+    "ref_dvdt": 0.0,  # AP duration
+    "refactory": 0.0,  # refactory for threshold
+    "Iext": 0.0,
+    "N": 400,
+    "dts": 0.5,
+    "channels_params": [],
+    "target": {},
+}
+
+CA1_pyr_soma_active3_params = {
+    "name": "CA1_pyr_soma_active3",
+    "neuron_class": neuron_models.Soma,
+    "is_sim_rho": True,
+    "Vreset": -90.0,
+    "Vt": -50.0,
+    "gl": 0.1,
+    "El": -60.0,
+    "C": 1.0,  #
+    "sigma": 0.3,
+    "ref_dvdt": 3.0,  # AP duration
+    "refactory": 3.0,  # refactory for threshold
+    "Iext": 1.0,
+    "N": 400,
+    "dts": 0.5,
+
+    "channels_params": [],
+    "target": {},
+}
+
+CA1_pyr_dend_active3_params = {
+    "name": "CA1_pyr_dend_active3",
+    "neuron_class": neuron_models.Dendrite,
+    "is_sim_rho": False,
+    "Vreset": -90.0,
+    "Vt": -50.0,
+    "gl": 0.1,
+    "El": -60.0,
+    "C": 1.0,  #
+    "sigma": 0.3,
+    "ref_dvdt": 0.0,  # AP duration
+    "refactory": 0.0,  # refactory for threshold
+    "Iext": 0.0,
+    "N": 400,
+    "dts": 0.5,
+    "channels_params": [],
+    "target": {},
+}
+
+CA1_pyr_soma_active4_params = {
+    "name": "CA1_pyr_soma_active4",
+    "neuron_class": neuron_models.Soma,
+    "is_sim_rho": True,
+    "Vreset": -90.0,
+    "Vt": -50.0,
+    "gl": 0.1,
+    "El": -60.0,
+    "C": 1.0,  #
+    "sigma": 0.3,
+    "ref_dvdt": 3.0,  # AP duration
+    "refactory": 3.0,  # refactory for threshold
+    "Iext": 1.0,
+    "N": 400,
+    "dts": 0.5,
+
+    "channels_params": [],
+    "target": {},
+}
+
+CA1_pyr_dend_active4_params = {
+    "name": "CA1_pyr_dend_active4",
+    "neuron_class": neuron_models.Dendrite,
+    "is_sim_rho": False,
+    "Vreset": -90.0,
+    "Vt": -50.0,
+    "gl": 0.1,
+    "El": -60.0,
+    "C": 1.0,  #
+    "sigma": 0.3,
+    "ref_dvdt": 0.0,  # AP duration
+    "refactory": 0.0,  # refactory for threshold
+    "Iext": 0.0,
+    "N": 400,
+    "dts": 0.5,
+    "channels_params": [],
+    "target": {},
+}
+
+CA1_pyr_soma_active5_params = {
+    "name": "CA1_pyr_soma_active5",
+    "neuron_class": neuron_models.Soma,
+    "is_sim_rho": True,
+    "Vreset": -90.0,
+    "Vt": -50.0,
+    "gl": 0.1,
+    "El": -60.0,
+    "C": 1.0,  #
+    "sigma": 0.3,
+    "ref_dvdt": 3.0,  # AP duration
+    "refactory": 3.0,  # refactory for threshold
+    "Iext": 1.0,
+    "N": 400,
+    "dts": 0.5,
+
+    "channels_params": [],
+    "target": {},
+}
+
+CA1_pyr_dend_active5_params = {
+    "name": "CA1_pyr_dend_active5",
     "neuron_class": neuron_models.Dendrite,
     "is_sim_rho": False,
     "Vreset": -90.0,
@@ -1522,6 +1718,10 @@ CA1_pyr_cells = [CA1_pyr_soma_background_params, CA1_pyr_dend_background_params,
                  CA1_pyr_soma_active3_params, CA1_pyr_dend_active3_params, \
                  CA1_pyr_soma_active4_params, CA1_pyr_dend_active4_params, \
                  CA1_pyr_soma_active5_params, CA1_pyr_dend_active5_params ]
+
+
+two_comps_cells = DG_granular_cells + CA3_pyr_cells + CA1_pyr_cells
+print(two_comps_cells)
 
 # dg_cells = [DG_mossy_params, DG_aac_params, DG_cckbas_params, DG_pvbas_params]
 #

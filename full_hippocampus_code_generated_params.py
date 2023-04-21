@@ -1,4 +1,5 @@
 import neuron_models
+from copy import deepcopy
 ##### block of neurons params #########
 ## DG neurons
 DG_granule_soma_background_params = {
@@ -1721,15 +1722,20 @@ CA1_pyr_cells = [CA1_pyr_soma_background_params, CA1_pyr_dend_background_params,
 
 
 two_comps_cells = DG_granular_cells + CA3_pyr_cells + CA1_pyr_cells
-print(two_comps_cells)
 
-# dg_cells = [DG_mossy_params, DG_aac_params, DG_cckbas_params, DG_pvbas_params]
+
+DG_cells = [DG_mossy_params, DG_aac_params, DG_cckbas_params, DG_pvbas_params]
+CA3_cells = [CA3_aac_params, CA3_pvbas_params, CA3_cckbas_params, CA3_olm_params]
+CA1_cells = [CA1_pvbas_params, CA1_olm_params, CA1_cckbas_params, CA1_bis_params, CA1_aac_params, CA1_ivy_params, CA1_ngf_params]
+
+
+
+#params_synapses = [CA1_pyr_2_CA1_pyr, CA3_pyr_2_CA1_pyr, EC3_pyr_2_CA1_pyr, CA1_aac_2_CA1_pyr, CA1_pvbas_2_CA1_pyr, CA1_cckbas_2_CA1_pyr, CA1_bis_2_CA1_pyr, CA1_ivy_2_CA1_pyr, CA1_olm_2_CA1_pyr, CA1_ngf_2_CA1_pyr, CA3_pyr_2_CA1_aac, CA1_pyr_2_CA1_aac, EC3_pyr_2_CA1_aac, CA1_pvbas_2_CA1_aac, CA1_cckbas_2_CA1_aac, CA1_ngf_2_CA1_aac, CA1_olm_2_CA1_aac, CA1_bis_2_CA1_aac, CA1_ivy_2_CA1_aac, CA3_pyr_2_CA1_pvbas, CA1_pyr_2_CA1_pvbas, EC3_pyr_2_CA1_pvbas, CA1_pvbas_2_CA1_pvbas, CA1_cckbas_2_CA1_pvbas, CA1_ngf_2_CA1_pvbas, CA1_olm_2_CA1_pvbas, CA1_bis_2_CA1_pvbas, CA1_ivy_2_CA1_pvbas, CA3_pyr_2_CA1_cckbas, CA1_pyr_2_CA1_cckbas, EC3_pyr_2_CA1_cckbas, CA1_pvbas_2_CA1_cckbas, CA1_cckbas_2_CA1_cckbas, CA1_ngf_2_CA1_cckbas, CA1_olm_2_CA1_cckbas, CA1_bis_2_CA1_cckbas, CA1_ivy_2_CA1_cckbas, EC3_pyr_2_CA1_ngf, CA1_ngf_2_CA1_ngf, CA1_olm_2_CA1_ngf, CA3_pyr_2_CA1_olm, CA1_pyr_2_CA1_olm, CA1_bis_2_CA1_olm, CA1_ivy_2_CA1_olm, CA3_pyr_2_CA1_bis, CA1_pyr_2_CA1_bis, CA1_pvbas_2_CA1_bis, CA1_cckbas_2_CA1_bis, CA1_bis_2_CA1_bis, CA1_ivy_2_CA1_bis, CA3_pyr_2_CA1_ivy, CA1_pyr_2_CA1_ivy, CA1_pvbas_2_CA1_ivy, CA1_cckbas_2_CA1_ivy, CA1_bis_2_CA1_ivy, CA1_ivy_2_CA1_ivy, EC3_pyr_2_CA1_ivy, CA3_pyr_2_CA1_ngf, CA1_ivy_2_CA1_ngf]
+
+
+
+params_net = {
+"params_neurons" : two_comps_cells + DG_cells + CA3_cells + CA1_cells,
+"params_generators" : [msteevra_params, ec2_params, ec3_params],
 #
-#
-# params_neurons = [CA3_pyr_params, CA3_aac_params, CA3_pvbas_params, CA3_cckbas_params, CA3_olm_params, CA1_pvbas_params, CA1_olm_params, CA1_cckbas_params, CA1_bis_params, CA1_aac_params, CA1_ivy_params, CA1_ngf_params],
-#
-# params_net = {
-# "params_neurons" : params_neurons,
-# "params_generators" : [CA1_pyr_params, EC3_pyr_params, EC2_stellate_params],
-# "params_synapses" : [CA1_pyr_2_CA1_pyr, CA3_pyr_2_CA1_pyr, EC3_pyr_2_CA1_pyr, CA1_aac_2_CA1_pyr, CA1_pvbas_2_CA1_pyr, CA1_cckbas_2_CA1_pyr, CA1_bis_2_CA1_pyr, CA1_ivy_2_CA1_pyr, CA1_olm_2_CA1_pyr, CA1_ngf_2_CA1_pyr, CA3_pyr_2_CA1_aac, CA1_pyr_2_CA1_aac, EC3_pyr_2_CA1_aac, CA1_pvbas_2_CA1_aac, CA1_cckbas_2_CA1_aac, CA1_ngf_2_CA1_aac, CA1_olm_2_CA1_aac, CA1_bis_2_CA1_aac, CA1_ivy_2_CA1_aac, CA3_pyr_2_CA1_pvbas, CA1_pyr_2_CA1_pvbas, EC3_pyr_2_CA1_pvbas, CA1_pvbas_2_CA1_pvbas, CA1_cckbas_2_CA1_pvbas, CA1_ngf_2_CA1_pvbas, CA1_olm_2_CA1_pvbas, CA1_bis_2_CA1_pvbas, CA1_ivy_2_CA1_pvbas, CA3_pyr_2_CA1_cckbas, CA1_pyr_2_CA1_cckbas, EC3_pyr_2_CA1_cckbas, CA1_pvbas_2_CA1_cckbas, CA1_cckbas_2_CA1_cckbas, CA1_ngf_2_CA1_cckbas, CA1_olm_2_CA1_cckbas, CA1_bis_2_CA1_cckbas, CA1_ivy_2_CA1_cckbas, EC3_pyr_2_CA1_ngf, CA1_ngf_2_CA1_ngf, CA1_olm_2_CA1_ngf, CA3_pyr_2_CA1_olm, CA1_pyr_2_CA1_olm, CA1_bis_2_CA1_olm, CA1_ivy_2_CA1_olm, CA3_pyr_2_CA1_bis, CA1_pyr_2_CA1_bis, CA1_pvbas_2_CA1_bis, CA1_cckbas_2_CA1_bis, CA1_bis_2_CA1_bis, CA1_ivy_2_CA1_bis, CA3_pyr_2_CA1_ivy, CA1_pyr_2_CA1_ivy, CA1_pvbas_2_CA1_ivy, CA1_cckbas_2_CA1_ivy, CA1_bis_2_CA1_ivy, CA1_ivy_2_CA1_ivy, EC3_pyr_2_CA1_ivy, CA3_pyr_2_CA1_ngf, CA1_ivy_2_CA1_ngf, ],
-# }
+}

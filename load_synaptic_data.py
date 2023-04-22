@@ -494,7 +494,7 @@ data = pd.read_csv(filepath, delimiter="\t")
 
 
 code_full = ""
-code_template = """{:s}2{:s} = {{
+code_template = """{:s}_2_{:s} = {{
     \"w\": {Weight},
     \"pre_name\": \"{pre}\",
     \"post_name\": \"{post}\",
@@ -508,42 +508,69 @@ code_template = """{:s}2{:s} = {{
 """
 code4synlist = "\"params_synapses\" : ["
 
+two_comps = ['DG_granule', 'CA3_pyr', 'CA1_pyr']
+two_comps_names = ['backgrond', 'active1','active2','active3','active4','active5',]
+dend_target = ['EC3_pyr', 'EC2_stellate', 'CA1_ivy', 'CA1_ngf', 'CA1_olm', 'CA3_olm']
+
 indexes_by_condiion = []
 for idx in range(len(data)):
     presyncell = data["Presynaptic Neuron"][idx]
     postsyncell = data["Postsynaptic Neuron"][idx]
 
-    # if presyncell.find("CA1 ") != -1 and postsyncell.find("CA1 ") != -1:
-    #     print(presyncell, postsyncell)
+    try:
+        if neurons_names[postsyncell] in ['EC3_pyr', 'EC2_stellate']:
+            continue
+    except KeyError:
+        continue
 
-    if (presyncell in neurons_names.keys()) and (postsyncell in neurons_names.keys() and postsyncell.find("CA1") != -1 and neurons_names[postsyncell] != "ca1pyr"):
-        #print(presyncell, postsyncell)
-        indexes_by_condiion.append(idx)
-
-        if presyncell.find("(-)") != -1:
-            Erev = -75.0
-            Weight = 0.1
-            gbarS_coeff = 1.0
+    if (presyncell in neurons_names.keys()) and (postsyncell in neurons_names.keys()):
+        if neurons_names[presyncell] in two_comps:
+            pre_names = []
+            for two_comps_name in two_comps_names:
+                pre_names.append( neurons_names[presyncell] + "_soma_" + two_comps_name)
         else:
-            Erev = 0.0
-            Weight = 0.5
-            gbarS_coeff = 1.0
+            pre_names = [neurons_names[presyncell], ]
+
+        if neurons_names[postsyncell] in two_comps:
+            post_names = []
+            for two_comps_name in two_comps_names:
+                if pre_names[0] in dend_target:
+                    post_names.append(neurons_names[postsyncell] + "_dend_" + two_comps_name)
+                else:
+                    post_names.append( neurons_names[postsyncell] + "_soma_" + two_comps_name)
+        else:
+            post_names = [neurons_names[postsyncell], ]
+
+        for pre_name in pre_names:
+            for post_name in post_names:
 
 
-        code = code_template.format(neurons_names[presyncell], neurons_names[postsyncell], \
-                                     Weight = Weight,\
-                                     pre = neurons_names[presyncell], \
-                                     post = neurons_names[postsyncell], \
-                                     tau_f = data["tau_f"][idx], \
-                                     tau_r = data["tau_r"][idx], \
-                                     tau_d = data["tau_d"][idx], \
-                                     Uinc = data["U"][idx],\
-                                     gbarS = gbarS_coeff * data["g"][idx],
-                                     Erev=Erev)
+                indexes_by_condiion.append(idx)
 
-        code_full += code
+                if presyncell.find("(-)") != -1:
+                    Erev = -75.0
+                    Weight = 0.1
+                    gbarS_coeff = 1.0
+                else:
+                    Erev = 0.0
+                    Weight = 0.5
+                    gbarS_coeff = 1.0
 
-        code4synlist += neurons_names[presyncell] + "_2_" + neurons_names[postsyncell] + ", "
+
+                code = code_template.format(pre_name, post_name, \
+                                             Weight = Weight,\
+                                             pre = pre_name, \
+                                             post = post_name, \
+                                             tau_f = data["tau_f"][idx], \
+                                             tau_r = data["tau_r"][idx], \
+                                             tau_d = data["tau_d"][idx], \
+                                             Uinc = data["U"][idx],\
+                                             gbarS = gbarS_coeff * data["g"][idx],
+                                             Erev=Erev)
+
+                code_full += code
+
+                #code4synlist += pre_name + "_2_" + post_name + ", "
 
 short_names = []
 for short_name in neurons_names.values():
@@ -556,7 +583,7 @@ code4synlist += "],\n"
 #print(code4generators)
 code_full += start_code + "params_net = {\n" + code4neurons + code4generators + code4synlist + "}\n"
 
-file4code = open("full_hippocampus_code_generated_params.py", mode="w")
+file4code = open("/home/ivan/Data/hippocampome/full_hippocampus_code_generated_params.txt", mode="w")
 file4code.write(code_full)
 file4code.close()
 

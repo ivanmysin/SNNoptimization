@@ -59,7 +59,7 @@ class Networkmcomps(cbrd_tfdiffeq.Network):
         self.generators.append(generator)
 
     def set_compartmets(self, ntwocomps, strength):
-        for neuron_idx in range(0, ntwocomps//2, 2):
+        for neuron_idx in range(0, ntwocomps, 2):
             self.neurons[neuron_idx].add_compartment(self.neurons[neuron_idx + 1], strength[neuron_idx])
             self.neurons[neuron_idx+1].add_compartment(self.neurons[neuron_idx], strength[neuron_idx+1])
 

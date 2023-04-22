@@ -26,8 +26,8 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
 
         self.is_sim_rho = params["is_sim_rho"]
         self.connected_compartments = []
-        #self.connection_strength = tf.constant([], dtype=tf.float64)
-        self.connection_strength = tf.zeros(shape=(0,), dtype=tf.float64)
+        self.connection_strength = tf.constant([], dtype=tf.float64)
+        #self.connection_strength = tf.zeros(shape=(0,), dtype=tf.float64)
 
         if not self.is_sim_rho:
             self.n_dynamic_vars = 1
@@ -40,7 +40,7 @@ class LIFCompartment(cbrd_tfdiffeq.HH_Neuron):
 
     def add_compartment(self, compartment, connection_strength):
         self.connected_compartments.append(compartment)
-        self.connection_strength = tf.concat([self.connection_strength, connection_strength], axis=0)
+        self.connection_strength = tf.concat([self.connection_strength, tf.reshape(connection_strength, shape=(1,))], axis=0)
 
     def set_indexes(self, start_idx):
         self.start_idx = start_idx

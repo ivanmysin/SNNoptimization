@@ -6081,6 +6081,29 @@ CA1_ivy_2_CA1_ngf = {
     "Erev": -75.0,
 }
 
+MS_teevra_2_CA3_aac = {
+    "w": 0.1,
+    "pre_name": "MS_teevra",
+    "post_name": "CA3_aac",
+    "tau_f": 25.480563,
+    "tau_r": 553.4916051,
+    "tau_d": 8.831768275,
+    "Uinc": 0.212282632,
+    "gbarS": 1.588573475,
+    "Erev": -75.0,
+}
+
+MS_teevra_2_CA3_cckbas = {
+    "w": 0.1,
+    "pre_name": "MS_teevra",
+    "post_name": "CA3_cckbas",
+    "tau_f": 25.480563,
+    "tau_r": 553.4916051,
+    "tau_d": 8.831768275,
+    "Uinc": 0.212282632,
+    "gbarS": 1.588573475,
+    "Erev": -75.0,
+}
 
 
 ################# end block of synapses params #########################

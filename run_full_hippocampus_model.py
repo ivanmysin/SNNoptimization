@@ -32,10 +32,11 @@ from time import time
 #         synapse_params["gbarS"] = gbarS
 #         w_coeff = 1
 
-path4savingresults_template = '/media/LD/Data/SSN_simulated/Full_hippocampus/solution_{:03}.hdf5'
+#path4savingresults_template = '/media/LD/Data/SSN_simulated/Full_hippocampus/solution_{:03}.hdf5'
+path4savingresults_template = '/home/ivan/Data/Full_rhythms/tests/solution_{:03}.hdf5'
 
 Optimizer = Adam(learning_rate=0.001)  # Adagrad #Adadelta
-t = tf.range(0.0, 18.0, 0.1, dtype=tf.float64)
+t = tf.range(0.0, 1800.0, 0.1, dtype=tf.float64)
 # generators4targets = cbrd_tfdiffeq.VonMissesGenerators(params_net["params_neurons"])
 # Targets_spikes_rates = generators4targets(tf.reshape(t, shape=(-1, 1)))
 
@@ -61,14 +62,15 @@ for cell_p in params_net['params_neurons']:
     if len(cell_p['target'].keys()) == 0:
         targets_firings.append(None)
     else:
-        Gen = cbrd_tfdiffeq.VonMissesGenerators(cell_p['target'])
+        Gen = cbrd_tfdiffeq.VonMissesGenerators([cell_p, ])
         tar_fir = Gen(t)
+        tar_fir = tf.squeeze(tar_fir)
         targets_firings.append(tar_fir)
 
 targets_lfp = []
 for idx in range(n_two_coms//2):
     targets_lfp.append( tf.math.cos(2*np.pi*7*0.001*t) )
-
+    
 number_of_simulation_0 = 0
 for idx in range(1000):
     timer = time()
@@ -76,7 +78,7 @@ for idx in range(1000):
 
     path = path4savingresults_template.format(number_of_simulation)
     solution, clearloss, fullloss = net.fit(t, targets_firings, targets_lfp, path4saving=path, n_inter=1, win4_start=10000,
-                                            win4grad=500)
+                                            win4grad=50)
 
     #net.save_simulation_data(path, solution, Targets_spikes_rates)
     print("Прогон № ", str(number_of_simulation), ", Clear Loss = ", float(clearloss), ", Full Loss = ",

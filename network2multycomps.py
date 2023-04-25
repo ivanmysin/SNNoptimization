@@ -138,19 +138,20 @@ class Networkmcomps(cbrd_tfdiffeq.Network):
             lfps.append(lfp)
         lfps = tf.stack(lfps)
         return lfps
+    
     def __get_targets_lfps(self, targets_lfp):
-        targets_lfps = []
+        targets_lfps_ = []
         optim_lfp_indexes = []
 
-        for idx, tar_lfp in zip(range(2*self.n_mulcoms, 2), targets_lfp):
+        for idx, tar_lfp in zip(range(0, 2*self.n_mulcoms, 2), targets_lfp):
             if tar_lfp is None: continue
-            targets_lfps.append(tar_lfp)
+            targets_lfps_.append(tar_lfp)
             optim_lfp_indexes.append(idx)
-
-
-        targets_lfps = tf.stack(targets_lfps)
+        targets_lfps = tf.stack(targets_lfps_)
         optim_lfp_indexes = tf.constant(optim_lfp_indexes, dtype=tf.int32)
         return targets_lfps, optim_lfp_indexes
+    
+    
     def fit(self, t, targets_firings, targets_lfp, n_inter=50, path4saving=None, win4_start=2000, win4grad=500):
         n_points_of_simulation = int(tf.size(t))
         n_loops = int((n_points_of_simulation - win4_start) / win4grad)
@@ -210,9 +211,9 @@ class Networkmcomps(cbrd_tfdiffeq.Network):
                     firings = tf.gather(solution, optim_firing_indexes, axis=1)
                     lfps = self.__get_lfps(solution, optim_lfp_indexes)
 
-                    clear_loss = self.loss_function(targets_firings[time_start_idx: time_end_idx, :], firings)
+                    clear_loss = self.loss_function( tf.transpose(targets_firings[:, time_start_idx: time_end_idx]), firings )
 
-                    clear_loss = clear_loss +  tf.reduce_sum((lfps - targets_lfps[time_start_idx: time_end_idx, :])**2)
+                    clear_loss = clear_loss +  tf.reduce_sum((lfps - targets_lfps[:, time_start_idx: time_end_idx])**2)
 
 
                     clear_loss_over_simulation += clear_loss

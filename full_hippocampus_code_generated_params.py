@@ -15,7 +15,7 @@ DG_granule_soma_background_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -35,7 +35,7 @@ DG_granule_dend_background_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -54,7 +54,7 @@ DG_granule_soma_active1_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -74,7 +74,7 @@ DG_granule_dend_active1_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -93,7 +93,7 @@ DG_granule_soma_active2_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -113,7 +113,7 @@ DG_granule_dend_active2_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -132,7 +132,7 @@ DG_granule_soma_active3_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -152,7 +152,7 @@ DG_granule_dend_active3_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -171,7 +171,7 @@ DG_granule_soma_active4_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -191,7 +191,7 @@ DG_granule_dend_active4_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -209,7 +209,7 @@ DG_granule_soma_active5_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -229,7 +229,7 @@ DG_granule_dend_active5_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -251,7 +251,7 @@ DG_mossy_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {},
@@ -270,7 +270,7 @@ DG_aac_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {},
@@ -289,7 +289,7 @@ DG_cckbas_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {},
@@ -308,7 +308,7 @@ DG_pvbas_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {},
@@ -328,7 +328,7 @@ CA3_pyr_soma_background_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -348,7 +348,7 @@ CA3_pyr_dend_background_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -368,7 +368,7 @@ CA3_pyr_soma_active1_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -388,7 +388,7 @@ CA3_pyr_dend_active1_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -407,7 +407,7 @@ CA3_pyr_soma_active2_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -427,7 +427,7 @@ CA3_pyr_dend_active2_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -446,7 +446,7 @@ CA3_pyr_soma_active3_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -466,7 +466,7 @@ CA3_pyr_dend_active3_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -485,7 +485,7 @@ CA3_pyr_soma_active4_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -505,7 +505,7 @@ CA3_pyr_dend_active4_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -524,7 +524,7 @@ CA3_pyr_soma_active5_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -544,7 +544,7 @@ CA3_pyr_dend_active5_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -563,7 +563,7 @@ CA3_aac_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {},
@@ -582,7 +582,7 @@ CA3_cckbas_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {},
@@ -601,7 +601,7 @@ CA3_pvbas_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {},
@@ -620,7 +620,7 @@ CA3_olm_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {},
@@ -640,7 +640,7 @@ CA1_pyr_soma_background_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -660,7 +660,7 @@ CA1_pyr_dend_background_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -680,7 +680,7 @@ CA1_pyr_soma_active1_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -700,7 +700,7 @@ CA1_pyr_dend_active1_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -719,7 +719,7 @@ CA1_pyr_soma_active2_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -739,7 +739,7 @@ CA1_pyr_dend_active2_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -758,7 +758,7 @@ CA1_pyr_soma_active3_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -778,7 +778,7 @@ CA1_pyr_dend_active3_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -797,7 +797,7 @@ CA1_pyr_soma_active4_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -817,7 +817,7 @@ CA1_pyr_dend_active4_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -836,7 +836,7 @@ CA1_pyr_soma_active5_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
 
     "channels_params": [],
@@ -856,7 +856,7 @@ CA1_pyr_dend_active5_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -875,7 +875,7 @@ CA1_aac_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -899,7 +899,7 @@ CA1_cckbas_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -923,7 +923,7 @@ CA1_pvbas_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -947,7 +947,7 @@ CA1_olm_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -971,7 +971,7 @@ CA1_bis_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -995,7 +995,7 @@ CA1_ivy_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -1018,7 +1018,7 @@ CA1_ngf_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 400,
+    "N": 200,
     "dts": 0.5,
     "channels_params": [],
     "target" : {

@@ -362,9 +362,14 @@ CA3_pyr_soma_background_params = {
     "Iext": 0.1,
     "N": 400,
     "dts": 0.5,
-
     "channels_params": [],
-    "target": {},
+
+    "target" : {
+        "R": 0.3,
+        "freq": THETA_FREQ,
+        "mean_spike_rate": 0.5,
+        "phase": 1.58,
+    },
 }
 
 CA3_pyr_dend_background_params = {
@@ -598,7 +603,12 @@ CA3_aac_params = {
     "N": 400,
     "dts": 0.5,
     "channels_params": [],
-    "target" : {},
+    "target" : {
+        "R": 0.3,
+        "freq": THETA_FREQ,
+        "mean_spike_rate": 29.0,
+        "phase": -1.561592653589793,
+    },
 }
 
 CA3_cckbas_params = {
@@ -617,7 +627,14 @@ CA3_cckbas_params = {
     "N": 400,
     "dts": 0.5,
     "channels_params": [],
-    "target" : {},
+
+    "target" : {
+        "R": 0.3,
+        "freq": THETA_FREQ,
+        "mean_spike_rate": 9.0,
+        "phase": -3.1323889803846896,
+    },
+
 }
 
 CA3_pvbas_params = {
@@ -636,7 +653,13 @@ CA3_pvbas_params = {
     "N": 400,
     "dts": 0.5,
     "channels_params": [],
-    "target" : {},
+
+    "target" : {
+        "R": 0.3,
+        "freq": THETA_FREQ,
+        "mean_spike_rate": 24.0,
+        "phase": 0.0,
+    },
 }
 
 CA3_olm_params = {
@@ -655,7 +678,12 @@ CA3_olm_params = {
     "N": 400,
     "dts": 0.5,
     "channels_params": [],
-    "target" : {},
+    "target" : {
+        "R": 0.3,
+        "freq": THETA_FREQ,
+        "mean_spike_rate": 30.0,
+        "phase": 1.58,
+    },
 }
 ###################################################################
 ### CA1 neurons
@@ -676,7 +704,12 @@ CA1_pyr_soma_background_params = {
     "dts": 0.5,
 
     "channels_params": [],
-    "target": {},
+    "target" : {
+        "R": 0.3,
+        "freq": THETA_FREQ,
+        "mean_spike_rate": 0.5,
+        "phase": 3.141592653589793,
+    },
 }
 
 CA1_pyr_dend_background_params = {

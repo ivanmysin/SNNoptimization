@@ -41,7 +41,7 @@ t = tf.range(0.0, 1800.0, 0.1, dtype=tf.float64)
 # Targets_spikes_rates = generators4targets(tf.reshape(t, shape=(-1, 1)))
 
 net = network2multycomps.Networkmcomps(params_net)
-n_two_coms = 2*18
+n_two_coms = 2*3
 stength = tf.zeros(n_two_coms, dtype=tf.float64) + 3.0 #  [3.0, 3.0]
 net.set_compartmets(n_two_coms, stength)
 net.set_optimizator(Optimizer)
@@ -78,7 +78,7 @@ for idx in range(1000):
 
     path = path4savingresults_template.format(number_of_simulation)
     solution, clearloss, fullloss = net.fit(t, targets_firings, targets_lfp, path4saving=path, n_inter=1, win4_start=10000,
-                                            win4grad=50)
+                                            win4grad=500)
 
     #net.save_simulation_data(path, solution, Targets_spikes_rates)
     print("Прогон № ", str(number_of_simulation), ", Clear Loss = ", float(clearloss), ", Full Loss = ",

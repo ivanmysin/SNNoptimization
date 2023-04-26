@@ -25,14 +25,10 @@ class Networkmcomps(cbrd_tfdiffeq.Network):
         params_neurons = params["params_neurons"]
 
         self.synapses = []
-        params_synapses = self._set_connections(params_neurons, params["params_generators"], params["params_synapses"])
-        Syn = cbrd_tfdiffeq.PlasticSynapse(params_synapses, dt=dt)
-        self.synapses.append(Syn)
-        # for idx, param_synapse in enumerate(params_synapses):
-        #     Syn = PlasticSynapse(param_synapse)
-        #     Syn.start_idx = idx * 3 # 3 - число динамических переменных для синапса
-        #     Syn.end_idx = Syn.start_idx + 3
-        #     self.synapses.append(Syn)
+        for param_synapse in params["params_synapses"]:
+            params_synapses = self._set_connections(params_neurons, params["params_generators"], param_synapse)
+            Syn = cbrd_tfdiffeq.PlasticSynapse(params_synapses, dt=dt)
+            self.synapses.append(Syn)
 
         start_idx4_neurons = self.synapses[-1].end_idx
         self.neurons = []
@@ -90,16 +86,13 @@ class Networkmcomps(cbrd_tfdiffeq.Network):
         for neuron_idx, neuron in enumerate(self.neurons):
             Vpost = y[neuron.V_start_idx:neuron.V_end_idx]
 
-            gsyn_full = 0.0
-            Isyn_full = 0.0
+            Isyn_full = tf.zeros(neuron.N, dtype=tf.float64)
+            gsyn_full = tf.zeros(neuron.N, dtype=tf.float64)
             for synapse in self.synapses:
                 gsyn, Isyn = synapse.get_G_Isyn(y, Vpost, neuron_idx)
-                gsyn_full = gsyn_full + gsyn
-                Isyn_full = Isyn_full + Isyn
+                gsyn_full = gsyn_full + tf.reduce_sum(gsyn, axis=0)
+                Isyn_full = Isyn_full + tf.reduce_sum(Isyn, axis=0)
 
-            if tf.size(Isyn_full) == 0:
-                Isyn_full = tf.zeros(neuron.N, dtype=tf.float64)
-                gsyn_full = tf.zeros(neuron.N, dtype=tf.float64)
 
             dneur_dt, argmax_rho_H_ = neuron(t, y, argmax_rho_H, gsyn=gsyn_full, Isyn=Isyn_full)  # for LIF y4neuron
 
@@ -209,11 +202,11 @@ class Networkmcomps(cbrd_tfdiffeq.Network):
 
                     #firings = tf.gather(solution, self.ro_0_indexes, axis=1)
                     firings = tf.gather(solution, optim_firing_indexes, axis=1)
-                    lfps = self.__get_lfps(solution, optim_lfp_indexes)
+                    #lfps = self.__get_lfps(solution, optim_lfp_indexes)
 
                     clear_loss = self.loss_function( tf.transpose(targets_firings[:, time_start_idx: time_end_idx]), firings )
 
-                    clear_loss = clear_loss +  tf.reduce_sum((lfps - targets_lfps[:, time_start_idx: time_end_idx])**2)
+                    #clear_loss = clear_loss +  tf.reduce_sum((lfps - targets_lfps[:, time_start_idx: time_end_idx])**2)
 
 
                     clear_loss_over_simulation += clear_loss

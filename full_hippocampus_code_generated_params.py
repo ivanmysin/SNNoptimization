@@ -1,5 +1,8 @@
 import neuron_models
 from copy import deepcopy
+
+THETA_FREQ = 5 # Hz
+
 ##### block of neurons params #########
 ## DG neurons
 DG_granule_soma_background_params = {
@@ -14,12 +17,17 @@ DG_granule_soma_background_params = {
     "sigma": 0.3,
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
-    "Iext": 1.0,
-    "N": 200,
+    "Iext": 0.1,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
-    "target": {},
+    "target" : {
+        "R": 0.3,
+        "freq": THETA_FREQ,
+        "mean_spike_rate": 0.5,
+        "phase": 1.3089969389957472,
+    },
 }
 
 DG_granule_dend_background_params = {
@@ -35,7 +43,7 @@ DG_granule_dend_background_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -53,8 +61,8 @@ DG_granule_soma_active1_params = {
     "sigma": 0.3,
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
-    "Iext": 1.0,
-    "N": 200,
+    "Iext": 0.1,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -74,7 +82,7 @@ DG_granule_dend_active1_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -93,7 +101,7 @@ DG_granule_soma_active2_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -113,7 +121,7 @@ DG_granule_dend_active2_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -132,7 +140,7 @@ DG_granule_soma_active3_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -152,7 +160,7 @@ DG_granule_dend_active3_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -171,7 +179,7 @@ DG_granule_soma_active4_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -191,7 +199,7 @@ DG_granule_dend_active4_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -209,7 +217,7 @@ DG_granule_soma_active5_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -229,7 +237,7 @@ DG_granule_dend_active5_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -251,10 +259,16 @@ DG_mossy_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
-    "target" : {},
+
+    "target" : {
+        "R": 0.3,
+        "freq": THETA_FREQ,
+        "mean_spike_rate": 1.0,
+        "phase": 1.3089969389957472,
+    },
 }
 
 DG_aac_params = {
@@ -270,10 +284,16 @@ DG_aac_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
-    "target" : {},
+
+    "target" : {
+        "R": 0.3,
+        "freq": THETA_FREQ,
+        "mean_spike_rate": 30.0,
+        "phase": -1.8325957145940457,
+    },
 }
 
 DG_cckbas_params = {
@@ -289,10 +309,16 @@ DG_cckbas_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
-    "target" : {},
+
+    "target" : {
+        "R": 0.3,
+        "freq": THETA_FREQ,
+        "mean_spike_rate": 9.0,
+        "phase": 2.8797932657906435,
+    },
 }
 
 DG_pvbas_params = {
@@ -308,10 +334,16 @@ DG_pvbas_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
-    "target" : {},
+
+    "target" : {
+        "R": 0.3,
+        "freq": THETA_FREQ,
+        "mean_spike_rate": 24.0,
+        "phase": 0,
+    },
 }
 #########################
 # CA3 neurons
@@ -327,8 +359,8 @@ CA3_pyr_soma_background_params = {
     "sigma": 0.3,
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
-    "Iext": 1.0,
-    "N": 200,
+    "Iext": 0.1,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -348,7 +380,7 @@ CA3_pyr_dend_background_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -368,7 +400,7 @@ CA3_pyr_soma_active1_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -388,7 +420,7 @@ CA3_pyr_dend_active1_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -407,7 +439,7 @@ CA3_pyr_soma_active2_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -427,7 +459,7 @@ CA3_pyr_dend_active2_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -446,7 +478,7 @@ CA3_pyr_soma_active3_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -466,7 +498,7 @@ CA3_pyr_dend_active3_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -485,7 +517,7 @@ CA3_pyr_soma_active4_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -505,7 +537,7 @@ CA3_pyr_dend_active4_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -524,7 +556,7 @@ CA3_pyr_soma_active5_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -544,7 +576,7 @@ CA3_pyr_dend_active5_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -563,7 +595,7 @@ CA3_aac_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target" : {},
@@ -582,7 +614,7 @@ CA3_cckbas_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target" : {},
@@ -601,7 +633,7 @@ CA3_pvbas_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target" : {},
@@ -620,7 +652,7 @@ CA3_olm_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target" : {},
@@ -639,8 +671,8 @@ CA1_pyr_soma_background_params = {
     "sigma": 0.3,
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
-    "Iext": 1.0,
-    "N": 200,
+    "Iext": 0.1,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -660,7 +692,7 @@ CA1_pyr_dend_background_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -680,7 +712,7 @@ CA1_pyr_soma_active1_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -700,7 +732,7 @@ CA1_pyr_dend_active1_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -719,7 +751,7 @@ CA1_pyr_soma_active2_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -739,7 +771,7 @@ CA1_pyr_dend_active2_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -758,7 +790,7 @@ CA1_pyr_soma_active3_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -778,7 +810,7 @@ CA1_pyr_dend_active3_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -797,7 +829,7 @@ CA1_pyr_soma_active4_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -817,7 +849,7 @@ CA1_pyr_dend_active4_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -836,7 +868,7 @@ CA1_pyr_soma_active5_params = {
     "ref_dvdt": 3.0,  # AP duration
     "refactory": 3.0,  # refactory for threshold
     "Iext": 1.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
 
     "channels_params": [],
@@ -856,7 +888,7 @@ CA1_pyr_dend_active5_params = {
     "ref_dvdt": 0.0,  # AP duration
     "refactory": 0.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target": {},
@@ -875,7 +907,7 @@ CA1_aac_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -899,7 +931,7 @@ CA1_cckbas_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -923,7 +955,7 @@ CA1_pvbas_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -947,7 +979,7 @@ CA1_olm_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -971,7 +1003,7 @@ CA1_bis_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -995,7 +1027,7 @@ CA1_ivy_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -1018,7 +1050,7 @@ CA1_ngf_params = {
     "ref_dvdt": 3.0,
     "refactory": 3.0,  # refactory for threshold
     "Iext": 0.0,
-    "N": 200,
+    "N": 400,
     "dts": 0.5,
     "channels_params": [],
     "target" : {
@@ -6136,27 +6168,27 @@ ec3_params = {
 }
 ##############################################################################
 ##
-DG_granular_cells = [DG_granule_soma_background_params, DG_granule_dend_background_params, \
-                     DG_granule_soma_active1_params, DG_granule_dend_active1_params, \
-                     DG_granule_soma_active2_params, DG_granule_dend_active2_params, \
-                     DG_granule_soma_active3_params, DG_granule_dend_active3_params, \
-                     DG_granule_soma_active4_params, DG_granule_dend_active4_params, \
-                     DG_granule_soma_active5_params, DG_granule_dend_active5_params ]
+DG_granular_cells = [DG_granule_soma_background_params, DG_granule_dend_background_params,]# \
+#                     DG_granule_soma_active1_params, DG_granule_dend_active1_params, \
+#                     DG_granule_soma_active2_params, DG_granule_dend_active2_params, \
+#                     DG_granule_soma_active3_params, DG_granule_dend_active3_params, \
+#                     DG_granule_soma_active4_params, DG_granule_dend_active4_params, \
+#                     DG_granule_soma_active5_params, DG_granule_dend_active5_params ]
 
 
-CA3_pyr_cells = [CA3_pyr_soma_background_params, CA3_pyr_dend_background_params, \
-                 CA3_pyr_soma_active1_params, CA3_pyr_dend_active1_params, \
-                 CA3_pyr_soma_active2_params, CA3_pyr_dend_active2_params, \
-                 CA3_pyr_soma_active3_params, CA3_pyr_dend_active3_params, \
-                 CA3_pyr_soma_active4_params, CA3_pyr_dend_active4_params, \
-                 CA3_pyr_soma_active5_params, CA3_pyr_dend_active5_params ]
+CA3_pyr_cells = [CA3_pyr_soma_background_params, CA3_pyr_dend_background_params,] # \
+#                 CA3_pyr_soma_active1_params, CA3_pyr_dend_active1_params, \
+#                 CA3_pyr_soma_active2_params, CA3_pyr_dend_active2_params, \
+#                 CA3_pyr_soma_active3_params, CA3_pyr_dend_active3_params, \
+#                 CA3_pyr_soma_active4_params, CA3_pyr_dend_active4_params, \
+#                 CA3_pyr_soma_active5_params, CA3_pyr_dend_active5_params ]
 
-CA1_pyr_cells = [CA1_pyr_soma_background_params, CA1_pyr_dend_background_params, \
-                 CA1_pyr_soma_active1_params, CA1_pyr_dend_active1_params, \
-                 CA1_pyr_soma_active2_params, CA1_pyr_dend_active2_params, \
-                 CA1_pyr_soma_active3_params, CA1_pyr_dend_active3_params, \
-                 CA1_pyr_soma_active4_params, CA1_pyr_dend_active4_params, \
-                 CA1_pyr_soma_active5_params, CA1_pyr_dend_active5_params ]
+CA1_pyr_cells = [CA1_pyr_soma_background_params, CA1_pyr_dend_background_params,] # \
+#                 CA1_pyr_soma_active1_params, CA1_pyr_dend_active1_params, \
+#                 CA1_pyr_soma_active2_params, CA1_pyr_dend_active2_params, \
+#                 CA1_pyr_soma_active3_params, CA1_pyr_dend_active3_params, \
+#                 CA1_pyr_soma_active4_params, CA1_pyr_dend_active4_params, \
+#                 CA1_pyr_soma_active5_params, CA1_pyr_dend_active5_params ]
 
 
 two_comps_cells = DG_granular_cells + CA3_pyr_cells + CA1_pyr_cells
@@ -6170,11 +6202,23 @@ CA1_cells = [CA1_pvbas_params, CA1_olm_params, CA1_cckbas_params, CA1_bis_params
 
 #[CA1_pyr_2_CA1_pyr, CA3_pyr_2_CA1_pyr, EC3_pyr_2_CA1_pyr, CA1_aac_2_CA1_pyr, CA1_pvbas_2_CA1_pyr, CA1_cckbas_2_CA1_pyr, CA1_bis_2_CA1_pyr, CA1_ivy_2_CA1_pyr, CA1_olm_2_CA1_pyr, CA1_ngf_2_CA1_pyr, CA3_pyr_2_CA1_aac, CA1_pyr_2_CA1_aac, EC3_pyr_2_CA1_aac, CA1_pvbas_2_CA1_aac, CA1_cckbas_2_CA1_aac, CA1_ngf_2_CA1_aac, CA1_olm_2_CA1_aac, CA1_bis_2_CA1_aac, CA1_ivy_2_CA1_aac, CA3_pyr_2_CA1_pvbas, CA1_pyr_2_CA1_pvbas, EC3_pyr_2_CA1_pvbas, CA1_pvbas_2_CA1_pvbas, CA1_cckbas_2_CA1_pvbas, CA1_ngf_2_CA1_pvbas, CA1_olm_2_CA1_pvbas, CA1_bis_2_CA1_pvbas, CA1_ivy_2_CA1_pvbas, CA3_pyr_2_CA1_cckbas, CA1_pyr_2_CA1_cckbas, EC3_pyr_2_CA1_cckbas, CA1_pvbas_2_CA1_cckbas, CA1_cckbas_2_CA1_cckbas, CA1_ngf_2_CA1_cckbas, CA1_olm_2_CA1_cckbas, CA1_bis_2_CA1_cckbas, CA1_ivy_2_CA1_cckbas, EC3_pyr_2_CA1_ngf, CA1_ngf_2_CA1_ngf, CA1_olm_2_CA1_ngf, CA3_pyr_2_CA1_olm, CA1_pyr_2_CA1_olm, CA1_bis_2_CA1_olm, CA1_ivy_2_CA1_olm, CA3_pyr_2_CA1_bis, CA1_pyr_2_CA1_bis, CA1_pvbas_2_CA1_bis, CA1_cckbas_2_CA1_bis, CA1_bis_2_CA1_bis, CA1_ivy_2_CA1_bis, CA3_pyr_2_CA1_ivy, CA1_pyr_2_CA1_ivy, CA1_pvbas_2_CA1_ivy, CA1_cckbas_2_CA1_ivy, CA1_bis_2_CA1_ivy, CA1_ivy_2_CA1_ivy, EC3_pyr_2_CA1_ivy, CA3_pyr_2_CA1_ngf, CA1_ivy_2_CA1_ngf]
 
-params_synapses = []
+params_synapses = [[], []]
 for variable in dir():
     if variable.find('_2_') != -1:
-        params_synapses.append(globals()[variable])
-#print(len(params_synapses))
+        syn_params = globals()[variable]
+        if (syn_params['pre_name'].find("active") != -1) or (syn_params['post_name'].find("active") != -1):
+            continue
+
+        optim_idx = 0
+        if (syn_params['post_name'].find("CA1") != -1) and (syn_params['post_name'].find("pyr") == -1):
+            optim_idx = 1
+
+        params_synapses[optim_idx].append(syn_params)
+
+# for syn in params_synapses[0]:
+#     print(syn['pre_name'], "->", syn['post_name'])
+#print(len(params_synapses[0]))
+#print(len(params_synapses[1]))
 
 params_net = {
 "params_neurons" : two_comps_cells + DG_cells + CA3_cells + CA1_cells,

@@ -21,7 +21,7 @@ with open('/home/ivan/Data/Opt_res/LIF_params_net.pickle', 'rb') as file:
     params_net = pickle.load(file)
 
 path = '/home/ivan/Data/phase_relations/!!!LIF_solution_310.hdf5'
-
+#path = '/home/ivan/Data/Opt_res/_non_plastic_solution_3263!!!!.hdf5'
 
 hf = h5py.File(path, 'r')
 dset_solution = hf['solution']

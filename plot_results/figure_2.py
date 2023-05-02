@@ -16,7 +16,8 @@ TEXTFONTSIZE = 'xx-large'
 Parzen = parzen(101)
 Parzen = Parzen / np.sum(Parzen)
 
-path = '/home/ivan/Data/phase_relations/!!!LIF_solution_310.hdf5'
+#path = '/home/ivan/Data/phase_relations/!!!LIF_solution_310.hdf5'
+path = '/home/ivan/Data/Opt_res/_non_plastic_solution_3263!!!!.hdf5'
 
 
 hf = h5py.File(path, 'r')
@@ -78,7 +79,7 @@ for neuron_idx, (neuron_name, neuron_idx_in_sol) in enumerate(sorted(pop_indxes_
     montecarlofirings = montecarlofirings / (0.001 * (t[1] - t[0]))
     montecarlofirings = np.convolve(montecarlofirings, Parzen, mode='same')
 
-    ax.plot(t[:-1], montecarlofirings, linestyle="--", color=plotting_colors["neuron_colors"][neuron_name], label="Monte-Carlo")
+    #ax.plot(t[:-1], montecarlofirings, linestyle="--", color=plotting_colors["neuron_colors"][neuron_name], label="Monte-Carlo")
     sine_ampls = sine * 0.7*np.max(target)
     ax.plot(t, sine_ampls, linestyle="--", label = "cos", color='black')
 
@@ -91,7 +92,7 @@ for neuron_idx, (neuron_name, neuron_idx_in_sol) in enumerate(sorted(pop_indxes_
     #ax.set_ylim(0, 1.2*np.max(target))
     ax.set_xlim(800, 1800)
 
-fig.savefig('/home/ivan/Data/phase_relations/figures/Fig_2.png', dpi=500)
+fig.savefig('/home/ivan/Data/phase_relations/figures/SFig_2.png', dpi=200)
 hf.close()
 montecarlofile.close()
 plt.show()
